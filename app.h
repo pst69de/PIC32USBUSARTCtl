@@ -38,6 +38,8 @@ typedef enum {
     APP_STATE_SCHEDULE_WRITE,
     /* Wait for the write to complete */
     APP_STATE_WAIT_FOR_WRITE_COMPLETE,
+    /* LCD update */
+    APP_LCD_UPDATE,
     /* (not used) Register timer callback */
     APP_STATE_REGISTER_TMR,
     /* (not used) Check Time */
@@ -100,8 +102,11 @@ typedef enum {
     LCD_switch_4bit,
     LCD_4bit_wait,
     LCD_linefont_4bit,
-    LCD_displaycursor,
-    LCD_incr_shift,
+    LCD_displayoff,
+    LCD_displayclear,
+    LCD_waitclear,
+    LCD_cursor_shift,
+    LCD_displayon,
     LCD_ready
 } LCD_Init_Sequence;
 
@@ -121,10 +126,12 @@ typedef struct
     LCD_Init_Sequence LCD_Init;
     I2C_States        LCD_State;
     I2C_Data_State    LCD_Transfer;
-    uint8_t           LCD_Write[APP_LCD_BUFFER_SIZE];
+    uint8_t           LCD_Write[APP_LCD_I2C_WRITE_BUFFER_SIZE];
     uint8_t           LCD_WriteIx;
-    uint8_t           LCD_Read[APP_LCD_BUFFER_SIZE];
+    uint8_t           LCD_Read[APP_LCD_I2C_READ_BUFFER_SIZE];
     uint8_t           LCD_ReadIx;
+    char              LCD_Line[LCD_LINEBUFFERS,LCD_LINEBUFFER_SIZE];
+    APP_STATES        LCD_Return_AppState; 
     /* USB: Device layer handle returned by device layer open function */
     USB_DEVICE_HANDLE    deviceHandle;
     USB_DEVICE_CDC_INDEX cdcInstance;

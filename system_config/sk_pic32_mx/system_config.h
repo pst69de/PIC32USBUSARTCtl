@@ -49,23 +49,41 @@ extern "C" {
 #define APP_INT_ID                  INT_ID_0
 
 /* defs I2C 1 for LCD */
-#define APP_LCD_PORTS_ID           PORTS_ID_0
+#define APP_LCD_PORTS_ID               PORTS_ID_0
 /* PORTS mappings */
-#define APP_LCD_PORT_CHANNEL       PORT_CHANNEL_B
-#define APP_LCD_SCL_PIN            PORTS_BIT_POS_8
-#define APP_LCD_SDA_PIN            PORTS_BIT_POS_9
+#define APP_LCD_PORT_CHANNEL           PORT_CHANNEL_B
+#define APP_LCD_SCL_PIN                PORTS_BIT_POS_8
+#define APP_LCD_SDA_PIN                PORTS_BIT_POS_9
 /* TODO: defs CS/RST if needed: CS tied to GND (always select), RST tied to MCLR (reset on chip reset) */
+/* LCD Reset later by Power Control (define Port Pin for Output H = display on, L = display off, reinit display after power cycle) */
 /* I2C1 */
-#define APP_LCD_I2C_ID             I2C_ID_1
-#define APP_LCD_I2C_BAUD           100000L
+#define APP_LCD_I2C_ID                 I2C_ID_1
+#define APP_LCD_I2C_BAUD               100000L
 /* I2C data handling */
-#define APP_LCD_BUFFER_SIZE        8
+#define APP_LCD_I2C_READ_BUFFER_SIZE   8
+#define APP_LCD_I2C_WRITE_BUFFER_SIZE  336
 
-/* consts for I2C LCD Handling */
+/* consts for I2C LCD Handling  */
+/*
+  configuration I2C Chip PCF8574 on HD44780 Interface by sainsmart (most propably others)
+  address of PCF8574 (without an A) is , PCF8574 is 0x3F, LSB 0-2 are configurable, normally set H by pullup
+  PCF8574   HD44780
+  Bit 0   = RS
+  Bit 1   = R/W
+  Bit 2   = E
+  Bit 3   = N.C. (possible patching use)
+  Bit 4   = D4
+  Bit 5   = D5
+  Bit 6   = D6
+  Bit 7   = D7
+  so the 4bit data is always the high nibble of the transfer byte and control is done in the low nibble
+*/
 /* address shifted by 1 as LSB is R/W */
 #define LCD_ADDRESS                (0x27 << 1)
 #define I2C_WRITE                  0
 #define I2C_READ                   1
+#define LCD_LINEBUFFER_SIZE        20
+#define LCD_LINEBUFFERS            4
 /* Command/Data -> RS Bit 0 */
 #define LCD_COMMAND                0x00
 #define LCD_DATA                   0x01
@@ -79,7 +97,20 @@ extern "C" {
 #define LCD_4BIT_H                 0x20  // 0x30 would be 8bit mode
 //#define LCD_LINEFONT_L             0x80  // 2line display (1line bit7 off) with 5x7 font (5x10 font = bit6 on)
 #define LCD_LINEFONT_L             0x00 // try 1line mode (5x7 font) 1st    
-
+/* display OFF/ON */
+#define LCD_DISPLAY_OFF_H          0x00
+#define LCD_DISPLAY_OFF_L          0x80 // display off (no cursor, cursor underline)
+#define LCD_DISPLAY_ON_H           0x00
+#define LCD_DISPLAY_ON_L           0xc0 // display on, no cursor, cursor underline
+/* clear display, cursor to 0 */
+#define LCD_CLEAR_H                0x00
+#define LCD_CLEAR_L                0x10
+/* set cursor move (0 = right), shift on/off (0 = off)  */
+#define LCD_CURSORSHIFT_H          0x10
+#define LCD_CURSORSHIFT_L          0x00
+/* set cursor to home */
+#define LCD_SET_HOME_H             0x10
+#define LCD_SET_HOME_L             0x00
 
 /* TODO: defs UART 1/2 for COM */
 
