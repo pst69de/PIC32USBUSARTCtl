@@ -130,7 +130,7 @@ typedef struct
     uint8_t           LCD_WriteIx;
     uint8_t           LCD_Read[APP_LCD_I2C_READ_BUFFER_SIZE];
     uint8_t           LCD_ReadIx;
-    char              LCD_Line[LCD_LINEBUFFERS,LCD_LINEBUFFER_SIZE];
+    char              LCD_Line[LCD_LINEBUFFERS][LCD_LINEBUFFER_SIZE];
     APP_STATES        LCD_Return_AppState; 
     /* USB: Device layer handle returned by device layer open function */
     USB_DEVICE_HANDLE    deviceHandle;

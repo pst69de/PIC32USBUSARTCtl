@@ -249,7 +249,7 @@ USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler (
 
 void APP_LCD_ClearLine( uint8_t num) {
     uint8_t i;
-    for (i = 0; i < LCD_LINEBUFFER_SIZE; i++) { appData.LCD_Line[num,i] = ' ';}
+    for (i = 0; i < LCD_LINEBUFFER_SIZE; i++) { appData.LCD_Line[num][i] = ' ';}
 } 
 
 /* I2C write buffer filling in LIFO mode */
@@ -271,7 +271,7 @@ void APP_LCD_Update(void) {
     uint8_t c;
     for (l = LCD_LINEBUFFERS - 1; l = 0; l--) {
         for (c = LCD_LINEBUFFER_SIZE - 1; c = 0; c--) {
-            APP_LCD_AddCharWrite(appData.LCD_Line[l,c]);
+            APP_LCD_AddCharWrite(appData.LCD_Line[l][c]);
         }
     }
     APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME_L);
@@ -287,7 +287,7 @@ void APP_LCD_Print(uint8_t line, char* string) {
     len = strlen(*string);
     if (len > LCD_LINEBUFFER_SIZE) { len = LCD_LINEBUFFER_SIZE; }
     for (i = 0; i < len; i++) {
-        appData.LCD_Line[line,i] = *(string+i);
+        appData.LCD_Line[line][i] = *(string+i);
     }
 }
 
@@ -401,20 +401,62 @@ void APP_I2C_Process(void) {
     	case I2C_MASTER_WRITE:
             switch (appData.LCD_Transfer) {
                 case I2C_MS_Start:
+                    /* for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred */
                     if (PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
+                        /* top byte in buffer should always be a formatted i2c slave address */
                         PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, appData.LCD_Write[appData.LCD_WriteIx--]);
                         appData.LCD_Transfer = I2C_MS_Address;
                     }
                     break;
+                case I2C_MS_Address:
+                    /* for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred */
+                    if (PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID) & PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
+                        PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, appData.LCD_Write[appData.LCD_WriteIx--]);
+                        appData.LCD_Transfer = I2C_MS_Transmit;
+                    // ] else { -> if PLIB_I2C_TransmitterByteWasAcknowledged doesn't happen transfer should be restarted and after some tries given up
+                    // i assume all goes well ;)
+                    }
+                    break;
+                case I2C_MS_Transmit:
+                    /* for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred */
+                    if (PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID) & PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
+                        if (appData.LCD_WriteIx >= 0) {
+                            PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, appData.LCD_Write[appData.LCD_WriteIx--]);
+                            // keep appData.LCD_Transfer = I2C_MS_Transmit
+                        } else {
+                            // if (appData.LCD_WriteIx > 0) { PLIB_I2C_MasterStartRepeat(APP_LCD_I2C_ID); not used in this purpose
+                            PLIB_I2C_MasterStop(APP_LCD_I2C_ID);
+                            appData.LCD_Transfer = I2C_MS_Stop;
+                        }
+                    // ] else { -> if PLIB_I2C_TransmitterByteWasAcknowledged doesn't happen transfer should be restarted and after some tries given up
+                    // i assume all goes well ;)
+                    }
+                    break;
+                case I2C_MS_Repeat:
+                    /* only used for a write/read cycle or for subsequent writes to multiple slaves */
+                    break;
+                case I2C_MS_Stop:
+                    /* when this occurs, all is done, go back to wait */
+                    appData.LCD_State = I2C_MASTER_IDLE;
+                    appData.LCD_Transfer = I2C_Idle;
+                    break;
             }
             break;
     	case I2C_MASTER_WRITE_READ:
+            /* needs a repeatable and modifiable address variable (switch of RW bit in address) */
+            /* needs an acknowledge after read byte */
+            break;
     	case I2C_MASTER_READ:
+            /* needs a repeatable and modifiable address variable (switch of RW bit in address) */
+            /* needs an acknowledge after read byte */
+            break;
     	case I2C_SLAVE_IDLE:
             /* data coming in -> switch to appropriate mode */
             break;
     	case I2C_SLAVE_READ:
+            break;
     	case I2C_SLAVE_READ_WRITE:
+            break;
     	case I2C_SLAVE_WRITE:
             break;
         /* The default state should never be executed. */
@@ -449,6 +491,8 @@ void APP_Tasks ( void )
         case APP_STATE_LCD_INIT:
             if (APP_LCD_Init()) {
                 APP_LCD_Print( 0, "Hello World :)");
+                APP_LCD_Print( 1, "Allo le Mond :)"); // check usage of 2nd line part
+                // -> use of sprintf for string formatting
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_HOLD;
             }
