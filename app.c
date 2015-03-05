@@ -289,7 +289,7 @@ void APP_LCD_Update(void) {
 
 void APP_LCD_Print(uint8_t line, char* string) {
     uint8_t i, len;
-    len = strlen(*string);
+    len = strlen(string);
     if (len > LCD_LINEBUFFER_SIZE) { len = LCD_LINEBUFFER_SIZE; }
     for (i = 0; i < len; i++) {
         appData.LCD_Line[line][i] = *(string+i);

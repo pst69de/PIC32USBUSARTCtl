@@ -210,7 +210,49 @@ void APP_USBDeviceCDCEventHandler
 
 void APP_Initialize (void);
 
+void APP_TimingCallback ( void );
+
+void APP_CheckTimedLED(void);
+
+bool APP_StateReset(void);
+
+void APP_USBDeviceEventHandler ( 
+    USB_DEVICE_EVENT event
+,   void * eventData
+,   uintptr_t context
+);
+
+USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler (
+    USB_DEVICE_CDC_INDEX index
+,   USB_DEVICE_CDC_EVENT event
+,   void * pData
+,   uintptr_t userData
+);
+
+void APP_LCD_ClearLine( uint8_t num);
+
+void APP_I2C_AddWrite( uint8_t WriteIn);
+
+void APP_LCD_AddCharWrite( char aChar);
+
+void APP_LCD_Update(void);
+
+void APP_LCD_Print(uint8_t line, char* string);
+
+bool APP_LCD_Init(void);
+
+void APP_I2C_M_Write(void);
+
+void APP_I2C_Process(void);
+
+bool APP_I2C_Ready(void);
+
+void APP_USART_Read(void);
+
+void APP_USART_Write(void);
+
 void APP_Tasks ( void );
+
 
 // *****************************************************************************
 // *****************************************************************************

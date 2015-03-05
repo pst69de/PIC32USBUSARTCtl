@@ -37,7 +37,7 @@ void __ISR( _TIMER_1_VECTOR, ipl2soft ) _InterruptHandler_TMR_1(void) {
 }
 
 /* Vector for UART 2 RX , priority 2, software controlled register switching (on MX1xx/MX2xx MCUs) */
-void __ISR( _UART_2_RX_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
+void __ISR( _UART_2_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
     /* App Timing */
     APP_USART_Read();
     /* Clear the interrupt flag */
@@ -45,7 +45,7 @@ void __ISR( _UART_2_RX_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
 }
 
 /* Vector for UART 1 TX , priority 1, software controlled register switching (on MX1xx/MX2xx MCUs) */
-void __ISR( _UART_1_TX_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
+void __ISR( _UART_1_VECTOR, ipl2soft ) _InterruptHandler_U1TX(void) {
     /* App Timing */
     APP_USART_Write();
     /* Clear the interrupt flag */

@@ -33,6 +33,9 @@
           <logicalFolder name="f2" displayName="tmr" projectFiles="true">
             <itemPath>../../../../v1_03/framework/peripheral/tmr/plib_tmr.h</itemPath>
           </logicalFolder>
+          <logicalFolder name="f5" displayName="usart" projectFiles="true">
+            <itemPath>../../../../v1_03/framework/peripheral/usart/plib_usart.h</itemPath>
+          </logicalFolder>
           <itemPath>../../../../v1_03/framework/peripheral/peripheral.h</itemPath>
           <itemPath>../../../../v1_03/framework/peripheral/peripheral_common.h</itemPath>
           <itemPath>../../../../v1_03/framework/peripheral/peripheral_common_32bit.h</itemPath>

@@ -21,6 +21,7 @@ extern "C" {
 #include "peripheral/int/plib_int.h"
 #include "peripheral/tmr/plib_tmr.h"
 #include "peripheral/i2c/plib_i2c.h"
+#include "peripheral/usart/plib_usart.h"
     
 /* APP definitions */
 #define APP_SYSCLK_FREQ             24000000L

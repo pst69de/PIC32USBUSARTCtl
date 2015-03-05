@@ -163,8 +163,6 @@ void USART_Initialize(void) {
     PLIB_USART_OperationModeSelect(APP_USART_RX_ID, APP_USART_RX_OPER);
     PLIB_USART_HandshakeModeSelect(APP_USART_RX_ID, APP_USART_RX_HAND);
     PLIB_USART_BaudRateSet(APP_USART_RX_ID, APP_PBCLK_FREQ, APP_USART_RX_BAUD);
-    // Enable the asynchronous mode
-    PLIB_USART_SyncModeSelect(APP_USART_RX_ID, USART_ASYNC_MODE);
     /* Select 8 data bits, No parity and one stop bit */
     PLIB_USART_LineControlModeSelect(APP_USART_RX_ID, APP_USART_RX_MODE);
     
@@ -178,8 +176,6 @@ void USART_Initialize(void) {
     PLIB_USART_OperationModeSelect(APP_USART_TX_ID, APP_USART_TX_OPER);
     PLIB_USART_HandshakeModeSelect(APP_USART_TX_ID, APP_USART_TX_HAND);
     PLIB_USART_BaudRateSet(APP_USART_TX_ID, APP_PBCLK_FREQ, APP_USART_TX_BAUD);
-    // Enable the asynchronous mode
-    PLIB_USART_SyncModeSelect(APP_USART_TX_ID, USART_ASYNC_MODE);
     /* Select 8 data bits, No parity and one stop bit */
     PLIB_USART_LineControlModeSelect(APP_USART_TX_ID, APP_USART_TX_MODE);
     
