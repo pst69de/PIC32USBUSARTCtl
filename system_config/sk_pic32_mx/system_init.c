@@ -128,21 +128,21 @@ void PORTS_Initialize(void) {
 
 void I2C_Initialize(void) {
     PLIB_I2C_Disable(APP_LCD_I2C_ID);
-	// Prepare Ports I2C 1  
+    // Prepare Ports I2C 1  
     PLIB_PORTS_PinClear(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SCL_PIN);
     PLIB_PORTS_PinClear(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SDA_PIN);
-	// open drain configuration I2C 1 Pins 5V tolerant, pull up with 2k2
+    // open drain configuration I2C 1 Pins 5V tolerant, pull up with 2k2
     PLIB_PORTS_PinOpenDrainEnable(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SCL_PIN);
     PLIB_PORTS_PinOpenDrainEnable(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SDA_PIN);
     // Configure General I2C Options
     PLIB_I2C_SlaveClockStretchingEnable(APP_LCD_I2C_ID);
-	// future option SMB compatibility
+    // future option SMB compatibility
     PLIB_I2C_SMBDisable(APP_LCD_I2C_ID);
-	// future option high baud rates (>100kHz)
+    // future option high baud rates (>100kHz)
     PLIB_I2C_HighFrequencyDisable(APP_LCD_I2C_ID);
-	// only 7-Bit addresses
+    // only 7-Bit addresses
     PLIB_I2C_ReservedAddressProtectEnable(APP_LCD_I2C_ID);
-	// Idle when proc idle (no operation in idle mode)
+    // Idle when proc idle (no operation in idle mode)
     PLIB_I2C_StopInIdleEnable(APP_LCD_I2C_ID);
     // Set Desired baud rate
     PLIB_I2C_BaudRateSet( APP_LCD_I2C_ID, APP_SYSCLK_FREQ, APP_LCD_I2C_BAUD);
@@ -152,28 +152,78 @@ void I2C_Initialize(void) {
     // Enable the module -> in SYS_Startup
 }
 
+void USART_Initialize(void) {
+    // USART RX
+    PLIB_USART_Disable(APP_USART_RX_ID);
+    // Prepare Port
+    PLIB_PORTS_PinClear(APP_USART_RX_PORTS_ID, APP_USART_RX_PORT_CHANNEL, APP_USART_RX_PORT_PIN);
+    PLIB_PORTS_PinDirectionInputSet(APP_USART_RX_PORTS_ID, APP_USART_RX_PORT_CHANNEL, APP_USART_RX_PORT_PIN);
+    PLIB_PORTS_RemapInput(APP_USART_RX_PORTS_ID, APP_USART_RX_REMAP_FUNC, APP_USART_RX_REMAP_PIN);
+    // USART (RX) Config
+    PLIB_USART_OperationModeSelect(APP_USART_RX_ID, APP_USART_RX_OPER);
+    PLIB_USART_HandshakeModeSelect(APP_USART_RX_ID, APP_USART_RX_HAND);
+    PLIB_USART_BaudRateSet(APP_USART_RX_ID, APP_PBCLK_FREQ, APP_USART_RX_BAUD);
+    // Enable the asynchronous mode
+    PLIB_USART_SyncModeSelect(APP_USART_RX_ID, USART_ASYNC_MODE);
+    /* Select 8 data bits, No parity and one stop bit */
+    PLIB_USART_LineControlModeSelect(APP_USART_RX_ID, APP_USART_RX_MODE);
+    
+    // USART 1 TX
+    PLIB_USART_Disable(APP_USART_TX_ID);
+    // Prepare Port
+    PLIB_PORTS_PinClear(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
+    PLIB_PORTS_PinDirectionOutputSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
+    PLIB_PORTS_RemapOutput(APP_USART_TX_PORTS_ID, APP_USART_TX_REMAP_FUNC, APP_USART_TX_REMAP_PIN);
+    // USART (TX) Config
+    PLIB_USART_OperationModeSelect(APP_USART_TX_ID, APP_USART_TX_OPER);
+    PLIB_USART_HandshakeModeSelect(APP_USART_TX_ID, APP_USART_TX_HAND);
+    PLIB_USART_BaudRateSet(APP_USART_TX_ID, APP_PBCLK_FREQ, APP_USART_TX_BAUD);
+    // Enable the asynchronous mode
+    PLIB_USART_SyncModeSelect(APP_USART_TX_ID, USART_ASYNC_MODE);
+    /* Select 8 data bits, No parity and one stop bit */
+    PLIB_USART_LineControlModeSelect(APP_USART_TX_ID, APP_USART_TX_MODE);
+    
+    // enabling USARTs in SYS_Startup
+}
+
 void INT_Initialize(void) {
     /* enable the multi vector */
     PLIB_INT_MultiVectorSelect( INT_ID_0 );
     /* set priority and enable USB1 */
-    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_PRIORITY_LEVEL4);
+    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_PRIORITY_LEVEL5);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_SUBPRIORITY_LEVEL0);
+    /* set priority and enable I2C */
+    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_PRIORITY_LEVEL4);
+    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_SUBPRIORITY_LEVEL0);
     /* set priority and enable Timer1 */
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_PRIORITY_LEVEL3);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_SUBPRIORITY_LEVEL0);
+    /* set priority and enable USART RX */
+    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_PRIORITY_LEVEL2);
+    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_SUBPRIORITY_LEVEL0);
+    /* set priority and enable USART TX */
+    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_PRIORITY_LEVEL1);
+    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_SUBPRIORITY_LEVEL0);
     /* Enable the global interrupts */
     PLIB_INT_Enable(APP_INT_ID);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USB_1);
-	PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
+    //Not yet
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
 }
 
 void SYS_Startup(void) {
-	/* LCD I2C com */
+    /* LCD I2C com */
     PLIB_I2C_Enable(I2C_ID_2);
     /* system clock */
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_TIMER_1);
     PLIB_TMR_Start(APP_TMR_CLOCK);
+    // enable USARTs
+    //Not yet
+    //PLIB_USART_Enable(APP_USART_RX_ID);
+    //PLIB_USART_Enable(APP_USART_TX_ID);    
 }
 
 /* Initialize the System */
@@ -191,6 +241,8 @@ void SYS_Initialize ( void *data )
     SYS_ASSERT((SYS_MODULE_OBJ_INVALID != usbDevObject), "Invalid USB DEVICE object");
     /* init I2C */
     I2C_Initialize();
+    /* init USART */
+    USART_Initialize();
     /* TODO:  Initialize all modules and the application. */
 
     /* Initialize the Application */

@@ -158,6 +158,11 @@ typedef struct
     /* extend USB: output buffer */
     char                 writeBuffer[APP_READ_BUFFER_SIZE];
     int                  writeCount;
+    /* USART */ 
+    char                 USARTreadBuffer[APP_USART_RX_BUFFER_SIZE];
+    int                  USARTreadIdx;
+    char                 USARTwriteBuffer[APP_USART_TX_BUFFER_SIZE];
+    int                  USARTwriteIdx;
 } APP_DATA;
 
 /* External forward for App Timing Structure */

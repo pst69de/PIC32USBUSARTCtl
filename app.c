@@ -49,6 +49,11 @@ void APP_Initialize ( void )
     appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
     appData.isReadComplete = true;
     appData.isWriteComplete = true;
+    /* USART init */
+    for (i = 0; i < APP_USART_RX_BUFFER_SIZE; i++) { appData.USARTreadBuffer[i] = 0;};
+    appData.USARTreadIdx = 0;
+    for (i = 0; i < APP_USART_TX_BUFFER_SIZE; i++) { appData.USARTwriteBuffer[i] = 0;};
+    appData.USARTwriteIdx = 0;
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
 }
@@ -395,10 +400,10 @@ void APP_I2C_M_Write(void) {
 
 void APP_I2C_Process(void) {
     switch ( appData.LCD_State) {
-	case I2C_UNINITIALIZED:
-    	case I2C_MASTER_IDLE:
+    case I2C_UNINITIALIZED:
+        case I2C_MASTER_IDLE:
             break;
-    	case I2C_MASTER_WRITE:
+        case I2C_MASTER_WRITE:
             switch (appData.LCD_Transfer) {
                 case I2C_MS_Start:
                     /* for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred */
@@ -442,31 +447,53 @@ void APP_I2C_Process(void) {
                     break;
             }
             break;
-    	case I2C_MASTER_WRITE_READ:
+        case I2C_MASTER_WRITE_READ:
             /* needs a repeatable and modifiable address variable (switch of RW bit in address) */
             /* needs an acknowledge after read byte */
             break;
-    	case I2C_MASTER_READ:
+        case I2C_MASTER_READ:
             /* needs a repeatable and modifiable address variable (switch of RW bit in address) */
             /* needs an acknowledge after read byte */
             break;
-    	case I2C_SLAVE_IDLE:
+        case I2C_SLAVE_IDLE:
             /* data coming in -> switch to appropriate mode */
             break;
-    	case I2C_SLAVE_READ:
+        case I2C_SLAVE_READ:
             break;
-    	case I2C_SLAVE_READ_WRITE:
+        case I2C_SLAVE_READ_WRITE:
             break;
-    	case I2C_SLAVE_WRITE:
+        case I2C_SLAVE_WRITE:
             break;
         /* The default state should never be executed. */
         default:
             break;
-	}
+    }
 }
 
 bool APP_I2C_Ready(void) {
     return (appData.LCD_State == I2C_MASTER_IDLE);
+}
+
+/* USART routines */
+/* INT Handling Read */
+void APP_USART_Read(void) {
+    /*
+    while (PLIB_USART_ReceiverDataIsAvailable(APP_USART_RX_ID)) {
+        appData.USARTreadBuffer[appData.USARTreadIdx++] = PLIB_USART_ReceiverByteReceive(APP_USART_RX_ID);
+    }
+    */
+}
+/* INT Handling Write */
+void APP_USART_Write(void) {
+    /*
+    if (appData.USARTreadIdx > 0) {
+        while (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USARTwriteIdx > 0)) {
+            PLIB_USART_TransmitterByteSend(APP_USART_TX_ID, appData.USARTwriteBuffer[0]);
+            appData.USARTwriteIdx--;
+            for (int i = 1; i <= appData.USARTwriteIdx; i++) { appData.USARTwriteBuffer[i - 1] = appData.USARTwriteBuffer[i]; }
+        }
+    }
+    */
 }
 
 /****************************************************

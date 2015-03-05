@@ -112,7 +112,38 @@ extern "C" {
 #define LCD_SET_HOME_H             0x10
 #define LCD_SET_HOME_L             0x00
 
-/* TODO: defs UART 1/2 for COM */
+/* TODO: defs USART 1/2 for COM */
+/* Defs USART RX (is unit 2) */
+#define APP_USART_RX_ID            USART_ID_2
+/* USART RX Port */
+#define APP_USART_RX_PORTS_ID      PORTS_ID_0
+#define APP_USART_RX_PORT_CHANNEL  PORT_CHANNEL_B
+#define APP_USART_RX_PORT_PIN      PORTS_BIT_POS_5
+#define APP_USART_RX_REMAP_PIN     INPUT_PIN_RPB5
+#define APP_USART_RX_REMAP_FUNC    INPUT_FUNC_U2RX
+/* USART RX Module (keep the same if using the same module for RX & TX) */
+#define APP_USART_RX_BAUD          9600
+#define APP_USART_RX_MODE          USART_8N1
+#define APP_USART_RX_OPER          USART_ENABLE_TX_RX_USED // no flow control
+#define APP_USART_RX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
+/* general RX config */
+#define APP_USART_RX_BUFFER_SIZE   128
+
+/* Defs USART TX (is unit 1) */
+#define APP_USART_TX_ID            USART_ID_1
+/* USART TX Port */
+#define APP_USART_TX_PORTS_ID      PORTS_ID_0
+#define APP_USART_TX_PORT_CHANNEL  PORT_CHANNEL_B
+#define APP_USART_TX_PORT_PIN      PORTS_BIT_POS_7
+#define APP_USART_TX_REMAP_PIN     OUTPUT_PIN_RPB7
+#define APP_USART_TX_REMAP_FUNC    OUTPUT_FUNC_U1TX
+/* USART TX Module (keep the same if using the same module for RX & TX) */
+#define APP_USART_TX_BAUD          9600
+#define APP_USART_TX_MODE          USART_8N1
+#define APP_USART_TX_OPER          USART_ENABLE_TX_RX_USED // no flow control
+#define APP_USART_TX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
+/* general TX config */
+#define APP_USART_TX_BUFFER_SIZE   128
 
 // *****************************************************************************
 // Section: USB controller Driver Configuration
