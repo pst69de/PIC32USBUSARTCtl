@@ -128,7 +128,7 @@ extern "C" {
 #define APP_USART_RX_OPER          USART_ENABLE_TX_RX_USED // no flow control
 #define APP_USART_RX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
 /* general RX config */
-#define APP_USART_RX_BUFFER_SIZE   128
+#define APP_USART_RX_BUFFER_SIZE   1024
 
 /* Defs USART TX (is unit 1) */
 #define APP_USART_TX_ID            USART_ID_1
@@ -144,7 +144,7 @@ extern "C" {
 #define APP_USART_TX_OPER          USART_ENABLE_TX_RX_USED // no flow control
 #define APP_USART_TX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
 /* general TX config */
-#define APP_USART_TX_BUFFER_SIZE   128
+#define APP_USART_TX_BUFFER_SIZE   1024
 
 // *****************************************************************************
 // Section: USB controller Driver Configuration
@@ -179,7 +179,7 @@ extern "C" {
 #define USB_DEVICE_CDC_QUEUE_DEPTH_COMBINED      3
 /* Application USB Device CDC Read Buffer Size. This should be a multiple of
  * the CDC Bulk Endpoint size */
-#define APP_READ_BUFFER_SIZE 64
+#define APP_READ_BUFFER_SIZE 1024
 
 /* TODO:  Define build-time Configuration Options. */
 
