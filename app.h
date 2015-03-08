@@ -124,12 +124,12 @@ typedef struct
     int               lastSecond;
     /* LCD I2C data */
     LCD_Init_Sequence LCD_Init;
-    I2C_States        LCD_State;
-    I2C_Data_State    LCD_Transfer;
+    I2C_States        I2C_State;
+    I2C_Data_State    I2C_Transfer;
     uint8_t           LCD_Write[APP_LCD_I2C_WRITE_BUFFER_SIZE];
-    uint8_t           LCD_WriteIx;
+    int               LCD_WriteIx;
     uint8_t           LCD_Read[APP_LCD_I2C_READ_BUFFER_SIZE];
-    uint8_t           LCD_ReadIx;
+    int               LCD_ReadIx;
     char              LCD_Line[LCD_LINEBUFFERS][LCD_LINEBUFFER_SIZE];
     APP_STATES        LCD_Return_AppState; 
     /* USB: Device layer handle returned by device layer open function */
@@ -208,13 +208,13 @@ void APP_USBDeviceCDCEventHandler
     uintptr_t userData
 );
 
-void APP_Initialize (void);
+void APP_Initialize ( void );
 
 void APP_TimingCallback ( void );
 
-void APP_CheckTimedLED(void);
+void APP_CheckTimedLED ( void );
 
-bool APP_StateReset(void);
+bool APP_StateReset ( void );
 
 void APP_USBDeviceEventHandler ( 
     USB_DEVICE_EVENT event
@@ -246,6 +246,8 @@ void APP_I2C_M_Write(void);
 void APP_I2C_Process(void);
 
 bool APP_I2C_Ready(void);
+
+bool APP_LCD_Ready(void);
 
 void APP_USART_Read(void);
 

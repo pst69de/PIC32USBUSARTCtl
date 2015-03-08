@@ -40,11 +40,13 @@ extern "C" {
 /* Ports ID = 0 (future extension may take higher IDs) */
 #define APP_LED_PORTS_ID            PORTS_ID_0
 /* PORTS mappings */
-#define APP_LED_PORT_CHANNEL        PORT_CHANNEL_A
-#define APP_LEDR_PIN                PORTS_BIT_POS_0
-#define APP_LEDR_AIPIN              PORTS_ANALOG_PIN_0
-#define APP_LEDG_PIN                PORTS_BIT_POS_1
-#define APP_LEDG_AIPIN              PORTS_ANALOG_PIN_1
+#define APP_LED_PORT_CHANNEL        PORT_CHANNEL_B
+#define APP_LEDR_PIN                PORTS_BIT_POS_2
+#define APP_LEDR_AIPIN              PORTS_ANALOG_PIN_4
+#define APP_LEDG_PIN                PORTS_BIT_POS_3
+#define APP_LEDG_AIPIN              PORTS_ANALOG_PIN_5
+#define APP_LEDY_PIN                PORTS_BIT_POS_4
+//#define APP_LEDY_AIPIN              
 
 /* APP's interrupt handling */
 #define APP_INT_ID                  INT_ID_0
@@ -58,6 +60,9 @@ extern "C" {
 /* TODO: defs CS/RST if needed: CS tied to GND (always select), RST tied to MCLR (reset on chip reset) */
 /* LCD Reset later by Power Control (define Port Pin for Output H = display on, L = display off, reinit display after power cycle) */
 /* I2C1 */
+// see http://ww1.microchip.com/downloads/en/DeviceDoc/80000531F.pdf Errata
+// Enabling I2C1 makes Ports A0 / A1 unusable
+// Enabling I2C2 makes Ports B5 / B6 unusable
 #define APP_LCD_I2C_ID                 I2C_ID_1
 #define APP_LCD_I2C_BAUD               100000L
 /* I2C data handling */
@@ -80,7 +85,8 @@ extern "C" {
   so the 4bit data is always the high nibble of the transfer byte and control is done in the low nibble
 */
 /* address shifted by 1 as LSB is R/W */
-#define LCD_ADDRESS                (0x27 << 1)
+#define LCD_ADDRESS                (0x3F << 1)
+//#define LCD_ADDRESS                (0x01 << 1)
 #define I2C_WRITE                  0
 #define I2C_READ                   1
 #define LCD_LINEBUFFER_SIZE        20

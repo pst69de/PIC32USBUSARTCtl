@@ -53,53 +53,54 @@
 #include "usb/usb_device.h"
 #include "../../app.h"
 
-/* Global allocation of structure to hold system objects handles */
+// Global allocation of structure to hold system objects handles
 SYSTEM_OBJECTS sysObjects;
-
-/****************************************************
- * Endpoint Table needed by the Device Layer.
- ****************************************************/
+/*
+//***************************************************
+// Endpoint Table needed by the Device Layer.
+//***************************************************
 
 uint8_t __attribute__((aligned(512))) endpointTable[USB_DEVICE_ENDPOINT_TABLE_SIZE];
 
-/****************************************************
- * USB Device Layer Initialization Data
- ****************************************************/
+//***************************************************
+// USB Device Layer Initialization Data
+//***************************************************
 
 USB_DEVICE_INIT usbDevInitData =
 {
-    /* System module initialization */
+    // System module initialization
     .moduleInit = {SYS_MODULE_POWER_RUN_FULL},
 
-    /* Identifies peripheral (PLIB-level) ID */
+    // Identifies peripheral (PLIB-level) ID
     .usbID = USB_ID_1,
 
-    /* Stop in idle */
+    // Stop in idle 
     .stopInIdle = false,
 
-    /* Suspend in sleep */
+    // Suspend in sleep
     .suspendInSleep = false,
 
-    /* Endpoint table */
+    // Endpoint table
     .endpointTable = endpointTable,
 
-    /* Interrupt Source for USB module */
+    // Interrupt Source for USB module
     .interruptSource = INT_SOURCE_USB_1,
 
-    /* Number of function drivers registered to this instance of the
-       USB device layer */
+    // Number of function drivers registered to this instance of the
+    // USB device layer
     .registeredFuncCount = 1,
 
-    /* Function driver table registered to this instance of the USB device layer*/
+    // Function driver table registered to this instance of the USB device layer
     .registeredFunctions = (USB_DEVICE_FUNCTION_REGISTRATION_TABLE*)funcRegistrationTable,
 
-    /* Pointer to USB Descriptor structure */
+    // Pointer to USB Descriptor structure
     .usbMasterDescriptor = (USB_DEVICE_MASTER_DESCRIPTOR*)&usbMasterDescriptor,
 
-    /* USB Device Speed */
+    // USB Device Speed
     .deviceSpeed = USB_SPEED_FULL
 
 };
+*/
 
 void TMR_Initialize(void) {
     // Timer1 System Clock
@@ -115,15 +116,19 @@ void TMR_Initialize(void) {
 }
 
 void PORTS_Initialize(void) {
-    /* Set outputting Ports to Output (default ist Input), clear Analog Input */
-    /* red LED */
+    // Set outputting Ports to Output (default ist Input), clear Analog Input
+    // red LED
     PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
     PLIB_PORTS_PinDirectionOutputSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
     PLIB_PORTS_PinModeSelect(APP_LED_PORTS_ID, APP_LEDR_AIPIN, PORTS_PIN_MODE_DIGITAL);
-    /* green LED */
+    // green LED
     PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
     PLIB_PORTS_PinDirectionOutputSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
     PLIB_PORTS_PinModeSelect(APP_LED_PORTS_ID, APP_LEDG_AIPIN, PORTS_PIN_MODE_DIGITAL);
+    // yellow LED
+    PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
+    PLIB_PORTS_PinDirectionOutputSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
+    //PLIB_PORTS_PinModeSelect(APP_LED_PORTS_ID, APP_LEDY_AIPIN, PORTS_PIN_MODE_DIGITAL); not an analog pin
 }
 
 void I2C_Initialize(void) {
@@ -131,23 +136,31 @@ void I2C_Initialize(void) {
     // Prepare Ports I2C 1  
     PLIB_PORTS_PinClear(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SCL_PIN);
     PLIB_PORTS_PinClear(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SDA_PIN);
+    PLIB_PORTS_RemapOutput(APP_LCD_PORTS_ID, OUTPUT_FUNC_NO_CONNECT, OUTPUT_PIN_RPB8);
     // open drain configuration I2C 1 Pins 5V tolerant, pull up with 2k2
     PLIB_PORTS_PinOpenDrainEnable(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SCL_PIN);
     PLIB_PORTS_PinOpenDrainEnable(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SDA_PIN);
+    //PLIB_PORTS_PinDirectionOutputSet(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SCL_PIN);
+    //PLIB_PORTS_PinDirectionOutputSet(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SDA_PIN);
+    // set the ports Input
+    PLIB_PORTS_PinDirectionInputSet(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SCL_PIN);
+    PLIB_PORTS_PinDirectionInputSet(APP_LCD_PORTS_ID, APP_LCD_PORT_CHANNEL, APP_LCD_SDA_PIN);
     // Configure General I2C Options
     PLIB_I2C_SlaveClockStretchingEnable(APP_LCD_I2C_ID);
+    // Disable to be called 
+    PLIB_I2C_GeneralCallDisable(APP_LCD_I2C_ID);
     // future option SMB compatibility
     PLIB_I2C_SMBDisable(APP_LCD_I2C_ID);
     // future option high baud rates (>100kHz)
-    PLIB_I2C_HighFrequencyDisable(APP_LCD_I2C_ID);
+    PLIB_I2C_HighFrequencyEnable(APP_LCD_I2C_ID);
     // only 7-Bit addresses
-    PLIB_I2C_ReservedAddressProtectEnable(APP_LCD_I2C_ID);
+    PLIB_I2C_ReservedAddressProtectDisable(APP_LCD_I2C_ID);
     // Idle when proc idle (no operation in idle mode)
-    PLIB_I2C_StopInIdleEnable(APP_LCD_I2C_ID);
+    PLIB_I2C_StopInIdleDisable(APP_LCD_I2C_ID);
     // Set Desired baud rate
     PLIB_I2C_BaudRateSet( APP_LCD_I2C_ID, APP_SYSCLK_FREQ, APP_LCD_I2C_BAUD);
     // Set the appropriate slave address (slave only)
-    //PLIB_I2C_SlaveAddress7BitSet(APP_LCD_I2C_ID, MY_SLAVE_ADDRESS);
+    //PLIB_I2C_SlaveAddress7BitSet(APP_LCD_I2C_ID, 0x7f);
     // Optional:  Clear and enable interrupts before enabling the I2C module.
     // Enable the module -> in SYS_Startup
 }
@@ -163,7 +176,7 @@ void USART_Initialize(void) {
     PLIB_USART_OperationModeSelect(APP_USART_RX_ID, APP_USART_RX_OPER);
     PLIB_USART_HandshakeModeSelect(APP_USART_RX_ID, APP_USART_RX_HAND);
     PLIB_USART_BaudRateSet(APP_USART_RX_ID, APP_PBCLK_FREQ, APP_USART_RX_BAUD);
-    /* Select 8 data bits, No parity and one stop bit */
+    // Select 8 data bits, No parity and one stop bit
     PLIB_USART_LineControlModeSelect(APP_USART_RX_ID, APP_USART_RX_MODE);
     
     // USART 1 TX
@@ -176,33 +189,39 @@ void USART_Initialize(void) {
     PLIB_USART_OperationModeSelect(APP_USART_TX_ID, APP_USART_TX_OPER);
     PLIB_USART_HandshakeModeSelect(APP_USART_TX_ID, APP_USART_TX_HAND);
     PLIB_USART_BaudRateSet(APP_USART_TX_ID, APP_PBCLK_FREQ, APP_USART_TX_BAUD);
-    /* Select 8 data bits, No parity and one stop bit */
+    // Select 8 data bits, No parity and one stop bit
     PLIB_USART_LineControlModeSelect(APP_USART_TX_ID, APP_USART_TX_MODE);
     
     // enabling USARTs in SYS_Startup
 }
 
 void INT_Initialize(void) {
-    /* enable the multi vector */
-    PLIB_INT_MultiVectorSelect( INT_ID_0 );
-    /* set priority and enable USB1 */
+    // enable the multi vector
+    PLIB_INT_MultiVectorSelect( APP_INT_ID );
+    /*
+    // set priority and enable USB1
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_PRIORITY_LEVEL5);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_SUBPRIORITY_LEVEL0);
-    /* set priority and enable I2C */
+    */    
+    // set priority and enable I2C
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_PRIORITY_LEVEL4);
-    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_SUBPRIORITY_LEVEL0);
-    /* set priority and enable Timer1 */
+    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_SUBPRIORITY_LEVEL0);    
+    // set priority and enable Timer1
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_PRIORITY_LEVEL3);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_SUBPRIORITY_LEVEL0);
-    /* set priority and enable USART RX */
+    /*
+    // set priority and enable USART RX
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_PRIORITY_LEVEL2);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_SUBPRIORITY_LEVEL0);
-    /* set priority and enable USART TX */
+    // set priority and enable USART TX
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_PRIORITY_LEVEL1);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_SUBPRIORITY_LEVEL0);
-    /* Enable the global interrupts */
+    */
+    // Enable the global interrupts
     PLIB_INT_Enable(APP_INT_ID);
-    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USB_1);
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USB_1);
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_ERROR);
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
     //Not yet
@@ -211,13 +230,18 @@ void INT_Initialize(void) {
 }
 
 void SYS_Startup(void) {
-    /* LCD I2C com */
-    PLIB_I2C_Enable(I2C_ID_2);
-    /* system clock */
+    // LCD I2C com
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_ERROR);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
+    // see http://ww1.microchip.com/downloads/en/DeviceDoc/80000531F.pdf Errata
+    // Enabling I2C1 makes Ports A0 / A1 unusable
+    // Enabling I2C2 makes Ports B5 / B6 unusable
+    PLIB_I2C_Enable(APP_LCD_I2C_ID);
+    // system clock 
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_TIMER_1);
     PLIB_TMR_Start(APP_TMR_CLOCK);
     // enable USARTs
-    //Not yet
     //PLIB_USART_Enable(APP_USART_RX_ID);
     //PLIB_USART_Enable(APP_USART_TX_ID);    
 }
@@ -225,27 +249,30 @@ void SYS_Startup(void) {
 /* Initialize the System */
 void SYS_Initialize ( void *data )
 {
-    /* Initialize all modules and the application */
-    /* Timer initializations */
+    // Initialize all modules and the application
+    // Timer initializations
     TMR_Initialize();
-    /* Set outputting Ports to Output (default is Input), clear analog Input */
+    // Set outputting Ports to Output (default is Input), clear analog Input
     PORTS_Initialize();
-    /* Initialize the USB device layer */
+    /*
+    // Initialize the USB device layer
     sysObjects.usbDevObject = USB_DEVICE_Initialize (USB_DEVICE_INDEX_0 ,
                                                     ( SYS_MODULE_INIT* ) & usbDevInitData);
-    /* Check if the object returned by the device layer is valid */
+    // Check if the object returned by the device layer is valid
     SYS_ASSERT((SYS_MODULE_OBJ_INVALID != usbDevObject), "Invalid USB DEVICE object");
-    /* init I2C */
+    */
+    // init I2C
+    //PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
     I2C_Initialize();
-    /* init USART */
-    USART_Initialize();
+    // init USART
+    //USART_Initialize();
     /* TODO:  Initialize all modules and the application. */
 
-    /* Initialize the Application */
+    // Initialize the Application
     APP_Initialize();
 
-    /* Initialize the interrupt system (after all other init's) */
+    // Initialize the interrupt system (after all other init's)
     INT_Initialize();
-    /* startup system */
+    // startup system
     SYS_Startup();
 }
