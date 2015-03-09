@@ -99,13 +99,14 @@ extern "C" {
 /* Read/Write -> RW Bit 1 (always 0 = W) */
 #define LCD_RW_WRITE               0x00
 /* Enable (Clock Strobe) -> E Bit 2 (1 -> 0) */
-#define LCD_E_PREPARE              0x02
+#define LCD_E_PREPARE              0x04
 #define LCD_E_WRITE                0x00
 /* commands differentiated by (H)igh (1st) and (L)ow (2nd) nibble */
 /* LCD_4BIT_H and LCD_LINEFONT_L compare in the init sequence and cannot be changed on Runtime */
+#define LCD_8BIT_H                 0x30  // 0x30 would be 8bit mode
 #define LCD_4BIT_H                 0x20  // 0x30 would be 8bit mode
-//#define LCD_LINEFONT_L             0x80  // 2line display (1line bit7 off) with 5x7 font (5x10 font = bit6 on)
-#define LCD_LINEFONT_L             0x00 // try 1line mode (5x7 font) 1st    
+#define LCD_LINEFONT_L             0x80  // 2line display (1line bit7 off) with 5x7 font (5x10 font = bit6 on)
+//#define LCD_LINEFONT_L             0x00 // try 1line mode (5x7 font) 1st
 /* display OFF/ON */
 #define LCD_DISPLAY_OFF_H          0x00
 #define LCD_DISPLAY_OFF_L          0x80 // display off (no cursor, cursor underline)
@@ -115,11 +116,13 @@ extern "C" {
 #define LCD_CLEAR_H                0x00
 #define LCD_CLEAR_L                0x10
 /* set cursor move (0 = right), shift on/off (0 = off)  */
-#define LCD_CURSORSHIFT_H          0x10
-#define LCD_CURSORSHIFT_L          0x00
+#define LCD_CURSORSHIFT_H          0x00
+#define LCD_CURSORSHIFT_L          0x60
 /* set cursor to home */
-#define LCD_SET_HOME_H             0x10
-#define LCD_SET_HOME_L             0x00
+#define LCD_SET_HOME1_H            0x80
+#define LCD_SET_HOME1_L            0x00
+#define LCD_SET_HOME2_H            0xc0
+#define LCD_SET_HOME2_L            0x00
 
 /* TODO: defs USART 1/2 for COM */
 /* Defs USART RX (is unit 2) */

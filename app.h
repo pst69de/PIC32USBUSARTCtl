@@ -99,8 +99,11 @@ typedef enum {
 
 typedef enum {
     LCD_wait_on,
+    LCD_init_8bit,
+    LCD_wait_8bit,
+    LCD_switch_8bit,
+    LCD_8bit_wait,
     LCD_switch_4bit,
-    LCD_4bit_wait,
     LCD_linefont_4bit,
     LCD_displayoff,
     LCD_displayclear,

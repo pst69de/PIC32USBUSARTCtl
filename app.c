@@ -79,22 +79,18 @@ void APP_TimingCallback ( void ) {
                     appData.time.Days++;
                 }
                 // Set Hours to Time field
-                /*
-                LCD_Line[0][2] = numChar[appData.time.Hours % 10];
-                LCD_Line[0][1] = numChar[appData.time.Hours / 10];
-                */
+                appData.LCD_Line[0][2] = numChar[appData.time.Hours % 10];
+                appData.LCD_Line[0][1] = numChar[appData.time.Hours / 10];
             }
             // Set Minutes to Time field
-            /*
-            LCD_Line[0][5] = numChar[appData.time.Minutes % 10];
-            LCD_Line[0][4] = numChar[appData.time.Minutes / 10];
-            */
+            appData.LCD_Line[0][5] = numChar[appData.time.Minutes % 10];
+            appData.LCD_Line[0][4] = numChar[appData.time.Minutes / 10];
         }
         // Set Seconds to Time field
-        /*
-        LCD_Line[0][8] = numChar[appData.time.Seconds % 10];
-        LCD_Line[0][7] = numChar[appData.time.Seconds / 10];
-        */
+        appData.LCD_Line[0][8] = numChar[appData.time.Seconds % 10];
+        appData.LCD_Line[0][7] = numChar[appData.time.Seconds / 10];
+        appData.LCD_Return_AppState = appData.state;
+        appData.state = APP_LCD_UPDATE;
     }
     if (appData.timerCount > 0) {
         appData.timerCount--;
@@ -290,17 +286,27 @@ void APP_LCD_AddCharWrite( char aChar) {
 }
 
 void APP_LCD_Update(void) {
-    uint8_t l;
     uint8_t c;
-    for (l = LCD_LINEBUFFERS - 1; l = 0; l--) {
-        for (c = LCD_LINEBUFFER_SIZE - 1; c = 0; c--) {
-            APP_LCD_AddCharWrite(appData.LCD_Line[l][c]);
-        }
+    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
+        APP_LCD_AddCharWrite(appData.LCD_Line[3][c-1]);
     }
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME_L);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME_L); 
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME_H);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME_H); 
+    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
+        APP_LCD_AddCharWrite(appData.LCD_Line[1][c-1]);
+    }
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME2_L);
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME2_L);
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME2_H);
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME2_H);
+    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
+        APP_LCD_AddCharWrite(appData.LCD_Line[2][c-1]);
+    }
+    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
+        APP_LCD_AddCharWrite(appData.LCD_Line[0][c-1]);
+    }
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME1_L);
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME1_L);
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME1_H);
+    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME1_H);
     APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
     APP_I2C_M_Write();
 }
@@ -324,8 +330,42 @@ bool APP_LCD_Init(void) {
         case LCD_wait_on:
             if (!appData.time.Wait) {
                 // data & address always LIFO
+                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
+                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_8BIT_H);
+                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
+                APP_I2C_M_Write();
+                appData.LCD_Init = LCD_init_8bit;
+            }
+            break;
+        case LCD_init_8bit:
+            if (APP_I2C_Ready()) {
+                appData.time.Wait = 4; // Wait at least 4 ms after 8bit switch
+                appData.LCD_Init = LCD_wait_8bit;
+            }
+            break;
+        case LCD_wait_8bit:
+            if (!appData.time.Wait) {
+                // data & address always LIFO
+                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
+                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_8BIT_H);
+                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
+                APP_I2C_M_Write();
+                appData.LCD_Init = LCD_switch_8bit;
+            }
+            break;
+        case LCD_switch_8bit:
+            if (APP_I2C_Ready()) {
+                appData.time.Wait = 1; // Wait at least 1 ms after 8bit switch
+                appData.LCD_Init = LCD_8bit_wait;
+            }
+            break;
+        case LCD_8bit_wait:
+            if (!appData.time.Wait) {
+                // data & address always LIFO
                 APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_4BIT_H);
                 APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_4BIT_H);
+                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
+                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_8BIT_H);
                 APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
                 APP_I2C_M_Write();
                 appData.LCD_Init = LCD_switch_4bit;
@@ -333,12 +373,6 @@ bool APP_LCD_Init(void) {
             break;
         case LCD_switch_4bit:
             if (APP_I2C_Ready()) {
-                appData.time.Wait = 4; // Wait at least 4 ms after 4bit switch
-                appData.LCD_Init = LCD_4bit_wait;
-            }
-            break;
-        case LCD_4bit_wait:
-            if (!appData.time.Wait) {
                 APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_LINEFONT_L);
                 APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_LINEFONT_L);
                 APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_4BIT_H);
@@ -558,23 +592,19 @@ void APP_Tasks ( void )
             APP_CheckTimedLED();
             if (APP_LCD_Init()) {
                 PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
-                //APP_LCD_Print( 0, "Hello World :)");
-                //APP_LCD_Print( 1, "Allo le Mond :)"); // check usage of 2nd line part
+                APP_LCD_Print( 3, "LCD ready");
                 // -> use of sprintf for string formatting
-                /*
                 // Time representation 
-                LCD_Line[0][1] = '0';
-                LCD_Line[0][2] = '0';
-                LCD_Line[0][3] = ':';
-                LCD_Line[0][4] = '0';
-                LCD_Line[0][5] = '0';
-                LCD_Line[0][6] = ':';
-                LCD_Line[0][7] = '0';
-                LCD_Line[0][8] = '0';
-                */
-                appData.state = APP_STATE_ERROR;
-                //appData.state = APP_LCD_UPDATE;
-                //appData.LCD_Return_AppState = APP_STATE_ERROR;
+                appData.LCD_Line[0][1] = '0';
+                appData.LCD_Line[0][2] = '0';
+                appData.LCD_Line[0][3] = ':';
+                appData.LCD_Line[0][4] = '0';
+                appData.LCD_Line[0][5] = '0';
+                appData.LCD_Line[0][6] = ':';
+                appData.LCD_Line[0][7] = '0';
+                appData.LCD_Line[0][8] = '0';
+                appData.state = APP_LCD_UPDATE;
+                appData.LCD_Return_AppState = APP_STATE_HOLD;
                 //appData.LCD_Return_AppState = APP_STATE_USB_INIT;
             }
             break;
