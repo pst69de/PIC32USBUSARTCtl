@@ -59,6 +59,8 @@ void APP_Initialize ( void )
     appData.state = APP_STATE_INIT;
 }
 
+const char numChar[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
 // APP Time Base
 void APP_TimingCallback ( void ) {
     // Adjust App Timing
@@ -76,8 +78,23 @@ void APP_TimingCallback ( void ) {
                     appData.time.Hours = 0;
                     appData.time.Days++;
                 }
+                // Set Hours to Time field
+                /*
+                LCD_Line[0][2] = numChar[appData.time.Hours % 10];
+                LCD_Line[0][1] = numChar[appData.time.Hours / 10];
+                */
             }
+            // Set Minutes to Time field
+            /*
+            LCD_Line[0][5] = numChar[appData.time.Minutes % 10];
+            LCD_Line[0][4] = numChar[appData.time.Minutes / 10];
+            */
         }
+        // Set Seconds to Time field
+        /*
+        LCD_Line[0][8] = numChar[appData.time.Seconds % 10];
+        LCD_Line[0][7] = numChar[appData.time.Seconds / 10];
+        */
     }
     if (appData.timerCount > 0) {
         appData.timerCount--;
@@ -118,6 +135,11 @@ bool APP_StateReset(void) {
     // This function returns true if the device was reset
     bool retVal;
     if(appData.isConfigured == false) {
+        // Clear Display from USB Status
+        //LCD_Line[0][11] = ' ';
+        //LCD_Line[0][12] = ' ';
+        //appData.state = APP_LCD_UPDATE;
+        //appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
         appData.state = APP_STATE_USB_CONFIGURATION;
         appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
         appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
@@ -131,7 +153,6 @@ bool APP_StateReset(void) {
     return(retVal);
 }
 
-
 //******************************************************
 // USB Device Layer Events - Application Event Handler
 //******************************************************
@@ -140,18 +161,12 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event,
     uint8_t * configuredEventData;
     switch ( event ) {
         case USB_DEVICE_EVENT_RESET:
-            // Update LED to show reset state 
-            PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-            PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
             appData.isConfigured = false;
             break;
         case USB_DEVICE_EVENT_CONFIGURED:
-            // Check the configuratio. We only support configuration 1 
+            // Check the configuration. We only support configuration 1 
             configuredEventData = (uint8_t *)eventData;
             if ( *configuredEventData == 1) {
-                // Update LED to show configured state 
-                PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-                PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
                 // Register the CDC Device application event handler here.
                 // Note how the appData object pointer is passed as the
                 // user data 
@@ -159,24 +174,20 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event,
                         APP_USBDeviceCDCEventHandler, (uintptr_t)&appData);
                 // Mark that the device is now configured 
                 appData.isConfigured = true;
+                //LCD_Line[0][11] = 'S';
             }
             break;
         case USB_DEVICE_EVENT_POWER_DETECTED:
             // VBUS was detected. We can attach the device 
             USB_DEVICE_Attach(appData.deviceHandle);
-            PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-            PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
+            //LCD_Line[0][12] = 'B';
             break;
         case USB_DEVICE_EVENT_POWER_REMOVED:
             // VBUS is not available any more. Detach the device. 
             USB_DEVICE_Detach(appData.deviceHandle);
-            PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-            PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
+            //LCD_Line[0][12] = ' ';
             break;
         case USB_DEVICE_EVENT_SUSPENDED:
-            // Switch LED to show suspended state 
-            PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-            PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
             break;
         case USB_DEVICE_EVENT_RESUMED:
         case USB_DEVICE_EVENT_ERROR:
@@ -402,6 +413,7 @@ bool APP_LCD_Init(void) {
 void APP_I2C_M_Write(void) {
     appData.I2C_State = I2C_MASTER_WRITE;
     appData.I2C_Transfer = I2C_MS_Start;
+    PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
     PLIB_I2C_MasterStart(APP_LCD_I2C_ID);
 }
 
@@ -427,29 +439,36 @@ void APP_I2C_Process(void) {
                     break;
                 case I2C_MS_Address:
                     // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
-                    if (PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID) & PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
-                        appData.I2C_Transfer = I2C_MS_Transmit;
-                        appData.LCD_WriteIx--;
-                        PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, appData.LCD_Write[appData.LCD_WriteIx]);
-                    // ] else { -> if PLIB_I2C_TransmitterByteWasAcknowledged doesn't happen transfer should be restarted and after some tries given up
-                    // i assume all goes well ;)
+                    if (!PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID)) {
+                        PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
+                    } else {
+                        if ( PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
+                            appData.I2C_Transfer = I2C_MS_Transmit;
+                            appData.LCD_WriteIx--;
+                            Xfer = appData.LCD_Write[appData.LCD_WriteIx];
+                            PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, Xfer);
+                        }
                     }
                     break;
                 case I2C_MS_Transmit:
                     // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
-                    PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
-                    if (PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID) & PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
-                        if (appData.LCD_WriteIx >= 0) {
-                            appData.LCD_WriteIx--;
-                            PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, appData.LCD_Write[appData.LCD_WriteIx]);
-                            // keep appData.LCD_Transfer = I2C_MS_Transmit
-                        } else {
-                            // if (appData.LCD_WriteIx > 0) { PLIB_I2C_MasterStartRepeat(APP_LCD_I2C_ID); not used in this purpose
-                            PLIB_I2C_MasterStop(APP_LCD_I2C_ID);
-                            appData.I2C_Transfer = I2C_MS_Stop;
+                    if (!PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID)) {
+                        PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
+                    } else {
+                        if (PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
+                            if (appData.LCD_WriteIx > 0) {
+                                appData.LCD_WriteIx--;
+                                Xfer = appData.LCD_Write[appData.LCD_WriteIx];
+                                PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, Xfer);
+                                // keep appData.LCD_Transfer = I2C_MS_Transmit
+                            } else {
+                                // if (appData.LCD_WriteIx > 0) { PLIB_I2C_MasterStartRepeat(APP_LCD_I2C_ID); not used in this purpose
+                                PLIB_I2C_MasterStop(APP_LCD_I2C_ID);
+                                appData.I2C_Transfer = I2C_MS_Stop;
+                            }
+                        // ] else { -> if PLIB_I2C_TransmitterByteWasAcknowledged doesn't happen transfer should be restarted and after some tries given up
+                        // i assume all goes well ;)
                         }
-                    // ] else { -> if PLIB_I2C_TransmitterByteWasAcknowledged doesn't happen transfer should be restarted and after some tries given up
-                    // i assume all goes well ;)
                     }
                     break;
                 case I2C_MS_Repeat:
@@ -457,6 +476,7 @@ void APP_I2C_Process(void) {
                     break;
                 case I2C_MS_Stop:
                     // when this occurs, all is done, go back to wait
+                    PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
                     appData.I2C_State = I2C_MASTER_IDLE;
                     appData.I2C_Transfer = I2C_Idle;
                     break;
@@ -531,21 +551,31 @@ void APP_Tasks ( void )
             // Turn Off LED
             PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
             PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
-            PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
+            PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
             appData.state = APP_STATE_LCD_INIT;
             break;
         case APP_STATE_LCD_INIT:
             APP_CheckTimedLED();
             if (APP_LCD_Init()) {
                 PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
-                //PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-                //PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
                 //APP_LCD_Print( 0, "Hello World :)");
                 //APP_LCD_Print( 1, "Allo le Mond :)"); // check usage of 2nd line part
                 // -> use of sprintf for string formatting
-                //appData.state = APP_LCD_UPDATE;
+                /*
+                // Time representation 
+                LCD_Line[0][1] = '0';
+                LCD_Line[0][2] = '0';
+                LCD_Line[0][3] = ':';
+                LCD_Line[0][4] = '0';
+                LCD_Line[0][5] = '0';
+                LCD_Line[0][6] = ':';
+                LCD_Line[0][7] = '0';
+                LCD_Line[0][8] = '0';
+                */
                 appData.state = APP_STATE_ERROR;
-                //appData.LCD_Return_AppState = APP_STATE_HOLD;
+                //appData.state = APP_LCD_UPDATE;
+                //appData.LCD_Return_AppState = APP_STATE_ERROR;
+                //appData.LCD_Return_AppState = APP_STATE_USB_INIT;
             }
             break;
         /*
@@ -558,25 +588,32 @@ void APP_Tasks ( void )
                 // Attach the device 
                 USB_DEVICE_Attach (appData.deviceHandle);
                 appData.state = APP_STATE_USB_CONFIGURATION;
-                PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
+                // Fillup Display with USB Status
+                //LCD_Line[0][10] = 'U';
+                //appData.state = APP_LCD_UPDATE;
+                //appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
             }
             else {
-                PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
+                PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
                 // The Device Layer is not ready to be opened. We should try
                 // again later.
             }
             break;
         case APP_STATE_USB_CONFIGURATION:
+            // if the USB device is reset by the Host we return to this state (checked by APP_StateReset)
             // Check if the device was configured 
             if(appData.isConfigured) {
                 // If the device is configured then lets start reading 
                 appData.state = APP_STATE_SCHEDULE_READ;
-                PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
-                PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
+                // Fillup Display with USB Status
+                //LCD_Line[0][12] = 'B';
+                //appData.state = APP_LCD_UPDATE;
+                //appData.LCD_Return_AppState = APP_STATE_SCHEDULE_READ;
             }
             break;
         case APP_STATE_SCHEDULE_READ:
             if(APP_StateReset()) { break; }
+            // Clear Read Buffer and then wait for data send by Host
             //memset(appData.readBuffer, 0, APP_READ_BUFFER_SIZE); -> doesn't work
             for (i = 0; i < APP_READ_BUFFER_SIZE; i++) { appData.readBuffer[i] = '\0'; }
             appData.state = APP_STATE_WAIT_FOR_READ_COMPLETE;
@@ -593,31 +630,28 @@ void APP_Tasks ( void )
                     appData.state = APP_STATE_ERROR;
                     break;
                 }
+                // Update LCD with count bytes read 
+                //i = strlen( appData.readBuffer);
+                //LCD_Line[0][16] = numChar[i%10];
+                //i /= 10;
+                //LCD_Line[0][15] = numChar[i%10];
+                //i /= 10;
+                //LCD_Line[0][14] = numChar[i%10];
+                //i /= 10;
+                //LCD_Line[0][13] = numChar[i];
                 switch (appData.readBuffer[0]) {
-                    case 'A':
-                    case 'a':
-                        //strcpy(appData.writeBuffer, "\r\nOK");
-                        //appData.writeCount = strlen(appData.writeBuffer);
-                        //appData.state = APP_STATE_SAMPLE_AIN1;
+                    case 'U':
+                        //POE.net Message -> pass to interpreter
                         break;
-                    case 'F':
-                    case 'f':
-                        //appData.state = APP_STATE_SET_FREQ;
-                        break;
-                    case 'W':
-                    case 'w':
-                        //appData.state = APP_STATE_SET_WIDTH;
+                    case 'T':
+                        // set a text message
                         break;
                     default:
+                        // ignore Message
                         appData.writeCount = 0;
                         appData.state = APP_STATE_SCHEDULE_WRITE;
                         break;
                 }
-                // code xample
-                // if (i) {
-                //     sprintf(appData.writeBuffer,"\r\n%c%d",appData.readBuffer[0],i);
-                //     appData.writeCount = strlen(appData.writeBuffer);
-                // }
             }
             break;
         case APP_STATE_SCHEDULE_WRITE:
@@ -640,7 +674,6 @@ void APP_Tasks ( void )
             // flag gets updated in the CDC event handler
             if (appData.isWriteComplete) {
                 appData.state = APP_STATE_SCHEDULE_READ;
-                PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
             }
             break;
         */
@@ -649,21 +682,6 @@ void APP_Tasks ( void )
             if (APP_I2C_Ready()) {
                 APP_LCD_Update();
                 appData.state = appData.LCD_Return_AppState;
-            }
-            break;
-        case APP_STATE_REGISTER_TMR:
-            if (APP_RegisterTimedLED( 1000)) {
-                PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-                appData.state = APP_STATE_OUTPUT_TIME;
-            }
-            break;
-        case APP_STATE_OUTPUT_TIME:
-            APP_CheckTimedLED();
-            if (appData.lastSecond != appData.time.Seconds) {
-                appData.lastSecond = appData.time.Seconds;
-                if ((appData.time.Seconds == 59) & (appData.time.Minutes == 0) & (appData.time.Hours == 0)) {
-                    appData.state = APP_STATE_ERROR;
-                }
             }
             break;
         case APP_STATE_ERROR:

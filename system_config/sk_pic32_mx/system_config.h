@@ -72,7 +72,7 @@ extern "C" {
 /* consts for I2C LCD Handling  */
 /*
   configuration I2C Chip PCF8574 on HD44780 Interface by sainsmart (most propably others)
-  address of PCF8574 (without an A) is , PCF8574 is 0x3F, LSB 0-2 are configurable, normally set H by pullup
+  address of PCF8574 (without an A) is 0x27 , PCF8574A is 0x3F, LSB 0-2 are configurable, normally set H by pullup
   PCF8574   HD44780
   Bit 0   = RS
   Bit 1   = R/W
@@ -85,8 +85,10 @@ extern "C" {
   so the 4bit data is always the high nibble of the transfer byte and control is done in the low nibble
 */
 /* address shifted by 1 as LSB is R/W */
-#define LCD_ADDRESS                (0x3F << 1)
-//#define LCD_ADDRESS                (0x01 << 1)
+// PCF8574 (A0 = H, A1 = H, A2 = H)
+#define LCD_ADDRESS                (0x27 << 1) //
+// PCF8574A (A0 = H, A1 = H, A2 = H)
+//#define LCD_ADDRESS                (0x3F << 1) 
 #define I2C_WRITE                  0
 #define I2C_READ                   1
 #define LCD_LINEBUFFER_SIZE        20
