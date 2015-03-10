@@ -568,6 +568,15 @@ void APP_USART_Write(void) {
 }
 #endif // of ifdef APP_USE_USART
 
+void ClearBuffer(char *buffer) {
+    char *first = buffer;
+    while (*buffer != '\0') {
+        *buffer = '\0';
+        buffer++;
+        if (buffer-first >= USB_BUFFER_SIZE) { break; }
+    }
+}
+
 //***************************************************
 // This is the standard texts replied to host
 //***************************************************
@@ -669,26 +678,47 @@ void APP_Tasks ( void )
                 }
                 // Update LCD with count bytes read 
                 i = strlen( appData.readBuffer);
+                appData.LCD_Line[0][17] = numChar[i%10];
+                i /= 10;
                 appData.LCD_Line[0][16] = numChar[i%10];
                 i /= 10;
                 appData.LCD_Line[0][15] = numChar[i%10];
                 i /= 10;
-                appData.LCD_Line[0][14] = numChar[i%10];
-                i /= 10;
-                appData.LCD_Line[0][13] = numChar[i];
+                appData.LCD_Line[0][14] = numChar[i];
                 switch (appData.readBuffer[0]) {
                     case 'U':
                         //POE.net Message -> pass to interpreter
                         break;
                     case 'T':
+                        switch (appData.readBuffer[1]) {
+                            case '1':
+                                APP_LCD_ClearLine(1);
+                                APP_LCD_Print(1,&appData.readBuffer[2]);
+                                break;
+                            case '2':
+                                APP_LCD_ClearLine(2);
+                                APP_LCD_Print(2,&appData.readBuffer[2]);
+                                break;
+                            case '3':
+                                APP_LCD_ClearLine(3);
+                                APP_LCD_Print(3,&appData.readBuffer[2]);
+                                break;
+                            default:
+                                strcpy(appData.writeBuffer, "NOK\n");
+                                appData.writeCount = strlen(appData.writeBuffer);
+                                appData.state = APP_STATE_SCHEDULE_WRITE;
+                                break;
+                        }
                         // set a text message
                         break;
                     default:
                         // ignore Message
-                        appData.writeCount = 0;
+                        strcpy(appData.writeBuffer, "see http://wiki69.pst69.homeip.net/index.php/PIC32_USART for POE.net messages\n");
+                        appData.writeCount = strlen(appData.writeBuffer);
                         appData.state = APP_STATE_SCHEDULE_WRITE;
                         break;
                 }
+                ClearBuffer(appData.readBuffer);
             }
             break;
         case APP_STATE_SCHEDULE_WRITE:

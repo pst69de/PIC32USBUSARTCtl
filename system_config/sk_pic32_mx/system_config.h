@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 // global usage defines
-#define APP_USE_USART
+//#define APP_USE_USART
 #define APP_USE_USB
 
 
