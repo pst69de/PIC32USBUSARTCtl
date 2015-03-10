@@ -55,7 +55,8 @@
 
 // Global allocation of structure to hold system objects handles
 SYSTEM_OBJECTS sysObjects;
-/*
+
+#ifdef APP_USE_USB
 //***************************************************
 // Endpoint Table needed by the Device Layer.
 //***************************************************
@@ -100,7 +101,7 @@ USB_DEVICE_INIT usbDevInitData =
     .deviceSpeed = USB_SPEED_FULL
 
 };
-*/
+#endif // of ifdef APP_USE_USB
 
 void TMR_Initialize(void) {
     // Timer1 System Clock
@@ -115,20 +116,37 @@ void TMR_Initialize(void) {
     PLIB_TMR_Period16BitSet(APP_TMR_CLOCK, APP_TMR_CLKINTERVAL);
 }
 
-void PORTS_Initialize(void) {
-    // Set outputting Ports to Output (default ist Input), clear Analog Input
+void LEDS_Initialize(void) {
     // red LED
-    PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-    PLIB_PORTS_PinDirectionOutputSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
-    PLIB_PORTS_PinModeSelect(APP_LED_PORTS_ID, APP_LEDR_AIPIN, PORTS_PIN_MODE_DIGITAL);
-    // green LED
-    PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
-    PLIB_PORTS_PinDirectionOutputSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDG_PIN);
-    PLIB_PORTS_PinModeSelect(APP_LED_PORTS_ID, APP_LEDG_AIPIN, PORTS_PIN_MODE_DIGITAL);
+    LEDR_Clear;
+    LEDR_Direction;
+    LEDR_Mode;
+    LEDR_Remap;
+    LEDR_OD;
     // yellow LED
-    PLIB_PORTS_PinClear(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
-    PLIB_PORTS_PinDirectionOutputSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDY_PIN);
-    //PLIB_PORTS_PinModeSelect(APP_LED_PORTS_ID, APP_LEDY_AIPIN, PORTS_PIN_MODE_DIGITAL); not an analog pin
+    LEDY_Clear;
+    LEDY_Direction;
+    LEDY_Mode;
+    LEDY_Remap;
+    LEDY_OD;
+    // green LED
+    LEDG_Clear;
+    LEDG_Direction;
+    LEDG_Mode;
+    LEDG_Remap;
+    LEDG_OD;
+    // blue LED
+    LEDB_Clear;
+    LEDB_Direction;
+    LEDB_Mode;
+    LEDB_Remap;
+    LEDB_OD;
+    // white LED
+    LEDW_Clear;
+    LEDW_Direction;
+    LEDW_Mode;
+    LEDW_Remap;
+    LEDW_OD;
 }
 
 void I2C_Initialize(void) {
@@ -165,6 +183,7 @@ void I2C_Initialize(void) {
     // Enable the module -> in SYS_Startup
 }
 
+#ifdef APP_USE_USART
 void USART_Initialize(void) {
     // USART RX
     PLIB_USART_Disable(APP_USART_RX_ID);
@@ -194,39 +213,43 @@ void USART_Initialize(void) {
     
     // enabling USARTs in SYS_Startup
 }
+#endif // of ifdef APP_USE_USART
 
 void INT_Initialize(void) {
     // enable the multi vector
     PLIB_INT_MultiVectorSelect( APP_INT_ID );
-    /*
+#ifdef APP_USE_USB
     // set priority and enable USB1
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_PRIORITY_LEVEL5);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_SUBPRIORITY_LEVEL0);
-    */    
+#endif // of ifdef APP_USE_USB
     // set priority and enable I2C
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_PRIORITY_LEVEL4);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_SUBPRIORITY_LEVEL0);    
     // set priority and enable Timer1
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_PRIORITY_LEVEL3);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_SUBPRIORITY_LEVEL0);
-    /*
+#ifdef APP_USE_USART
     // set priority and enable USART RX
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_PRIORITY_LEVEL2);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_SUBPRIORITY_LEVEL0);
     // set priority and enable USART TX
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_PRIORITY_LEVEL1);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_SUBPRIORITY_LEVEL0);
-    */
+#endif // of ifdef APP_USE_USART
     // Enable the global interrupts
     PLIB_INT_Enable(APP_INT_ID);
-    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USB_1);
+#ifdef APP_USE_USB
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USB_1);
+#endif
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_ERROR);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
-    //Not yet
-    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
-    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
+#ifdef APP_USE_USART
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
+#endif
 }
 
 void SYS_Startup(void) {
@@ -241,9 +264,11 @@ void SYS_Startup(void) {
     // system clock 
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_TIMER_1);
     PLIB_TMR_Start(APP_TMR_CLOCK);
+#ifdef APP_USE_USART
     // enable USARTs
-    //PLIB_USART_Enable(APP_USART_RX_ID);
-    //PLIB_USART_Enable(APP_USART_TX_ID);    
+    PLIB_USART_Enable(APP_USART_RX_ID);
+    PLIB_USART_Enable(APP_USART_TX_ID);    
+#endif
 }
 
 /* Initialize the System */
@@ -253,19 +278,20 @@ void SYS_Initialize ( void *data )
     // Timer initializations
     TMR_Initialize();
     // Set outputting Ports to Output (default is Input), clear analog Input
-    PORTS_Initialize();
-    /*
+    LEDS_Initialize();
+#ifdef APP_USE_USB
     // Initialize the USB device layer
     sysObjects.usbDevObject = USB_DEVICE_Initialize (USB_DEVICE_INDEX_0 ,
                                                     ( SYS_MODULE_INIT* ) & usbDevInitData);
     // Check if the object returned by the device layer is valid
     SYS_ASSERT((SYS_MODULE_OBJ_INVALID != usbDevObject), "Invalid USB DEVICE object");
-    */
+#endif
     // init I2C
-    //PLIB_PORTS_PinSet(APP_LED_PORTS_ID, APP_LED_PORT_CHANNEL, APP_LEDR_PIN);
     I2C_Initialize();
+#ifdef APP_USE_USART
     // init USART
-    //USART_Initialize();
+    USART_Initialize();
+#endif
     /* TODO:  Initialize all modules and the application. */
 
     // Initialize the Application

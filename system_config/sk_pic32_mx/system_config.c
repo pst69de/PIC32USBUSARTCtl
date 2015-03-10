@@ -1,5 +1,5 @@
 /*
- * File:   system_config.h
+ * File:   system_config.c
  * Author: patrick
  * Most parts taken from system_config.c of MPLAB Harmony v0.80
  * code example usb device cdc_com_port_single
@@ -13,11 +13,14 @@
 // *****************************************************************************
 // *****************************************************************************
 
+#include "system_config.h"
 #include "../../app.h"
 //#include "app.h"
+#ifdef APP_USE_USB
 #include "usb/usb_chapter_9.h"
 #include "usb/usb_cdc.h"
 #include "usb/usb_device_cdc.h"
+#endif
 
 // *****************************************************************************
 // *****************************************************************************
@@ -25,9 +28,10 @@
 // *****************************************************************************
 // *****************************************************************************
 
-/*******************************************
- *  USB Device Desciptor for this demo
- *******************************************/
+#ifdef APP_USE_USB
+//******************************************
+//  USB Device Desciptor for this demo
+//******************************************
 const USB_DEVICE_DESCRIPTOR fullSpeedDeviceDescriptor=
 {
     0x12,                       // Size of this descriptor in bytes
@@ -46,13 +50,12 @@ const USB_DEVICE_DESCRIPTOR fullSpeedDeviceDescriptor=
     0x01                        // Number of possible configurations
 };
 
-/*******************************************
- *  Device Configuration Decriptor
- *******************************************/
+//******************************************
+//  Device Configuration Decriptor
+//******************************************
 const uint8_t fullSpeedConfigurationDescriptor1[]=
 {
-    /* Configuration Descriptor Header */
-
+    // > Configuration Descriptor Header 
     0x09,                                                   // Size of this descriptor
     USB_DESCRIPTOR_CONFIGURATION,                           // CONFIGURATION descriptor type
     66,0,                                                   // Total length of data for this configuration
@@ -62,9 +65,7 @@ const uint8_t fullSpeedConfigurationDescriptor1[]=
     USB_ATTRIBUTE_DEFAULT | USB_ATTRIBUTE_SELF_POWERED,     // Attributes, see usb_device.h
     //USB_ATTRIBUTE_DEFAULT,     // Attributes, see usb_device.h
     50,                                                     // Max power consumption (2X mA)
-
-    /* Interface Descriptor 1 */
-
+    // > Interface Descriptor 1 
     9,                                              // Size of the descriptor
     USB_DESCRIPTOR_INTERFACE,                       // INTERFACE descriptor type
     0,                                              // Interface Number
@@ -74,9 +75,7 @@ const uint8_t fullSpeedConfigurationDescriptor1[]=
     USB_CDC_SUBCLASS_ABSTRACT_CONTROL_MODEL,        // Subclass code
     USB_CDC_PROTOCOL_AT_V250,                       // Protocol code
     0,                                              // Interface string index
-
-    /* CDC Class-Specific Descriptors */
-
+    // > CDC Class-Specific Descriptors 
     sizeof(USB_CDC_HEADER_FUNCTIONAL_DESCRIPTOR),                   // Size of the descriptor
     USB_CDC_DESC_CS_INTERFACE,                                      // CS_INTERFACE
     USB_CDC_FUNCTIONAL_HEADER,                                      // Type of functional descriptor
@@ -97,18 +96,14 @@ const uint8_t fullSpeedConfigurationDescriptor1[]=
     USB_CDC_FUNCTIONAL_CALL_MANAGEMENT,                             // Type of functional descriptor
     0x00,                                                           // bmCapabilities of CallManagement
     1,                                                              // Data interface number
-
-    /* Interrupt Endpoint (IN) Descriptor */
-
+    // Interrupt Endpoint (IN) Descriptor 
     0x07,                           // Size of this descriptor in bytes
     USB_DESCRIPTOR_ENDPOINT,        // Endpoint Descriptor
     0x81,                           // EndpointAddress ( EP1 IN INTERRUPT)
     USB_TRANSFER_TYPE_INTERRUPT,    // Attributes type of EP (INTERRUPT)
     0x0A,0x00,                      // Max packet size of this EP
     0x02,                           // Interval (in ms)
-
-    /* Interface Descriptor */
-
+    // Interface Descriptor 
     9,                                  // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,           // INTERFACE descriptor type
     1,                                  // Interface Number
@@ -118,18 +113,14 @@ const uint8_t fullSpeedConfigurationDescriptor1[]=
     0,                                  // Subclass code
     USB_CDC_PROTOCOL_NO_CLASS_SPECIFIC, // Protocol code
     0,                                  // Interface string index
-
-    /* Bulk Endpoint (OUT) Descriptor */
-
+    // Bulk Endpoint (OUT) Descriptor 
     0x07,                       // Sizeof of this descriptor in bytes
     USB_DESCRIPTOR_ENDPOINT,    // Endpoint Descriptor
     0x02,                       // Endpoint Address BULK OUT
     USB_TRANSFER_TYPE_BULK,     // Attributes BULK EP
     0x40,0x00,                  // MaxPacket Size of EP (BULK OUT)
     0x00,                       // Interval Can be ignored for BULK EPs.
-
-    /* Bulk Endpoint (IN)Descriptor */
-
+    // Bulk Endpoint (IN)Descriptor 
     0x07,                       // Size of this descriptor in bytes
     USB_DESCRIPTOR_ENDPOINT,    // Endpoint Descriptor
     0x82,                       // EndpointAddress BULK IN
@@ -138,11 +129,11 @@ const uint8_t fullSpeedConfigurationDescriptor1[]=
     0x00,                       // Interval Can be ignored for BULK EPs.
 };
 
-/**************************************
- *  String descriptors.
- *************************************/
+//*************************************
+//  String descriptors.
+//************************************
 
-/* Language code string descriptor 0 */
+// Language code string descriptor 0
 const struct
 {
     uint8_t bLength;
@@ -156,7 +147,7 @@ sd000 =
     {0x0409}                // Language ID
 };
 
-/* Manufacturer string descriptor 1  */
+// Manufacturer string descriptor 1
 const struct
 {
     uint8_t bLength;        // Size of this descriptor in bytes
@@ -171,7 +162,7 @@ sd001 =
      'T','e','c','h','n','o','l','o','g','y',' ','I','n','c','.'}
 };
 
-/* Product string descriptor 2 */
+// Product string descriptor 2
 const struct
 {
     uint8_t bLength;        // Size of this descriptor in bytes
@@ -186,9 +177,9 @@ sd002 =
      'D','e','v','i','c','e',' ','D','e','m','o' }
 };
 
-/***************************************
- * Array of string descriptors
- ***************************************/
+//**************************************
+// Array of string descriptors
+//**************************************
 USB_DEVICE_STRING_DESCRIPTORS_TABLE stringDescriptors[3]=
 {
     (const uint8_t *const)&sd000,
@@ -196,18 +187,18 @@ USB_DEVICE_STRING_DESCRIPTORS_TABLE stringDescriptors[3]=
     (const uint8_t *const)&sd002
 };
 
-/*******************************************
- * Array of full speed config descriptors
- *******************************************/
+//******************************************
+// Array of full speed config descriptors
+//******************************************
 USB_DEVICE_CONFIGURATION_DESCRIPTORS_TABLE fullSpeedConfigDescSet[1] =
 {
     fullSpeedConfigurationDescriptor1
 };
 
-/*************************************************
- * USB CDC Device Function Driver Initialization
- * Data Structure
- *************************************************/
+//************************************************
+// USB CDC Device Function Driver Initialization
+// Data Structure
+//************************************************
 const USB_DEVICE_CDC_INIT  cdcInit =
 {
     .queueSizeRead = 1,                     // Read Queue Size
@@ -215,10 +206,10 @@ const USB_DEVICE_CDC_INIT  cdcInit =
     .queueSizeSerialStateNotification = 1   // Serial State Notification Queue Size
 };
 
-/**************************************************
- * USB Device Layer Function Driver Registration
- * Table
- **************************************************/
+//*************************************************
+// USB Device Layer Function Driver Registration
+// Table
+//*************************************************
 const USB_DEVICE_FUNCTION_REGISTRATION_TABLE funcRegistrationTable[1] =
 {
     {
@@ -232,22 +223,21 @@ const USB_DEVICE_FUNCTION_REGISTRATION_TABLE funcRegistrationTable[1] =
     }
 };
 
-/**************************************************
- * USB Device Layer Master Descriptor Table
- **************************************************/
+//*************************************************
+// USB Device Layer Master Descriptor Table
+//*************************************************
 const USB_DEVICE_MASTER_DESCRIPTOR usbMasterDescriptor =
 {
     &fullSpeedDeviceDescriptor,    // Full Speed Device Descriptor.
     1,                            // Total number of full speed configurations available.
     &fullSpeedConfigDescSet[0],   // Pointer to array of full speed configurations descriptors.
-
     NULL,                         // High speed device desc is not supported.
     0,                            // Total number of high speed configurations available.
     NULL,                         // Pointer to array of high speed configurations descriptors.
-
     3,                            // Total number of string descriptors available.
     stringDescriptors,            // Pointer to array of string descriptors
-
     NULL,                         // Pointer to full speed dev qualifier.
     NULL,                         // Pointer to high speed dev qualifier.
 };
+
+#endif //of ifdef APP_USE_USB

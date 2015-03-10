@@ -18,7 +18,9 @@ extern "C" {
 #include <stddef.h>
 #include <stdlib.h>
 #include "system_config/sk_pic32_mx/system_config.h"
+#ifdef APP_USE_USB
 #include "usb/usb_device_cdc.h"
+#endif
     
 /* Application States */
 typedef enum {
@@ -26,6 +28,7 @@ typedef enum {
     APP_STATE_INIT,
     /* Init LCD */
     APP_STATE_LCD_INIT,
+#ifdef APP_USE_USB
     /* Init USB */
     APP_STATE_USB_INIT,
     /* USB Configuration (wait on host to activate this device) */
@@ -38,6 +41,7 @@ typedef enum {
     APP_STATE_SCHEDULE_WRITE,
     /* Wait for the write to complete */
     APP_STATE_WAIT_FOR_WRITE_COMPLETE,
+#endif // of ifdef APP_USE_USB
     /* LCD update */
     APP_LCD_UPDATE,
     /* (not used) Register timer callback */
@@ -50,7 +54,9 @@ typedef enum {
     APP_STATE_HOLD
 } APP_STATES;
 
+#ifdef APP_USE_USB
 #define USB_DEVICE_CDC_INDEX_0 0
+#endif
 
 /* App Timing Structure */
 typedef struct {
@@ -135,6 +141,7 @@ typedef struct
     int               LCD_ReadIx;
     char              LCD_Line[LCD_LINEBUFFERS][LCD_LINEBUFFER_SIZE];
     APP_STATES        LCD_Return_AppState; 
+#ifdef APP_USE_USB
     /* USB: Device layer handle returned by device layer open function */
     USB_DEVICE_HANDLE    deviceHandle;
     USB_DEVICE_CDC_INDEX cdcInstance;
@@ -161,21 +168,21 @@ typedef struct
     /* extend USB: output buffer */
     char                 writeBuffer[APP_READ_BUFFER_SIZE];
     int                  writeCount;
-    /* USART */ 
+#endif // of ifdef APP_USE_USB
+#ifdef APP_USE_USART
+    // USART 
     char                 USARTreadBuffer[APP_USART_RX_BUFFER_SIZE];
     int                  USARTreadIdx;
     char                 USARTwriteBuffer[APP_USART_TX_BUFFER_SIZE];
     int                  USARTwriteIdx;
+#endif // of ifdef APP_USE_USART
 } APP_DATA;
 
-/* External forward for App Timing Structure */
-//extern APP_TIMING appTiming;
-
+#ifdef APP_USE_USB
 // *****************************************************************************
 // Section: Application Callback Routines
 // *****************************************************************************
-/* These routines are called by drivers when certain events occur.
-*/
+// These routines are called by drivers when certain events occur.
 /*******************************************************************************
   Function:
     void APP_UsbDeviceEventCallBack(USB_DEVICE_EVENTS events)
@@ -200,6 +207,8 @@ typedef struct
     None.
 */
 
+bool APP_USBStateReset ( void );
+
 void APP_USBDeviceEventCallBack(USB_DEVICE_EVENT events,
         void * eventData, uintptr_t context);
 
@@ -210,14 +219,6 @@ void APP_USBDeviceCDCEventHandler
     void * pData,
     uintptr_t userData
 );
-
-void APP_Initialize ( void );
-
-void APP_TimingCallback ( void );
-
-void APP_CheckTimedLED ( void );
-
-bool APP_StateReset ( void );
 
 void APP_USBDeviceEventHandler ( 
     USB_DEVICE_EVENT event
@@ -231,18 +232,15 @@ USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler (
 ,   void * pData
 ,   uintptr_t userData
 );
+#endif // of ifdef APP_USE_USB
 
-void APP_LCD_ClearLine( uint8_t num);
+void APP_Initialize ( void );
+
+void APP_TimingCallback ( void );
+
+void APP_CheckTimedLED ( void );
 
 void APP_I2C_AddWrite( uint8_t WriteIn);
-
-void APP_LCD_AddCharWrite( char aChar);
-
-void APP_LCD_Update(void);
-
-void APP_LCD_Print(uint8_t line, char* string);
-
-bool APP_LCD_Init(void);
 
 void APP_I2C_M_Write(void);
 
@@ -250,11 +248,23 @@ void APP_I2C_Process(void);
 
 bool APP_I2C_Ready(void);
 
+void APP_LCD_AddCharWrite( char aChar);
+
+void APP_LCD_Update(void);
+
+void APP_LCD_ClearLine( uint8_t line);
+
+void APP_LCD_Print(uint8_t line, char* string);
+
+bool APP_LCD_Init(void);
+
 bool APP_LCD_Ready(void);
 
+#ifdef APP_USE_USART
 void APP_USART_Read(void);
 
 void APP_USART_Write(void);
+#endif // of ifdef APP_USE_USART
 
 void APP_Tasks ( void );
 
@@ -267,10 +277,12 @@ void APP_Tasks ( void );
 
 extern APP_DATA appData;
 
+#ifdef APP_USE_USB
 extern const USB_DEVICE_FUNCTION_REGISTRATION_TABLE
     funcRegistrationTable[USB_DEVICE_CDC_INSTANCES_NUMBER];
 
 extern const USB_DEVICE_MASTER_DESCRIPTOR usbMasterDescriptor;
+#endif // of ifdef APP_USE_USB
 
 #ifdef	__cplusplus
 }

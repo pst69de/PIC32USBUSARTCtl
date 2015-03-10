@@ -12,21 +12,28 @@
 extern "C" {
 #endif
 
-/* imports:
- * ports
- * int
- * tmr
- */
+// global usage defines
+#define APP_USE_USART
+#define APP_USE_USB
+
+
+// imports:
 #include "peripheral/ports/plib_ports.h"
 #include "peripheral/int/plib_int.h"
 #include "peripheral/tmr/plib_tmr.h"
 #include "peripheral/i2c/plib_i2c.h"
+#ifdef APP_USE_USART
 #include "peripheral/usart/plib_usart.h"
+#endif
+#ifdef APP_USE_USB
+#endif
     
 /* APP definitions */
 #define APP_SYSCLK_FREQ             24000000L
 #define APP_PBCLK_FREQ              24000000L
 
+/* APP's interrupt handling */
+#define APP_INT_ID                  INT_ID_0
 
 /* timer 1 for system clock */
 #define APP_TMR_CLOCK               TMR_ID_1
@@ -36,22 +43,57 @@ extern "C" {
 #define APP_TMR_CLKPRESCALE         TMR_PRESCALE_VALUE_8
 #define APP_TMR_CLKINTERVAL         3000
     
-/* Application Ports Definitions */
-/* Ports ID = 0 (future extension may take higher IDs) */
-#define APP_LED_PORTS_ID            PORTS_ID_0
-/* PORTS mappings */
-#define APP_LED_PORT_CHANNEL        PORT_CHANNEL_B
-#define APP_LEDR_PIN                PORTS_BIT_POS_2
-#define APP_LEDR_AIPIN              PORTS_ANALOG_PIN_4
-#define APP_LEDG_PIN                PORTS_BIT_POS_3
-#define APP_LEDG_AIPIN              PORTS_ANALOG_PIN_5
-#define APP_LEDY_PIN                PORTS_BIT_POS_4
-//#define APP_LEDY_AIPIN              
-
-/* APP's interrupt handling */
-#define APP_INT_ID                  INT_ID_0
+// Application LEDs Definitions 
+// LED red 
+// Used for general error signaling 
+#define LEDR_Direction  PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
+#define LEDR_Mode       PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_4, PORTS_PIN_MODE_DIGITAL)
+#define LEDR_OD
+#define LEDR_Remap
+#define LEDR_Clear      PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
+#define LEDR_Set        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
+#define LEDR_Toggle     PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
+// LED yellow
+// Used for I2C transmit / error signaling 
+#define LEDY_Direction  PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
+#define LEDY_Mode
+#define LEDY_OD
+#define LEDY_Remap
+#define LEDY_Clear      PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
+#define LEDY_Set        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
+#define LEDY_Toggle     PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
+// LED green
+// Used for data acceptance
+#define LEDG_Direction  PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
+#define LEDG_Mode       PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_5, PORTS_PIN_MODE_DIGITAL)
+#define LEDG_OD
+#define LEDG_Remap
+#define LEDG_Clear      PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
+#define LEDG_Set        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
+#define LEDG_Toggle     PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
+// LED blue
+// Not Used
+#define LEDB_Direction
+#define LEDB_Mode
+#define LEDB_OD
+#define LEDB_Remap
+#define LEDB_Clear
+#define LEDB_Set
+#define LEDB_Toggle
+// LED white
+// Not Used
+#define LEDW_Direction
+#define LEDW_Mode
+#define LEDW_OD
+#define LEDW_Remap
+#define LEDW_Clear
+#define LEDW_Set
+#define LEDW_Toggle
 
 /* defs I2C 1 for LCD */
+// see http://ww1.microchip.com/downloads/en/DeviceDoc/80000531F.pdf Errata
+// Enabling I2C1 makes Ports A0 / A1 unusable
+// Enabling I2C2 makes Ports B5 / B6 unusable
 #define APP_LCD_PORTS_ID               PORTS_ID_0
 /* PORTS mappings */
 #define APP_LCD_PORT_CHANNEL           PORT_CHANNEL_B
@@ -60,9 +102,6 @@ extern "C" {
 /* TODO: defs CS/RST if needed: CS tied to GND (always select), RST tied to MCLR (reset on chip reset) */
 /* LCD Reset later by Power Control (define Port Pin for Output H = display on, L = display off, reinit display after power cycle) */
 /* I2C1 */
-// see http://ww1.microchip.com/downloads/en/DeviceDoc/80000531F.pdf Errata
-// Enabling I2C1 makes Ports A0 / A1 unusable
-// Enabling I2C2 makes Ports B5 / B6 unusable
 #define APP_LCD_I2C_ID                 I2C_ID_1
 #define APP_LCD_I2C_BAUD               100000L
 /* I2C data handling */
@@ -124,7 +163,8 @@ extern "C" {
 #define LCD_SET_HOME2_H            0xc0
 #define LCD_SET_HOME2_L            0x00
 
-/* TODO: defs USART 1/2 for COM */
+/* defs USART 1/2 for COM */
+#ifdef APP_USE_USART
 /* Defs USART RX (is unit 2) */
 #define APP_USART_RX_ID            USART_ID_2
 /* USART RX Port */
@@ -156,41 +196,46 @@ extern "C" {
 #define APP_USART_TX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
 /* general TX config */
 #define APP_USART_TX_BUFFER_SIZE   1024
+#endif // of ifdef APP_USE_USART
 
 // *****************************************************************************
 // Section: USB controller Driver Configuration
 // *****************************************************************************
-/* Enables Device Support */
-#define DRV_USB_DEVICE_SUPPORT      true
-/* Disables host support */
-#define DRV_USB_HOST_SUPPORT        false
-/* Provides 3 endpoints */
-#define DRV_USB_ENDPOINTS_NUMBER    3
-/* Only one instance of the USB Peripheral*/
-#define DRV_USB_INSTANCES_NUMBER    1
-/* Enables interrupt mode */
-#define DRV_USB_INTERRUPT_MODE      true
+#ifdef APP_USE_USB
+// Enables Device Support 
+#define DRV_USB_DEVICE_SUPPORT               true
+// Disables host support 
+#define DRV_USB_HOST_SUPPORT                 false
+// Provides 3 endpoints 
+#define DRV_USB_ENDPOINTS_NUMBER             3
+// Only one instance of the USB Peripheral
+#define DRV_USB_INSTANCES_NUMBER             1
+// Enables interrupt mode 
+#define DRV_USB_INTERRUPT_MODE               true
 // *****************************************************************************
 // Section: USB Device Layer Configuration
 // *****************************************************************************
-/* Maximum device layer instances */
-#define USB_DEVICE_INSTANCES_NUMBER        1
-/* Maximum clients for Device Layer */
-#define USB_DEVICE_CLIENTS_NUMBER          1
-/* EP0 size in bytes */
-#define USB_DEVICE_EP0_BUFFER_SIZE          64
+// Maximum device layer instances 
+#define USB_DEVICE_INSTANCES_NUMBER          1
+// Maximum clients for Device Layer 
+#define USB_DEVICE_CLIENTS_NUMBER            1
+// EP0 size in bytes 
+#define USB_DEVICE_EP0_BUFFER_SIZE           64
 // *****************************************************************************
 // Section: CDC Function Driver Configuration
 // *****************************************************************************
-/* Maximum instances of CDC function driver */
-#define USB_DEVICE_CDC_INSTANCES_NUMBER   1
-/* CDC Transfer Queue Size for both read and
-   write. Applicable to all instances of the
-   function driver */
-#define USB_DEVICE_CDC_QUEUE_DEPTH_COMBINED      3
-/* Application USB Device CDC Read Buffer Size. This should be a multiple of
- * the CDC Bulk Endpoint size */
-#define APP_READ_BUFFER_SIZE 1024
+// Maximum instances of CDC function driver 
+#define USB_DEVICE_CDC_INSTANCES_NUMBER      1
+/* 
+  CDC Transfer Queue Size for both read and
+  write. Applicable to all instances of the
+  function driver 
+*/
+#define USB_DEVICE_CDC_QUEUE_DEPTH_COMBINED  3
+// Application USB Device CDC Read Buffer Size. This should be a multiple of
+// the CDC Bulk Endpoint size 
+#define USB_BUFFER_SIZE                      1024
+#endif // of ifdef APP_USE_USB
 
 /* TODO:  Define build-time Configuration Options. */
 
