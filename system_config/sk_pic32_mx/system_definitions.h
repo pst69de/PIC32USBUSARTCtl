@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include "system/common/sys_module.h"
+#include "system_config.h"
 
 /* System Object Handles Structure */
 typedef struct {

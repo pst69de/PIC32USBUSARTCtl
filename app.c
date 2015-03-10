@@ -6,7 +6,7 @@
  */
 
 #include "app.h"
-
+#include "system_config.h"
 
 APP_DATA appData;
 
@@ -557,11 +557,12 @@ void APP_USART_Read(void) {
 
 // INT Handling Write 
 void APP_USART_Write(void) {
+    int i;
     if (appData.USARTreadIdx > 0) {
         while (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USARTwriteIdx > 0)) {
             PLIB_USART_TransmitterByteSend(APP_USART_TX_ID, appData.USARTwriteBuffer[0]);
             appData.USARTwriteIdx--;
-            for (int i = 1; i <= appData.USARTwriteIdx; i++) { appData.USARTwriteBuffer[i - 1] = appData.USARTwriteBuffer[i]; }
+            for (i = 1; i <= appData.USARTwriteIdx; i++) { appData.USARTwriteBuffer[i - 1] = appData.USARTwriteBuffer[i]; }
         }
     }
 }
@@ -650,7 +651,7 @@ void APP_Tasks ( void )
             if(APP_USBStateReset()) { break; }
             // Clear Read Buffer and then wait for data send by Host
             //memset(appData.readBuffer, 0, APP_READ_BUFFER_SIZE); -> doesn't work
-            for (i = 0; i < APP_READ_BUFFER_SIZE; i++) { appData.readBuffer[i] = '\0'; }
+            for (i = 0; i < USB_BUFFER_SIZE; i++) { appData.readBuffer[i] = '\0'; }
             LEDG_Set; // Set acceptance LED
             appData.state = APP_STATE_WAIT_FOR_READ_COMPLETE;
             break;
@@ -661,7 +662,7 @@ void APP_Tasks ( void )
                 LEDG_Clear; // Clear acceptance LED
                 appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
                 USB_DEVICE_CDC_Read (appData.cdcInstance, &appData.readTransferHandle,
-                        appData.readBuffer, APP_READ_BUFFER_SIZE);
+                        appData.readBuffer, USB_BUFFER_SIZE);
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
                     appData.state = APP_STATE_ERROR;
                     break;

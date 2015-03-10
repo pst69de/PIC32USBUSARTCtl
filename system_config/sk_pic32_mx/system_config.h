@@ -235,6 +235,10 @@ extern "C" {
 // Application USB Device CDC Read Buffer Size. This should be a multiple of
 // the CDC Bulk Endpoint size 
 #define USB_BUFFER_SIZE                      1024
+
+//extern const USB_DEVICE_FUNCTION_REGISTRATION_TABLE funcRegistrationTable[USB_DEVICE_CDC_INSTANCES_NUMBER];
+
+//extern const USB_DEVICE_MASTER_DESCRIPTOR usbMasterDescriptor;
 #endif // of ifdef APP_USE_USB
 
 /* TODO:  Define build-time Configuration Options. */

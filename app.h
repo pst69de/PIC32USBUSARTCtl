@@ -148,7 +148,7 @@ typedef struct
     /* USB: Device configured state */
     bool                 isConfigured;
     /* USB: Read Data Buffer */
-    char                 readBuffer[APP_READ_BUFFER_SIZE];
+    char                 readBuffer[USB_BUFFER_SIZE];
     /* USB: Set Line Coding Data */
     USB_CDC_LINE_CODING  setLineCodingData;
     /* USB: Get Line Coding Data */
@@ -166,7 +166,7 @@ typedef struct
     /* USB: True if a character was written*/
     bool                 isWriteComplete;
     /* extend USB: output buffer */
-    char                 writeBuffer[APP_READ_BUFFER_SIZE];
+    char                 writeBuffer[USB_BUFFER_SIZE];
     int                  writeCount;
 #endif // of ifdef APP_USE_USB
 #ifdef APP_USE_USART

@@ -5,9 +5,7 @@
  * Created on 2014-09-13
  */
 
-#include "../../app.h"
 #include "system_definitions.h"
-#include "system_config.h"
 
 void SYS_Tasks ( void )
 {
