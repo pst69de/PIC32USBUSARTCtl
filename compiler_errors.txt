@@ -1,0 +1,80 @@
+
+CLEAN SUCCESSFUL (total time: 60ms)
+make -f nbproject/Makefile-default.mk SUBPROJECTS= .build-conf
+make[1]: Entering directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
+make  -f nbproject/Makefile-default.mk dist/default/production/PIC32USBUSARTCtl.X.production.hex
+make[2]: Entering directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/configuration_bits.o.d -o build/default/production/_ext/1360937237/configuration_bits.o ../src/configuration_bits.cpp 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/380963183/system_tasks.o.d -o build/default/production/_ext/380963183/system_tasks.o ../src/system_config/sk_pic32_mx/system_tasks.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/380963183/system_interrupt.o.d -o build/default/production/_ext/380963183/system_interrupt.o ../src/system_config/sk_pic32_mx/system_interrupt.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/380963183/system_init.o.d -o build/default/production/_ext/380963183/system_init.o ../src/system_config/sk_pic32_mx/system_init.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/interrupts.o.d -o build/default/production/_ext/1360937237/interrupts.o ../src/interrupts.cpp 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/exceptions.o.d -o build/default/production/_ext/1360937237/exceptions.o ../src/exceptions.cpp 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/app.o.d -o build/default/production/_ext/1360937237/app.o ../src/app.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/main.o.d -o build/default/production/_ext/1360937237/main.o ../src/main.cpp 
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_VectorPriority_Default.h: In function 'INT_PRIORITY_LEVEL INT_VectorPriorityGet_Default(INT_MODULE_ID, INT_VECTOR)':
+In file included from ../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h:759:0,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_p32xxxx.h:140,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/int/plib_int.h:77,
+                 from ../src/system_config/sk_pic32_mx/system_config.h:22,
+                 from ../src/system_config/sk_pic32_mx/system_init.h:18,
+                 from ../src/user.cpp:17:
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_VectorPriority_Default.h:127:148: error: invalid conversion from 'int' to 'INT_PRIORITY_LEVEL'
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_VectorPriority_Default.h: In function 'INT_SUBPRIORITY_LEVEL INT_VectorSubPriorityGet_Default(INT_MODULE_ID, INT_VECTOR)':
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_VectorPriority_Default.h:168:151: error: invalid conversion from 'int' to 'INT_SUBPRIORITY_LEVEL'
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_EnableControl_PIC32.h: In function 'void INT_Disable_PIC32(INT_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h:761:0,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_p32xxxx.h:140,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/int/plib_int.h:77,
+                 from ../src/system_config/sk_pic32_mx/system_config.h:22,
+                 from ../src/system_config/sk_pic32_mx/system_init.h:18,
+                 from ../src/user.cpp:17:
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_EnableControl_PIC32.h:116:33: error: too few arguments to function 'unsigned int __builtin_disable_interrupts(void)'
+<built-in>:0:0: note: declared here
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_EnableControl_PIC32.h: In function 'INT_STATE_GLOBAL INT_GetStateAndDisable_PIC32(INT_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h:761:0,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_p32xxxx.h:140,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/int/plib_int.h:77,
+                 from ../src/system_config/sk_pic32_mx/system_config.h:22,
+                 from ../src/system_config/sk_pic32_mx/system_init.h:18,
+                 from ../src/user.cpp:17:
+../../../../v1_03/framework/peripheral/int/processor/../templates/int_EnableControl_PIC32.h:149:42: error: too few arguments to function 'unsigned int __builtin_disable_interrupts(void)'
+<built-in>:0:0: note: declared here
+../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h: In function 'INT_VECTOR PLIB_INT_VectorGet(INT_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/int/processor/int_p32xxxx.h:140:0,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/int/plib_int.h:77,
+                 from ../src/system_config/sk_pic32_mx/system_config.h:22,
+                 from ../src/system_config/sk_pic32_mx/system_init.h:18,
+                 from ../src/user.cpp:17:
+../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h:985:47: error: cannot convert 'INT_SOURCE' to 'INT_VECTOR' in return
+../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h: In function '__uint32_t PLIB_INT_VariableVectorOffsetGet(INT_MODULE_ID, INT_SOURCE)':
+In file included from ../../../../v1_03/framework/peripheral/int/processor/int_p32xxxx.h:140:0,
+                 from ../../../../v1_03/framework/peripheral/int/processor/int_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/int/plib_int.h:77,
+                 from ../src/system_config/sk_pic32_mx/system_config.h:22,
+                 from ../src/system_config/sk_pic32_mx/system_init.h:18,
+                 from ../src/user.cpp:17:
+../../../../v1_03/framework/peripheral/int/processor/int_p32mx250f128b.h:1537:73: error: cannot convert 'INT_SOURCE' to 'INT_VECTOR' for argument '2' to '__uint32_t INT_VariableVectorOffsetGet_Unsupported(INT_MODULE_ID, INT_VECTOR)'
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/user.o.d -o build/default/production/_ext/1360937237/user.o ../src/user.cpp 
+make[2]: *** [build/default/production/_ext/1360937237/user.o] Error 1
+nbproject/Makefile-default.mk:303: recipe for target 'build/default/production/_ext/1360937237/user.o' failed
+make[2]: *** Waiting for unfinished jobs....
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/system.o.d -o build/default/production/_ext/1360937237/system.o ../src/system.cpp 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1402440541/drv_usb.o.d -o build/default/production/_ext/1402440541/drv_usb.o ../../../../v1_03/framework/driver/usb/usbfs/src/dynamic/drv_usb.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/623818269/sys_int_pic32.o.d -o build/default/production/_ext/623818269/sys_int_pic32.o ../../../../v1_03/framework/system/int/src/sys_int_pic32.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1402440541/drv_usb_device.o.d -o build/default/production/_ext/1402440541/drv_usb_device.o ../../../../v1_03/framework/driver/usb/usbfs/src/dynamic/drv_usb_device.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/2036594672/usb_device.o.d -o build/default/production/_ext/2036594672/usb_device.o ../../../../v1_03/framework/usb/src/dynamic/usb_device.c 
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/2036594672/usb_device_cdc.o.d -o build/default/production/_ext/2036594672/usb_device_cdc.o ../../../../v1_03/framework/usb/src/dynamic/usb_device_cdc.c 
+make[1]: *** [.build-conf] Error 2
+make: *** [.build-impl] Error 2
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src -I../src/system_config/sk_pic32_mx -I../tinyxml2 -I../src/peripheral_cpp -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/2147388853/tinyxml2.o.d -o build/default/production/_ext/2147388853/tinyxml2.o ../src/tinyxml2/tinyxml2.cpp 
+make[2]: Leaving directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
+nbproject/Makefile-default.mk:78: recipe for target '.build-conf' failed
+make[1]: Leaving directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
+nbproject/Makefile-impl.mk:39: recipe for target '.build-impl' failed
+
+BUILD FAILED (exit value 2, total time: 3s)
