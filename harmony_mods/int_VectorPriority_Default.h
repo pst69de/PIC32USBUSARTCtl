@@ -124,7 +124,27 @@ PLIB_TEMPLATE void INT_VectorPrioritySet_Default( INT_MODULE_ID index , INT_VECT
 
 PLIB_TEMPLATE INT_PRIORITY_LEVEL INT_VectorPriorityGet_Default( INT_MODULE_ID index , INT_VECTOR vector )
 {
-    return (INT_PRIORITY_LEVEL)_SFR_READ(_INT_INT_PRIORITY_CONTROL_0_VREG(index) + ((0x10 * ((vector & 0x7E0) >> 5)) >> 2)) >> ((vector & 0x1F) + 2);
+    //return (INT_PRIORITY_LEVEL)_SFR_READ(_INT_INT_PRIORITY_CONTROL_0_VREG(index) + ((0x10 * ((vector & 0x7E0) >> 5)) >> 2)) >> ((vector & 0x1F) + 2);
+    switch (_SFR_READ(_INT_INT_PRIORITY_CONTROL_0_VREG(index) + ((0x10 * ((vector & 0x7E0) >> 5)) >> 2)) >> ((vector & 0x1F) + 2)) {
+        case 0:
+            return INT_DISABLE_INTERRUPT;
+        case 1:
+            return INT_PRIORITY_LEVEL1;
+        case 2:
+            return INT_PRIORITY_LEVEL2;
+        case 3:
+            return INT_PRIORITY_LEVEL3;
+        case 4:
+            return INT_PRIORITY_LEVEL4;
+        case 5:
+            return INT_PRIORITY_LEVEL5;
+        case 6:
+            return INT_PRIORITY_LEVEL6;
+        case 7:
+            return INT_PRIORITY_LEVEL7;
+        default:
+            return INT_DISABLE_INTERRUPT;
+    }
 }
 
 
@@ -165,7 +185,19 @@ PLIB_TEMPLATE void INT_VectorSubPrioritySet_Default( INT_MODULE_ID index , INT_V
 
 PLIB_TEMPLATE INT_SUBPRIORITY_LEVEL INT_VectorSubPriorityGet_Default( INT_MODULE_ID index , INT_VECTOR vector )
 {
-    return (INT_SUBPRIORITY_LEVEL)(_SFR_READ(_INT_INT_PRIORITY_CONTROL_0_VREG(index) + ((0x10 * ((vector & 0x7E0) >> 5)) >> 2)) >> (vector & 0x1F)) & 0x3;
+    //return _SFR_READ(_INT_INT_PRIORITY_CONTROL_0_VREG(index) + ((0x10 * ((vector & 0x7E0) >> 5)) >> 2)) >> (vector & 0x1F)) & 0x3;
+    switch (_SFR_READ(_INT_INT_PRIORITY_CONTROL_0_VREG(index) + ((0x10 * ((vector & 0x7E0) >> 5)) >> 2)) >> (vector & 0x1F) & 0x3) {
+        case 0:
+            return INT_SUBPRIORITY_LEVEL0;
+        case 1:
+            return INT_SUBPRIORITY_LEVEL1;
+        case 2:
+            return INT_SUBPRIORITY_LEVEL2;
+        case 3:
+            return INT_SUBPRIORITY_LEVEL3;
+        default:
+            return INT_SUBPRIORITY_LEVEL0;
+    }
 }
 
 

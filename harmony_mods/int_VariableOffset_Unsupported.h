@@ -2,24 +2,25 @@
   INT Peripheral Library Template Implementation
 
   File Name:
-    int_INTCPUVector_Default.h
+    int_VariableOffset_Unsupported.h
 
   Summary:
     INT PLIB Template Implementation
 
   Description:
     This header file contains template implementations
-    For Feature : INTCPUVector
-    and its Variant : Default
+    For Feature : VariableOffset
+    and its Variant : Unsupported
     For following APIs :
-        PLIB_INT_ExistsINTCPUVector
-        PLIB_INT_VectorGet
+        PLIB_INT_ExistsVariableOffset
+        PLIB_INT_VariableOffsetSet
+        PLIB_INT_VariableOffsetGet
 
 *******************************************************************************/
 
 //DOM-IGNORE-BEGIN
 /*******************************************************************************
-Copyright (c) 2012 released Microchip Technology Inc.  All rights reserved.
+Copyright (c) 2013 released Microchip Technology Inc.  All rights reserved.
 
 Microchip licenses to you the right to use, modify, copy and distribute
 Software only when embedded on a Microchip microcontroller or digital signal
@@ -43,60 +44,79 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 //DOM-IGNORE-END
 
-#ifndef _INT_INTCPUVECTOR_DEFAULT_H
-#define _INT_INTCPUVECTOR_DEFAULT_H
+#ifndef _INT_VARIABLEOFFSET_UNSUPPORTED_H
+#define _INT_VARIABLEOFFSET_UNSUPPORTED_H
 
 //******************************************************************************
-/* Routines available for accessing VREGS, MASKS, POS, LEN are 
+/* Routines available for accessing VREGS, MASKS, POS, LEN are
 
-  VREGs: 
-    _INT_LATEST_INT_VECTOR_VREG(index)
+  VREGs:
+    None.
 
-  MASKs: 
-    _INT_LATEST_INT_VECTOR_MASK(index)
+  MASKs:
+    None.
 
-  POSs: 
-    _INT_LATEST_INT_VECTOR_POS(index)
+  POSs:
+    None.
 
-  LENs: 
-    _INT_LATEST_INT_VECTOR_LEN(index)
+  LENs:
+    None.
 
 */
 
 
 //******************************************************************************
-/* Function :  INT_ExistsINTCPUVector_Default
+/* Function :  INT_ExistsVariableOffset_Unsupported
 
   Summary:
-    Implements Default variant of PLIB_INT_ExistsINTCPUVector
+    Implements Unsupported variant of PLIB_INT_ExistsVariableOffset
 
   Description:
-    This template implements the Default variant of the PLIB_INT_ExistsINTCPUVector function.
+    This template implements the Unsupported variant of the PLIB_INT_ExistsVariableOffset function.
 */
 
-PLIB_TEMPLATE bool INT_ExistsINTCPUVector_Default( INT_MODULE_ID index )
+PLIB_TEMPLATE bool INT_ExistsVariableOffset_Unsupported( INT_MODULE_ID index )
 {
-    return true;
+    return false;
 }
 
 
 //******************************************************************************
-/* Function :  INT_VectorGet_Default
+/* Function :  INT_VariableVectorOffsetSet_Unsupported
 
   Summary:
-    Implements Default variant of PLIB_INT_VectorGet 
+    Implements Unsupported variant of PLIB_INT_VariableVectorOffsetSet
 
   Description:
-    This template implements the Default variant of the PLIB_INT_VectorGet function.
+    This template implements the Unsupported variant of the PLIB_INT_VariableVectorOffsetSet
+    function.
 */
 
-PLIB_TEMPLATE INT_VECTOR INT_VectorGet_Default( INT_MODULE_ID index )
+PLIB_TEMPLATE void INT_VariableVectorOffsetSet_Unsupported( INT_MODULE_ID index , INT_VECTOR vector , uint32_t offset )
 {
-    return(INT_VECTOR)(_SFR_FIELD_READ(_INT_LATEST_INT_VECTOR_VREG(index),_INT_LATEST_INT_VECTOR_MASK(index),_INT_LATEST_INT_VECTOR_POS(index)));
+    PLIB_ASSERT(false, "The device selected does not implement PLIB_INT_VariableVectorOffsetSet");
 }
 
 
-#endif /*_INT_INTCPUVECTOR_DEFAULT_H*/
+//******************************************************************************
+/* Function :  INT_VariableVectorOffsetGet_Unsupported
+
+  Summary:
+    Implements Unsupported variant of PLIB_INT_VariableVectorOffsetGet
+
+  Description:
+    This template implements the Unsupported variant of the PLIB_INT_VariableVectorOffsetGet function.
+*/
+
+PLIB_TEMPLATE uint32_t INT_VariableVectorOffsetGet_Unsupported( INT_MODULE_ID index , INT_SOURCE vector )
+{
+    PLIB_ASSERT(false, "The device selected does not implement PLIB_INT_VariableVectorOffsetGet");
+
+    return 0;
+}
+
+
+#endif /*_INT_VARIABLEOFFSET_UNSUPPORTED_H*/
 
 /******************************************************************************
  End of File
