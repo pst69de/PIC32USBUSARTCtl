@@ -6,7 +6,8 @@
     #include <xc.h>          /* Defines special funciton registers, CP0 regs  */
 #endif
 
-#include <peripheral/peripheral.h>            /* Include to use PIC32 peripheral libraries     */
+// only include distinct peripherals
+//#include <peripheral/peripheral.h>            /* Include to use PIC32 peripheral libraries     */
 #include <sys/attribs.h>     /* For __ISR definition                          */
 #include <stdint.h>          /* For uint32_t definition                       */
 #include <stdbool.h>         /* For true/false definition                     */

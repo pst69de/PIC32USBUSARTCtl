@@ -5,8 +5,10 @@
 #ifdef __XC32
     #include <xc.h>          /* Defines special funciton registers, CP0 regs  */
 #endif
+#include <GenericTypeDefs.h>
 
-#include <peripheral/peripheral.h>           /* Include to use PIC32 peripheral libraries      */
+// only include distinct peripherals
+//#include <peripheral/peripheral.h>           /* Include to use PIC32 peripheral libraries      */
 #include <stdint.h>         /* For UINT32 definition                          */
 #include <stdbool.h>        /* For true/false definition                      */
 #include <exception>        /* Includes C++ try/catch functions               */
@@ -73,23 +75,25 @@ INT main(void)
     SYS_CFG_PB_BUS (configures the PB bus from the system clock)
     SYS_CFG_PCACHE (configures the pCache if used)
     SYS_CFG_ALL (configures the flash wait states, PB bus, and pCache)*/
-
+    // Not needed in particular, should be done by SYS_Initialize() 
+    //SYSTEMConfig(SYS_FREQ, SYS_CFG_ALL);
     /* TODO Add user clock/system configuration code if appropriate.  */
-    SYSTEMConfig(SYS_FREQ, SYS_CFG_ALL);
 
     /* Initialize I/O and Peripherals for application */
+    // defined in user.hpp/user.cpp redirects to the SYS_Initialize
     InitApp();
 
     /*Configure Multivector Interrupt Mode.  Using Single Vector Mode
     is expensive from a timing perspective, so most applications
     should probably not use a Single Vector Mode*/
-    INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
+    // not needed in particular
+    //INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
 
     while(1)
     {
-
-    /* TODO <INSERT USER APPLICATION CODE HERE> */
-
+    
+        /* TODO <INSERT USER APPLICATION CODE HERE> */
+    
     }
 }
 

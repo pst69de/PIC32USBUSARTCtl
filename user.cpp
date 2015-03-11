@@ -6,12 +6,15 @@
     #include <xc.h>          /* Defines special funciton registers, CP0 regs  */
 #endif
 
-#include <peripheral/peripheral.h>            /* Include to use PIC32 peripheral libraries     */
+// only include distinct peripherals
+//#include <peripheral/peripheral.h>            /* Include to use PIC32 peripheral libraries     */
 #include <stdint.h>          /* For UINT32 definition                         */
 #include <stdbool.h>         /* For true/false definition                     */
 #include <exception>         /* Includes C++ try/catch functions              */
 
 #include "user.hpp"          /* variables/params used by user.cpp             */
+
+#include "system_init.h"
 
 /* All the files in the C++ standard library declare its entities
  * within the std namespace. */
@@ -27,6 +30,7 @@ using namespace std;        /* use the standard namespace                     */
 void InitApp(void)
 {
     /* Setup analog functionality and port direction */
-
     /* Initialize peripherals */
+    
+    SYS_Initialize( NULL );
 }
