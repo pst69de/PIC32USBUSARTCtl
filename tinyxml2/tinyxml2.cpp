@@ -1757,6 +1757,7 @@ XMLUnknown* XMLDocument::NewUnknown( const char* str )
     return unk;
 }
 
+#ifndef NOFILEIO
 static FILE* callfopen( const char* filepath, const char* mode )
 {
     TIXMLASSERT( filepath );
@@ -1772,6 +1773,7 @@ static FILE* callfopen( const char* filepath, const char* mode )
 #endif
     return fp;
 }
+#endif
     
 void XMLDocument::DeleteNode( XMLNode* node )	{
     TIXMLASSERT( node );
@@ -1790,7 +1792,7 @@ void XMLDocument::DeleteNode( XMLNode* node )	{
     }
 }
 
-
+#ifndef NOFILEIO
 XMLError XMLDocument::LoadFile( const char* filename )
 {
     Clear();
@@ -1862,7 +1864,7 @@ XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
     Print( &stream );
     return _errorID;
 }
-
+#endif
 
 XMLError XMLDocument::Parse( const char* p, size_t len )
 {
@@ -1951,10 +1953,16 @@ void XMLDocument::Parse()
     ParseDeep(p, 0 );
 }
 
+#ifndef NOFILEIO
 XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
+#else
+XMLPrinter::XMLPrinter( bool compact, int depth ) :
+#endif
     _elementJustOpened( false ),
     _firstElement( true ),
+#ifndef NOFILEIO
     _fp( file ),
+#endif
     _depth( depth ),
     _textDepth( -1 ),
     _processEntities( true ),
@@ -1981,10 +1989,12 @@ void XMLPrinter::Print( const char* format, ... )
     va_list     va;
     va_start( va, format );
 
+#ifndef NOFILEIO
     if ( _fp ) {
         vfprintf( _fp, format, va );
     }
     else {
+#endif
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 		#if defined(WINCE)
 		int len = 512;
@@ -2014,7 +2024,9 @@ void XMLPrinter::Print( const char* format, ... )
 #else
 		vsnprintf( p, len+1, format, va );
 #endif
+#ifndef NOFILEIO
     }
+#endif
     va_end( va );
 }
 

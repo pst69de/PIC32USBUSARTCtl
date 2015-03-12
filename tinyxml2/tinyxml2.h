@@ -24,7 +24,15 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
-#if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__) || defined(__PIC32MX)
+#ifdef __PIC32MX
+#define NOFILEIO
+#define NOXMLHANDLE
+#define MEMPOOL    128
+#else
+#define MEMPOOL    1024
+#endif
+
+#if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <ctype.h>
 #   include <limits.h>
 #   include <stdio.h>
@@ -406,7 +414,7 @@ public:
     }
     void Trace( const char* name ) {
         printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
-                name, _maxAllocs, _maxAllocs*SIZE/1024, _currentAllocs, SIZE, _nAllocs, _blockPtrs.Size() );
+                name, _maxAllocs, _maxAllocs*SIZE/MEMPOOL, _currentAllocs, SIZE, _nAllocs, _blockPtrs.Size() );
     }
 
     void SetTracked() {
@@ -426,7 +434,7 @@ public:
 	//		16k:	5200
 	//		32k:	4300
 	//		64k:	4000	21000
-    enum { COUNT = (4*1024)/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
+    enum { COUNT = (4*MEMPOOL)/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
@@ -1574,6 +1582,7 @@ public:
     */
     XMLError Parse( const char* xml, size_t nBytes=(size_t)(-1) );
 
+#ifndef NOFILEIO
     /**
     	Load an XML file from disk.
     	Returns XML_NO_ERROR (0) on success, or
@@ -1609,7 +1618,7 @@ public:
     	an errorID.
     */
     XMLError SaveFile( FILE* fp, bool compact = false );
-
+#endif
     bool ProcessEntities() const		{
         return _processEntities;
     }
@@ -1758,6 +1767,7 @@ private:
 };
 
 
+#ifndef NOXMLHANDLE
 /**
 	A XMLHandle is a class that wraps a node pointer with null checks; this is
 	an incredibly useful thing. Note that XMLHandle is not part of the TinyXML-2
@@ -1960,7 +1970,7 @@ public:
 private:
     const XMLNode* _node;
 };
-
+#endif
 
 /**
 	Printing functionality. The XMLPrinter gives you more
@@ -2013,7 +2023,11 @@ public:
     	If 'compact' is set to true, then output is created
     	with only required whitespace and newlines.
     */
+#ifndef NOFILEIO
     XMLPrinter( FILE* file=0, bool compact = false, int depth = 0 );
+#else
+    XMLPrinter( bool compact = false, int depth = 0 );
+#endif
     virtual ~XMLPrinter()	{}
 
     /** If streaming, write the BOM and declaration. */
@@ -2104,7 +2118,9 @@ private:
     void PrintString( const char*, bool restrictedEntitySet );	// prints out, after detecting entities.
 
     bool _firstElement;
+#ifndef NOFILEIO
     FILE* _fp;
+#endif
     int _depth;
     int _textDepth;
     bool _processEntities;
