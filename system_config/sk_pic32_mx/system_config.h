@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 // global usage defines
-//#define APP_USE_USART
+#define APP_USE_USART
 #define APP_USE_USB
 
 
@@ -31,6 +31,7 @@ extern "C" {
 /* APP definitions */
 #define APP_SYSCLK_FREQ             24000000L
 #define APP_PBCLK_FREQ              24000000L
+#define APP_BUFFER_SIZE             1024
 
 /* APP's interrupt handling */
 #define APP_INT_ID                  INT_ID_0
@@ -179,7 +180,7 @@ extern "C" {
 #define APP_USART_RX_OPER          USART_ENABLE_TX_RX_USED // no flow control
 #define APP_USART_RX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
 /* general RX config */
-#define APP_USART_RX_BUFFER_SIZE   1024
+#define APP_USART_RX_BUFFER_SIZE   APP_BUFFER_SIZE
 
 /* Defs USART TX (is unit 1) */
 #define APP_USART_TX_ID            USART_ID_1
@@ -234,7 +235,7 @@ extern "C" {
 #define USB_DEVICE_CDC_QUEUE_DEPTH_COMBINED  3
 // Application USB Device CDC Read Buffer Size. This should be a multiple of
 // the CDC Bulk Endpoint size 
-#define USB_BUFFER_SIZE                      1024
+#define USB_BUFFER_SIZE                      APP_BUFFER_SIZE
 
 //extern const USB_DEVICE_FUNCTION_REGISTRATION_TABLE funcRegistrationTable[USB_DEVICE_CDC_INSTANCES_NUMBER];
 

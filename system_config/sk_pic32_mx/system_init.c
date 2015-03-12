@@ -5,15 +5,14 @@
  * Created on 2014-09-13
  */
 
-#include <xc.h>
-
-
 // PIC32MX250F128B Configuration Bit Settings
 
 // 'C' source line config statements
 
 #include <xc.h>
 
+/* see configuration_bits.cpp
+#ifndef	__cplusplus
 // DEVCFG3
 // USERID = No Setting
 #pragma config PMDL1WAY = OFF           // Peripheral Module Disable Configuration (Allow multiple reconfigurations)
@@ -47,11 +46,14 @@
 #pragma config PWP = OFF                // Program Flash Write Protect (Disable)
 #pragma config BWP = OFF                // Boot Flash Write Protect bit (Protection Disabled)
 #pragma config CP = OFF                 // Code Protect (Protection Disabled)
+#endif // ifndef __cplusplus
+*/
 
 #include "system_definitions.h"
 #include "system_config.h"
+#ifdef APP_USE_USB
 #include "usb/usb_device.h"
-
+#endif
 // Global allocation of structure to hold system objects handles
 SYSTEM_OBJECTS sysObjects;
 

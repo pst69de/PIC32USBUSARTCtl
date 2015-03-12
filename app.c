@@ -573,7 +573,7 @@ void ClearBuffer(char *buffer) {
     while (*buffer != '\0') {
         *buffer = '\0';
         buffer++;
-        if (buffer-first >= USB_BUFFER_SIZE) { break; }
+        if (buffer-first >= APP_BUFFER_SIZE) { break; }
     }
 }
 
