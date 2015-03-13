@@ -4,7 +4,7 @@
  *
  * Created on 2014-09-13
  */
-
+/*
 #include <xc.h>
 #include <sys/attribs.h>
 #include "../../app.h"
@@ -63,3 +63,4 @@ void __ISR( _UART_1_VECTOR, ipl1soft ) _InterruptHandler_U1TX(void) {
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
 }
 #endif
+*/

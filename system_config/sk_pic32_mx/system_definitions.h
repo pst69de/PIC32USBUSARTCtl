@@ -14,6 +14,7 @@ extern "C" {
 
 #include "system/common/sys_module.h"
 #include "system_config.h"
+#include "usb/usb_device.h"
 
 /* System Object Handles Structure */
 typedef struct {
@@ -23,7 +24,6 @@ typedef struct {
 
 /* External forward reference for system objects structure */
 extern SYSTEM_OBJECTS sysObjects;
-
 
 #ifdef	__cplusplus
 }

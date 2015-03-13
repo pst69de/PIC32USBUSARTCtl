@@ -316,6 +316,12 @@ USB_DEVICE_INIT usbDevInitData =
     .deviceSpeed = USB_SPEED_FULL
 
 };
+
+// C Wrapper for C++ interrupt call (use of c struct sysObjects)
+void SYS_USB_DEVICE_ISR(void) {
+    USB_DEVICE_Tasks_ISR(sysObjects.usbDevObject);
+}
+
 #endif // of ifdef APP_USE_USB
 
 void TMR_Initialize(void) {

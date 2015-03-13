@@ -19,6 +19,8 @@ extern "C" {
 
 void SYS_Initialize ( void *data );
 
+void SYS_USB_DEVICE_ISR(void);
+
 #ifdef	__cplusplus
 }
 #endif
