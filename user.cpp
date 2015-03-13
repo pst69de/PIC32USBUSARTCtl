@@ -15,6 +15,8 @@
 #include "user.hpp"          /* variables/params used by user.cpp             */
 
 #include "system_init.h"
+#include "system_definitions.h"
+#include "app.h"
 
 /* All the files in the C++ standard library declare its entities
  * within the std namespace. */
@@ -33,4 +35,12 @@ void InitApp(void)
     /* Initialize peripherals */
     
     SYS_Initialize( NULL );
+}
+
+void RunApp(void)
+{
+    // separate regular calls (at time USB Handling)
+    USB_DEVICE_Tasks(sysObjects.usbDevObject);    
+    // centralized APP state machine (C code)
+    APP_Tasks();
 }

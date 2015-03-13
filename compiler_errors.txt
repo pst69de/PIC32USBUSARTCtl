@@ -1,34 +1,127 @@
-
-CLEAN SUCCESSFUL (total time: 78ms)
 make -f nbproject/Makefile-default.mk SUBPROJECTS= .build-conf
 make[1]: Entering directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
 make  -f nbproject/Makefile-default.mk dist/default/production/PIC32USBUSARTCtl.X.production.hex
 make[2]: Entering directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/system.o.d -o build/default/production/_ext/1360937237/system.o ../src/system.cpp 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/interrupts.o.d -o build/default/production/_ext/1360937237/interrupts.o ../src/interrupts.cpp 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/380963183/system_interrupt.o.d -o build/default/production/_ext/380963183/system_interrupt.o ../src/system_config/sk_pic32_mx/system_interrupt.c 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/user.o.d -o build/default/production/_ext/1360937237/user.o ../src/user.cpp 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/main.o.d -o build/default/production/_ext/1360937237/main.o ../src/main.cpp 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/app.o.d -o build/default/production/_ext/1360937237/app.o ../src/app.c 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/380963183/system_tasks.o.d -o build/default/production/_ext/380963183/system_tasks.o ../src/system_config/sk_pic32_mx/system_tasks.c 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/380963183/system_init.o.d -o build/default/production/_ext/380963183/system_init.o ../src/system_config/sk_pic32_mx/system_init.c 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/configuration_bits.o.d -o build/default/production/_ext/1360937237/configuration_bits.o ../src/configuration_bits.cpp 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/exceptions.o.d -o build/default/production/_ext/1360937237/exceptions.o ../src/exceptions.cpp 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c -c -mprocessor=32MX250F128B -O1 -I../src/system_config/sk_pic32_mx -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/623818269/sys_int_pic32.o.d -o build/default/production/_ext/623818269/sys_int_pic32.o ../../../../v1_03/framework/system/int/src/sys_int_pic32.c 
-"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe"   -mprocessor=32MX250F128B  -o dist/default/production/PIC32USBUSARTCtl.X.production.elf build/default/production/_ext/380963183/system_init.o build/default/production/_ext/380963183/system_tasks.o build/default/production/_ext/380963183/system_interrupt.o build/default/production/_ext/1360937237/app.o build/default/production/_ext/1360937237/main.o build/default/production/_ext/1360937237/system.o build/default/production/_ext/1360937237/user.o build/default/production/_ext/1360937237/interrupts.o build/default/production/_ext/1360937237/exceptions.o build/default/production/_ext/1360937237/configuration_bits.o build/default/production/_ext/623818269/sys_int_pic32.o    ..\..\..\..\v1_03\bin\framework\peripheral\PIC32MX250F128B_peripherals.a      -Wl,--defsym=__MPLAB_BUILD=1,-Map="dist/default/production/PIC32USBUSARTCtl.X.production.map"
-c:\program files (x86)\microchip\xc32\v1.34\bin\bin\gcc\pic32mx\4.5.2\..\..\..\..\bin/xc32-ld.exe: dist/default/production/PIC32USBUSARTCtl.X.production.elf section `.config_BFC00BF0' will not fit in region `config3'
-c:\program files (x86)\microchip\xc32\v1.34\bin\bin\gcc\pic32mx\4.5.2\..\..\..\..\bin/xc32-ld.exe: dist/default/production/PIC32USBUSARTCtl.X.production.elf section `.config_BFC00BF4' will not fit in region `config2'
-c:\program files (x86)\microchip\xc32\v1.34\bin\bin\gcc\pic32mx\4.5.2\..\..\..\..\bin/xc32-ld.exe: dist/default/production/PIC32USBUSARTCtl.X.production.elf section `.config_BFC00BF8' will not fit in region `config1'
-c:\program files (x86)\microchip\xc32\v1.34\bin\bin\gcc\pic32mx\4.5.2\..\..\..\..\bin/xc32-ld.exe: dist/default/production/PIC32USBUSARTCtl.X.production.elf section `.config_BFC00BFC' will not fit in region `config0'
-c:\program files (x86)\microchip\xc32\v1.34\bin\bin\gcc\pic32mx\4.5.2\..\..\..\..\bin/xc32-ld.exe: Link terminated due to previous error(s).
-collect2: ld returned 255 exit status
-make[2]: *** [dist/default/production/PIC32USBUSARTCtl.X.production.hex] Error 255
-make[1]: *** [.build-conf] Error 2
-make: *** [.build-impl] Error 2
-nbproject/Makefile-default.mk:247: recipe for target 'dist/default/production/PIC32USBUSARTCtl.X.production.hex' failed
+"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/POEnet.o.d -o build/default/production/_ext/1360937237/POEnet.o ../src/POEnet.cpp 
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_GEN_InterruptStatus_Default.h: In function 'USB_INTERRUPTS USB_InterruptFlagAllGet_Default(USB_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5933:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_GEN_InterruptStatus_Default.h:129:51: error: invalid conversion from 'SFR_TYPE' to 'USB_INTERRUPTS'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_ALL_Interrupt_Default.h: In function 'USB_INTERRUPTS USB_InterruptEnableGet_Default(USB_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5935:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_ALL_Interrupt_Default.h:95:48: error: invalid conversion from 'SFR_TYPE' to 'USB_INTERRUPTS'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_ERR_InterruptStatus_Default.h: In function 'USB_ERROR_INTERRUPTS USB_ErrorInterruptFlagAllGet_Default(USB_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5936:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_ERR_InterruptStatus_Default.h:128:53: error: invalid conversion from 'SFR_TYPE' to 'USB_ERROR_INTERRUPTS'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastDirection_Default.h: In function 'USB_BUFFER_DIRECTION USB_LastTransactionDirectionGet_Default(USB_MODULE_ID)':
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastDirection_Default.h:79:12: error: invalid conversion from 'int' to 'USB_BUFFER_DIRECTION'
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5939:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastPingPong_Default.h: In function 'USB_PING_PONG_STATE USB_LastTransactionPingPongStateGet_Default(USB_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5940:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastPingPong_Default.h:79:12: error: invalid conversion from 'int' to 'USB_PING_PONG_STATE'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastTransactionDetails_Default.h: In function 'void USB_LastTransactionDetailsGet_Default(USB_MODULE_ID, USB_BUFFER_DIRECTION*, USB_PING_PONG_STATE*, __uint8_t*)':
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5941:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastTransactionDetails_Default.h:89:36: error: invalid conversion from '__uint32_t' to 'USB_BUFFER_DIRECTION'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_LastTransactionDetails_Default.h:90:35: error: invalid conversion from '__uint32_t' to 'USB_PING_PONG_STATE'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_TokenPID_Default.h: In function 'USB_PID USB_TokenPIDGet_Default(USB_MODULE_ID)':
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5954:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_TokenPID_Default.h:80:12: error: invalid conversion from 'unsigned int' to 'USB_PID'
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_PingPongMode_Unsupported.h: In function 'USB_PING_PONG_MODE USB_PingPongModeGet_Unsupported(USB_MODULE_ID)':
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_PingPongMode_Unsupported.h:98:12: error: invalid conversion from 'int' to 'USB_PING_PONG_M"C:\Program Files (x86)\Microchip\xc32\v1.34\bin\xc32-g++.exe" -g -x c++ -c -mprocessor=32MX250F128B -frtti -fexceptions -fno-check-new -fenforce-eh-specs -O1 -I../src/system_config/sk_pic32_mx -I../src/tinyxml2 -I../../../../v1_03/framework -MMD -MF build/default/production/_ext/1360937237/user.o.d -o build/default/production/_ext/1360937237/user.o ../src/user.cpp 
+ODE'
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5961:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+nbproject/Makefile-default.mk:291: recipe for target 'build/default/production/_ext/1360937237/user.o' failed
 make[2]: Leaving directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
+In file included from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32mx250f128b.h:5970:0,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_p32xxxx.h:138,
+                 from ../../../../v1_03/framework/peripheral/usb/processor/usb_processor.h:29,
+                 from ../../../../v1_03/framework/peripheral/usb/plib_usb.h:391,
 nbproject/Makefile-default.mk:78: recipe for target '.build-conf' failed
 make[1]: Leaving directory 'C:/microchip/harmony/projects/PIC32USBUSARTCtl/framework/PIC32USBUSARTCtl.X'
+                 from ../../../../v1_03/framework/driver/usb/drv_usb.h:73,
+                 from ../../../../v1_03/framework/usb/usb_device.h:61,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
 nbproject/Makefile-impl.mk:39: recipe for target '.build-impl' failed
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_BDTFunctions_PIC32.h: In function 'USB_BUFFER_DATA01 USB_BufferDataToggleGet_PIC32(USB_MODULE_ID, void*, USB_PING_PONG_MODE, __uint8_t, USB_BUFFER_DIRECTION, USB_BUFFER_PING_PONG)':
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/peripheral/usb/processor/../templates/usb_BDTFunctions_PIC32.h:371:51: error: invalid conversion from 'unsigned char' to 'USB_BUFFER_DATA01'
+../../../../v1_03/framework/osal/src/osal_impl_basic.h: In function 'OSAL_CRITSECT_DATA_TYPE OSAL_CRIT_Enter(OSAL_CRIT_TYPE)':
+In file included from ../../../../v1_03/framework/osal/osal_definitions.h:10:0,
+                 from ../../../../v1_03/framework/osal/osal.h:79,
+                 from ../../../../v1_03/framework/usb/src/usb_device_local.h:55,
+                 from ../../../../v1_03/framework/usb/src/usb_device_mapping.h:56,
+                 from ../../../../v1_03/framework/usb/usb_device.h:3541,
+                 from ../../../../v1_03/framework/usb/usb_device_cdc.h:58,
+                 from ../src/app.h:22,
+                 from ../src/user.cpp:19:
+../../../../v1_03/framework/osal/src/osal_impl_basic.h:155:41: error: too few arguments to function 'unsigned int __builtin_disable_interrupts(void)'
+<built-in>:0:0: note: declared here
+make[2]: *** [build/default/production/_ext/1360937237/user.o] Error 1
+make[1]: *** [.build-conf] Error 2
+make: *** [.build-impl] Error 2
 
-BUILD FAILED (exit value 2, total time: 1s)
+BUILD FAILED (exit value 2, total time: 624ms)

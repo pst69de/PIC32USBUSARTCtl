@@ -12,4 +12,4 @@
 
 void InitApp(void);         /* I/O and Peripheral Initialization */
 
-
+void RunApp(void);          /* looped state machine */

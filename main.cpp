@@ -91,9 +91,8 @@ INT main(void)
 
     while(1)
     {
-    
-        /* TODO <INSERT USER APPLICATION CODE HERE> */
-    
+        /* RunApp of user.cpp */
+        RunApp();
     }
 }
 
