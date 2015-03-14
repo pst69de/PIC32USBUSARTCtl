@@ -13,21 +13,21 @@
 #ifndef POENET_H
 #define	POENET_H
 
-#include "tinyxml2.h"
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
 void POEnet_Interpret(const char *buffer);
 
-char *POEnet_Command(void);
+void POEnet_Output(char *buffer);
+
+void POEnet_GetCommand(char *tostring);
+
+void POEnet_GetNewNodeId(int *nodeid);
 
 #ifdef	__cplusplus
 }
 #endif
-
-tinyxml2::XMLDocument POEnetCommand;
 
 #endif	/* POENET_H */
 

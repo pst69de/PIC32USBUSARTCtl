@@ -32,6 +32,7 @@ extern "C" {
 #define APP_SYSCLK_FREQ             24000000L
 #define APP_PBCLK_FREQ              24000000L
 #define APP_BUFFER_SIZE             1024
+#define APP_STRING_SIZE             20
 
 /* APP's interrupt handling */
 #define APP_INT_ID                  INT_ID_0

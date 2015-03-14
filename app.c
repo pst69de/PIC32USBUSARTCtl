@@ -10,11 +10,36 @@
  *   Version 0: alpha development
  */
 
+#include <string.h>
 #include "app.h"
 #include "system_config.h"
+#include "POEnet.h"
 
+// helper routines
+void ClearBuffer(char *buffer) {
+    buffer = memset(buffer, '\0', APP_BUFFER_SIZE);
+    //char *first = buffer;
+    //while (*buffer != '\0') {
+    //   *buffer = '\0';
+    //    buffer++;
+    //    if (buffer-first >= APP_BUFFER_SIZE) { break; }
+    //}
+}
+
+void ClearString(char *str) {
+    str = memset(str, '\0', APP_STRING_SIZE);
+    //char *first = str;
+    //while (*str != '\0') {
+    //    *str = '\0';
+    //    str++;
+    //    if (str-first >= APP_STRING_SIZE) { break; }
+    //}
+}
+
+// APP's data struct
 APP_DATA appData;
 
+// Initialize
 void APP_Initialize ( void )
 {
     int i;
@@ -54,11 +79,16 @@ void APP_Initialize ( void )
 #endif // of ifdef APP_USE_USB
 #ifdef APP_USE_USART
     // USART init
-    for (i = 0; i < APP_USART_RX_BUFFER_SIZE; i++) { appData.USARTreadBuffer[i] = 0;};
+    ClearBuffer(&appData.USARTreadBuffer[0]);
+    //for (i = 0; i < APP_USART_RX_BUFFER_SIZE; i++) { appData.USARTreadBuffer[i] = 0;};
     appData.USARTreadIdx = 0;
-    for (i = 0; i < APP_USART_TX_BUFFER_SIZE; i++) { appData.USARTwriteBuffer[i] = 0;};
+    ClearBuffer(&appData.USARTwriteBuffer[0]);
+    //for (i = 0; i < APP_USART_TX_BUFFER_SIZE; i++) { appData.USARTwriteBuffer[i] = 0;};
     appData.USARTwriteIdx = 0;
 #endif // of ifdef APP_USE_USART
+    // POE.net handling
+    ClearString(&appData.POEnetCommand[0]);
+    appData.POEnet_NodeId = -1;
     // Place the App state machine in its initial state.
     appData.state = APP_STATE_INIT;
 }
@@ -414,12 +444,12 @@ void APP_LCD_ClearLine( uint8_t line) {
     for (i = 0; i < LCD_LINEBUFFER_SIZE; i++) { appData.LCD_Line[line][i] = ' ';}
 } 
 
-void APP_LCD_Print(uint8_t line, char* string) {
+void APP_LCD_Print(uint8_t line, uint8_t pos, char* string) {
     uint8_t i, len;
     len = strlen(string);
-    if (len > LCD_LINEBUFFER_SIZE) { len = LCD_LINEBUFFER_SIZE; }
+    if (len + pos > LCD_LINEBUFFER_SIZE) { len = LCD_LINEBUFFER_SIZE - pos; }
     for (i = 0; i < len; i++) {
-        appData.LCD_Line[line][i] = *(string+i);
+        appData.LCD_Line[line][i + pos] = *(string+i);
     }
 }
 
@@ -573,15 +603,6 @@ void APP_USART_Write(void) {
 }
 #endif // of ifdef APP_USE_USART
 
-void ClearBuffer(char *buffer) {
-    char *first = buffer;
-    while (*buffer != '\0') {
-        *buffer = '\0';
-        buffer++;
-        if (buffer-first >= APP_BUFFER_SIZE) { break; }
-    }
-}
-
 //***************************************************
 // This is the standard texts replied to host
 //***************************************************
@@ -606,10 +627,11 @@ void APP_Tasks ( void )
             APP_CheckTimedLED();
             if (APP_LCD_Init()) {
                 LEDG_Clear;
-                APP_LCD_Print( 3, "LCD ready");
+                APP_LCD_Print( 3, 0, "LCD ready");
                 // -> use of sprintf for string formatting
                 // Time representation
-                APP_LCD_Print( 0, " 00:00:00 --- 0000");
+                APP_LCD_Print( 0, 0, " 00:00:00 --- 0000");
+                APP_LCD_Print( 1, 0, "POEnet");
                 appData.state = APP_LCD_UPDATE;
 #ifdef APP_USE_USB
                 appData.LCD_Return_AppState = APP_STATE_USB_INIT;
@@ -650,6 +672,7 @@ void APP_Tasks ( void )
                 LEDR_Clear;
                 // Fillup Display with USB Status
                 appData.LCD_Line[0][12] = 'B';
+                APP_LCD_Print( 1, 7, "ready");
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_SCHEDULE_READ;
             }
@@ -686,20 +709,24 @@ void APP_Tasks ( void )
                 switch (appData.readBuffer[0]) {
                     case 'U':
                         //POE.net Message -> pass to interpreter
+                        POEnet_Interpret(&appData.readBuffer[1]);
+                        APP_LCD_Print( 1, 7, "              ");
+                        appData.state = APP_STATE_POENET_COMMAND;
+                        appData.POEnet_Return_AppState = APP_STATE_SCHEDULE_WRITE;
                         break;
                     case 'T':
                         switch (appData.readBuffer[1]) {
                             case '1':
                                 APP_LCD_ClearLine(1);
-                                APP_LCD_Print(1,&appData.readBuffer[2]);
+                                APP_LCD_Print(1, 0, &appData.readBuffer[2]);
                                 break;
                             case '2':
                                 APP_LCD_ClearLine(2);
-                                APP_LCD_Print(2,&appData.readBuffer[2]);
+                                APP_LCD_Print(2, 0, &appData.readBuffer[2]);
                                 break;
                             case '3':
                                 APP_LCD_ClearLine(3);
-                                APP_LCD_Print(3,&appData.readBuffer[2]);
+                                APP_LCD_Print(3, 0, &appData.readBuffer[2]);
                                 break;
                             default:
                                 strcpy(appData.writeBuffer, "NOK\n");
@@ -738,10 +765,25 @@ void APP_Tasks ( void )
             // Check if a character was sent. The isWriteComplete
             // flag gets updated in the CDC event handler
             if (appData.isWriteComplete) {
+                ClearBuffer(appData.writeBuffer);
+                appData.writeCount = 0;
                 appData.state = APP_STATE_SCHEDULE_READ;
             }
             break;
 #endif // of ifdef APP_USE_USB
+        case APP_STATE_POENET_COMMAND:
+            POEnet_GetCommand(&appData.POEnetCommand[0]);
+            APP_LCD_Print( 1, 8, &appData.POEnetCommand[0]);
+            if (!strcmp(&appData.POEnetCommand[0],"net")) {
+                // handle net command
+                POEnet_GetNewNodeId(&appData.POEnet_NodeId);
+            }
+            appData.writeBuffer[0] = 'U';
+            POEnet_Output(&appData.writeBuffer[1]);
+            appData.writeCount = strlen(appData.writeBuffer);
+            appData.LCD_Return_AppState = appData.POEnet_Return_AppState;
+            appData.state = APP_LCD_UPDATE;
+            break;
         case APP_LCD_UPDATE:
             APP_CheckTimedLED();
             if (APP_I2C_Ready()) {
