@@ -1,3 +1,12 @@
+/* 
+ * File:    getting_started.txt
+ * Author:  Microchip 
+ * License: by Microchip
+ *
+ * Created on 2015-03-11
+ * Description:
+ *   Startup a CPP project with MPLABX
+ */
 This is a general template for the PIC32 family of microcontrollers.  It's
 purpose is to provide a project shell for users to get started designing their
 own applications.  Final qualification and testing of this project is left to

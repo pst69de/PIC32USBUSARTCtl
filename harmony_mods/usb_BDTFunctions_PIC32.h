@@ -175,7 +175,7 @@ typedef union /*DOM-IGNORE-BEGIN*/__attribute__ ((packed))/*DOM-IGNORE-END*/
     Where <c>USB_MAX_EP_USED</c> is #define'd in a configuration header.
 */
 
-union /*DOM-IGNORE-BEGIN*/__attribute__ ((packed))/*DOM-IGNORE-END*/ USB_BDT_ENTRY_TAG
+typedef union /*DOM-IGNORE-BEGIN*/__attribute__ ((packed))/*DOM-IGNORE-END*/ USB_BDT_ENTRY_TAG
 {
     struct /*DOM-IGNORE-BEGIN*/__attribute__ ((packed))/*DOM-IGNORE-END*/
     {

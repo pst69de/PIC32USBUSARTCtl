@@ -1,3 +1,14 @@
+/* 
+ * File:    configuration_bits.cpp
+ * Author:  Patrick O. Ehrmann (pst69@pst69.de)
+ * License: Creative Commons Zero (https://creativecommons.org/publicdomain/zero/1.0/)
+ *
+ * Created on 2015-03-11
+ * Description:
+ *   not yet supplied
+ * Major Changes:
+ *   Version 0: alpha development
+ */
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -25,8 +36,8 @@
 /* available to Generate Configuration Bits source code which the user can    */
 /* paste into this project.                                                   */
 /******************************************************************************/
-
-/* TODO Fill in your configuration bits from the config bits generator here.  */
+/* Notice not to have these pragma statements anywhere else in your code.     */
+/******************************************************************************/
 
 // DEVCFG3
 // USERID = No Setting

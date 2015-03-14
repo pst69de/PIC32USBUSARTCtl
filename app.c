@@ -1,8 +1,13 @@
 /*
- * File:   app.c
- * Author: patrick
+ * File:    app.c
+ * Author:  Patrick O. Ehrmann (pst69@pst69.de)
+ * License: Creative Commons Zero (https://creativecommons.org/publicdomain/zero/1.0/)
  *
- * Created on 2014-09-13
+ * Created on 2015-02-26
+ * Description:
+ *   not yet supplied
+ * Major Changes:
+ *   Version 0: alpha development
  */
 
 #include "app.h"
@@ -131,8 +136,8 @@ bool APP_USBStateReset(void) {
     bool retVal;
     if(!appData.isConfigured) {
         // Clear Display from USB Status
-        appData.LCD_Line[0][11] = ' ';
-        appData.LCD_Line[0][12] = ' ';
+        appData.LCD_Line[0][11] = '-';
+        appData.LCD_Line[0][12] = '-';
         appData.state = APP_LCD_UPDATE;
         appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
         appData.state = APP_STATE_USB_CONFIGURATION;
@@ -180,7 +185,7 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event,
         case USB_DEVICE_EVENT_POWER_REMOVED:
             // VBUS is not available any more. Detach the device. 
             USB_DEVICE_Detach(appData.deviceHandle);
-            appData.LCD_Line[0][12] = ' ';
+            appData.LCD_Line[0][12] = '-';
             break;
         case USB_DEVICE_EVENT_SUSPENDED:
             break;
@@ -603,15 +608,8 @@ void APP_Tasks ( void )
                 LEDG_Clear;
                 APP_LCD_Print( 3, "LCD ready");
                 // -> use of sprintf for string formatting
-                // Time representation 
-                appData.LCD_Line[0][1] = '0';
-                appData.LCD_Line[0][2] = '0';
-                appData.LCD_Line[0][3] = ':';
-                appData.LCD_Line[0][4] = '0';
-                appData.LCD_Line[0][5] = '0';
-                appData.LCD_Line[0][6] = ':';
-                appData.LCD_Line[0][7] = '0';
-                appData.LCD_Line[0][8] = '0';
+                // Time representation
+                APP_LCD_Print( 0, " 00:00:00 --- 0000");
                 appData.state = APP_LCD_UPDATE;
 #ifdef APP_USE_USB
                 appData.LCD_Return_AppState = APP_STATE_USB_INIT;

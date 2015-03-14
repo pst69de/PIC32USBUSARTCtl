@@ -1,8 +1,13 @@
 /*
- * File:   system_tasks.c
- * Author: patrick
+ * File:    system_tasks.c
+ * Author:  Patrick O. Ehrmann (pst69@pst69.de)
+ * License: Creative Commons Zero (https://creativecommons.org/publicdomain/zero/1.0/)
  *
- * Created on 2014-09-13
+ * Created on 2015-02-26
+ * Description:
+ *   not yet supplied
+ * Major Changes:
+ *   Version 0: alpha development
  */
 
 #include "system_definitions.h"

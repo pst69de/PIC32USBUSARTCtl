@@ -1,11 +1,13 @@
-/* 
- * File:   system_init.h
- * Author: Patrick O. Ehrmann (pst69@pst69.de)
+/*
+ * File:    system_init.h
+ * Author:  Patrick O. Ehrmann (pst69@pst69.de)
+ * License: Creative Commons Zero (https://creativecommons.org/publicdomain/zero/1.0/)
  *
  * Created on 2015-03-11
- *
- * Use:
- * Header file for system_init.c to integrate to a C++ environment
+ * Description:
+ *   Header file for system_init.c to integrate to a C++ environment
+ * Major Changes:
+ *   Version 0: alpha development
  */
 
 #ifndef SYSTEM_INIT_H

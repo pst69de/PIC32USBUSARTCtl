@@ -1,3 +1,14 @@
+/* 
+ * File:    interrupts.cpp
+ * Author:  Patrick O. Ehrmann (pst69@pst69.de)
+ * License: Creative Commons Zero (https://creativecommons.org/publicdomain/zero/1.0/)
+ *
+ * Created on 2015-03-11
+ * Description:
+ *   not yet supplied
+ * Major Changes:
+ *   Version 0: alpha development
+ */
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -85,6 +96,10 @@ using namespace std;        /* use the standard namespace                     */
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 // ***********************************************
 // priority in interrupts (7)6 = high 0 = low  
 // ***********************************************
@@ -139,3 +154,6 @@ void __ISR( _UART_1_VECTOR, ipl1soft ) _InterruptHandler_U1TX(void) {
 }
 #endif
 
+#ifdef	__cplusplus
+}
+#endif
