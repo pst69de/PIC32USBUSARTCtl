@@ -13,6 +13,7 @@
 #include <string.h>
 #include "app.h"
 #include "system_config.h"
+#include "system_definitions.h"
 #include "POEnet.h"
 
 // helper routines
@@ -50,6 +51,7 @@ void APP_Initialize ( void )
     appData.time.Hours = 0;
     appData.time.Days = 0;
     appData.lastSecond = 59;
+    appData.pollSecond = false;
     appData.time.Wait = 0;
     // timing repetition 
     appData.timerCount = 0;
@@ -63,6 +65,7 @@ void APP_Initialize ( void )
     for (i = 0; i < APP_LCD_I2C_READ_BUFFER_SIZE; i++) { appData.LCD_Read[i] = 0;};
     appData.LCD_ReadIx = 0;
     for (i = 0; i < LCD_LINEBUFFERS; i++) { APP_LCD_ClearLine(i); }
+    appData.LCD_Backlight = false;
 #ifdef APP_USE_USB
     // USB Inits
     appData.deviceHandle = -1;
@@ -76,15 +79,23 @@ void APP_Initialize ( void )
     appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
     appData.isReadComplete = true;
     appData.isWriteComplete = true;
+    ClearBuffer(&appData.USB_INPUT_BUF[0]);
+    appData.USB_INPUT_SIZE = 0;
+    appData.USB_INPUT_IDX = 0;
+    ClearBuffer(&appData.USB_OUTPUT_BUF[0]);
+    appData.USB_OUTPUT_SIZE = 0;
+    appData.USB_OUTPUT_IDX = 0;
 #endif // of ifdef APP_USE_USB
 #ifdef APP_USE_USART
     // USART init
-    ClearBuffer(&appData.USARTreadBuffer[0]);
+    ClearBuffer(&appData.USART_INPUT_BUF[0]);
     //for (i = 0; i < APP_USART_RX_BUFFER_SIZE; i++) { appData.USARTreadBuffer[i] = 0;};
-    appData.USARTreadIdx = 0;
-    ClearBuffer(&appData.USARTwriteBuffer[0]);
+    appData.USART_INPUT_SIZE = 0;
+    appData.USART_INPUT_IDX = 0;
+    ClearBuffer(&appData.USART_OUTPUT_BUF[0]);
     //for (i = 0; i < APP_USART_TX_BUFFER_SIZE; i++) { appData.USARTwriteBuffer[i] = 0;};
-    appData.USARTwriteIdx = 0;
+    appData.USART_OUTPUT_SIZE = 0;
+    appData.USART_OUTPUT_IDX = 0;
 #endif // of ifdef APP_USE_USART
     // POE.net handling
     ClearString(&appData.POEnetCommand[0]);
@@ -123,8 +134,7 @@ void APP_TimingCallback ( void ) {
         // Set Seconds to Time field
         appData.LCD_Line[0][8] = numChar[appData.time.Seconds % 10];
         appData.LCD_Line[0][7] = numChar[appData.time.Seconds / 10];
-        appData.LCD_Return_AppState = appData.state;
-        appData.state = APP_LCD_UPDATE;
+        appData.pollSecond = true;
     }
     if (appData.timerCount > 0) {
         appData.timerCount--;
@@ -147,42 +157,55 @@ bool APP_RegisterTimedLED ( int thisTimeMs) {
 }
 
 // APP Timed LED routine (blink on different operation states)
-void APP_CheckTimedLED (void) {
+bool APP_CheckTimer (void) {
+    bool Result = false;
     if (appData.timerExpired) {
         // Toggle LED & clear flag
         LEDR_Toggle;
         appData.timerExpired = false;
     }
+    if (appData.pollSecond) {
+        appData.pollSecond = false;
+        if (APP_LCD_Ready()) {
+            if (appData.state != APP_LCD_UPDATE) {
+                appData.LCD_Return_AppState = appData.state;
+                appData.state = APP_LCD_UPDATE;
+                Result = true;
+            }
+        }
+    }
+    return Result;
 }
 
-#ifdef APP_USE_USB
 // USB Routines
 //****************************************************
 // This function is called in every step of the
 // application state machine.
+// even without USB, but then it does nothing
 //****************************************************
 bool APP_USBStateReset(void) {
-    // This function returns true if the device was reset
     bool retVal;
+    retVal = false;
+#ifdef APP_USE_USB
+    // This function returns true if the device was reset
     if(!appData.isConfigured) {
         // Clear Display from USB Status
         appData.LCD_Line[0][11] = '-';
         appData.LCD_Line[0][12] = '-';
         appData.state = APP_LCD_UPDATE;
         appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
-        appData.state = APP_STATE_USB_CONFIGURATION;
+        //appData.state = APP_STATE_USB_CONFIGURATION;
         appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
         appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
         appData.isReadComplete = true;
         appData.isWriteComplete = true;
         retVal = true;
     }
-    else {
-        retVal = false;
-    }
+#endif // ifdef APP_USE_USB
     return(retVal);
 }
 
+#ifdef APP_USE_USB
 //******************************************************
 // USB Device Layer Events - Application Event Handler
 //******************************************************
@@ -436,6 +459,9 @@ void APP_LCD_Update(void) {
     APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME1_H);
     APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME1_H);
     APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
+    if (appData.LCD_Backlight) {
+        appData.LCD_Write[0] |= LCD_BACKLIGHT;
+    }
     APP_I2C_M_Write();
 }
 
@@ -585,19 +611,31 @@ bool APP_LCD_Ready(void) {
 // USART routines 
 // INT Handling Read
 void APP_USART_Read(void) {
+    appData.LCD_Line[2][11] = '*';
     while (PLIB_USART_ReceiverDataIsAvailable(APP_USART_RX_ID)) {
-        appData.USARTreadBuffer[appData.USARTreadIdx++] = PLIB_USART_ReceiverByteReceive(APP_USART_RX_ID);
+        uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_USART_RX_ID);
+        appData.LCD_Line[2][12] = (char)readByte;
+        appData.USART_INPUT_BUF[appData.USART_INPUT_IDX++] = readByte;
+        // POE.net: zero is sent for termination
+        if (!readByte) {
+            appData.USART_INPUT_SIZE = appData.USART_INPUT_IDX;
+            appData.LCD_Line[2][11] = 'R';
+        }
     }
 }
 
 // INT Handling Write 
 void APP_USART_Write(void) {
-    int i;
-    if (appData.USARTreadIdx > 0) {
-        while (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USARTwriteIdx > 0)) {
-            PLIB_USART_TransmitterByteSend(APP_USART_TX_ID, appData.USARTwriteBuffer[0]);
-            appData.USARTwriteIdx--;
-            for (i = 1; i <= appData.USARTwriteIdx; i++) { appData.USARTwriteBuffer[i - 1] = appData.USARTwriteBuffer[i]; }
+    if (appData.USART_OUTPUT_IDX == appData.USART_OUTPUT_SIZE) {
+        appData.USART_OUTPUT_SIZE = 0;
+        appData.USART_OUTPUT_IDX = 0;
+        appData.LCD_Line[2][8] = 'T';
+    }
+    if (appData.USART_OUTPUT_SIZE > 0) {
+        appData.LCD_Line[2][8] = '*';
+        while (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USART_OUTPUT_IDX < appData.USART_OUTPUT_SIZE)) {
+            appData.LCD_Line[2][9] = appData.USART_OUTPUT_BUF[ appData.USART_OUTPUT_IDX];
+            PLIB_USART_TransmitterByteSend(APP_USART_TX_ID, appData.USART_OUTPUT_BUF[ appData.USART_OUTPUT_IDX++]);
         }
     }
 }
@@ -613,6 +651,10 @@ char str2int[12] = "\0";
 void APP_Tasks ( void )
 {
     int i;
+#ifdef APP_USE_USB
+    // separate regular calls (at time USB Handling)
+    USB_DEVICE_Tasks(sysObjects.usbDevObject);
+#endif
     // check the application state
     switch ( appData.state ) {
         // Application's initial state
@@ -624,20 +666,27 @@ void APP_Tasks ( void )
             appData.state = APP_STATE_LCD_INIT;
             break;
         case APP_STATE_LCD_INIT:
-            APP_CheckTimedLED();
             if (APP_LCD_Init()) {
                 LEDG_Clear;
-                APP_LCD_Print( 3, 0, "LCD ready");
                 // -> use of sprintf for string formatting
                 // Time representation
                 APP_LCD_Print( 0, 0, " 00:00:00 --- 0000");
                 APP_LCD_Print( 1, 0, "POEnet");
-                appData.state = APP_LCD_UPDATE;
-#ifdef APP_USE_USB
-                appData.LCD_Return_AppState = APP_STATE_USB_INIT;
-#else                
+#ifdef APP_USE_USART
+                APP_LCD_Print( 2, 0, "USART");
+#endif // ifdef APP_USE_USART
+                APP_LCD_Print( 3, 0, "LCD ready");
+#ifdef APP_USE_USART
+                // init USART before USB
+                appData.LCD_Return_AppState = APP_STATE_USART_INIT;
+#else
                 appData.LCD_Return_AppState = APP_STATE_HOLD;
+#endif // ifdef APP_USE_USART
+#ifdef APP_USE_USB
+                // use of USB overrides Init of USART
+                appData.LCD_Return_AppState = APP_STATE_USB_INIT;
 #endif // of else APP_USE_USB
+                appData.state = APP_LCD_UPDATE;
             }
             break;
 #ifdef APP_USE_USB
@@ -646,6 +695,7 @@ void APP_Tasks ( void )
         // S (LCD_Line[0][11]) = USB_DEVICE_CDC_EventHandlerSet
         // B (LCD_Line[0][12]) = Device attached (Vbus is powered)
         case APP_STATE_USB_INIT:
+            if (APP_CheckTimer()) { break; }
             // Signal init by setting error LED
             LEDR_Set;
             // Open the device layer 
@@ -663,42 +713,88 @@ void APP_Tasks ( void )
             }
             break;
         case APP_STATE_USB_CONFIGURATION:
+            if (APP_CheckTimer()) { break; }
             // if the USB device is reset by the Host we return to this state (checked by APP_USBStateReset)
             // Check if the device was configured 
             if(appData.isConfigured) {
-                // If the device is configured then lets start reading 
-                appData.state = APP_STATE_SCHEDULE_READ;
                 // Clear error LED
                 LEDR_Clear;
                 // Fillup Display with USB Status
                 appData.LCD_Line[0][12] = 'B';
                 APP_LCD_Print( 1, 7, "ready");
+                ClearBuffer(&appData.USB_INPUT_BUF[0]);
+                // If the device is configured then lets start reading
+                LEDG_Set; // Set acceptance LED
+#ifdef APP_USE_USART
+                // if there is the USART run their init
+                appData.LCD_Return_AppState = APP_STATE_USART_INIT;
+#else // ifdef APP_USE_USART
+                // or start waiting on input
+                appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
+#endif // else APP_USE_USART
                 appData.state = APP_LCD_UPDATE;
-                appData.LCD_Return_AppState = APP_STATE_SCHEDULE_READ;
             }
             break;
-        case APP_STATE_SCHEDULE_READ:
-            if(APP_USBStateReset()) { break; }
-            // Clear Read Buffer and then wait for data send by Host
-            //memset(appData.readBuffer, 0, APP_READ_BUFFER_SIZE); -> doesn't work
-            for (i = 0; i < USB_BUFFER_SIZE; i++) { appData.readBuffer[i] = '\0'; }
-            LEDG_Set; // Set acceptance LED
-            appData.state = APP_STATE_WAIT_FOR_READ_COMPLETE;
+        case APP_STATE_USB_WRITE:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+            // Setup the write 
+            appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
+            appData.isWriteComplete = false;
+            if (!appData.USB_OUTPUT_SIZE) {
+                USB_DEVICE_CDC_Write(appData.cdcInstance, &appData.writeTransferHandle,
+                        nokPrompt, 4, USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+            } else {
+                USB_DEVICE_CDC_Write(appData.cdcInstance, &appData.writeTransferHandle,
+                        appData.USB_OUTPUT_BUF, appData.USB_OUTPUT_SIZE - 1, USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+            }
+            appData.state = APP_STATE_USB_WAIT_WRITE_COMPLETE;
             break;
-        case APP_STATE_WAIT_FOR_READ_COMPLETE:
-            if(APP_USBStateReset()) { break; }
+        case APP_STATE_USB_WAIT_WRITE_COMPLETE:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+            // Check if a character was sent. The isWriteComplete
+            // flag gets updated in the CDC event handler
+            if (appData.isWriteComplete) {
+                ClearBuffer(appData.USB_OUTPUT_BUF);
+                appData.USB_OUTPUT_SIZE = 0;
+                appData.state = APP_STATE_POENET_INPUT;
+            }
+            break;
+#endif // of ifdef APP_USE_USB
+#ifdef APP_USE_USART
+        // Init USART
+        case APP_STATE_USART_INIT:
+            if (APP_CheckTimer()) { break; }
+            appData.LCD_Line[2][8] = 'T';
+            //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+            appData.LCD_Line[2][11] = 'R';
+            PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
+            // goto Input afterwards
+            appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
+            appData.state = APP_LCD_UPDATE;
+            break;
+#endif // of ifdef APP_USE_USART
+        // POE.net input phase
+        case APP_STATE_POENET_INPUT:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+#ifdef APP_USE_USB
+            // USB is always Primary, so pass Input to command interpretation
             if (appData.isReadComplete) {
                 appData.isReadComplete = false;
                 LEDG_Clear; // Clear acceptance LED
                 appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
                 USB_DEVICE_CDC_Read (appData.cdcInstance, &appData.readTransferHandle,
-                        appData.readBuffer, USB_BUFFER_SIZE);
+                        appData.USB_INPUT_BUF, USB_BUFFER_SIZE);
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
                     appData.state = APP_STATE_ERROR;
                     break;
                 }
-                // Update LCD with count bytes read 
-                i = strlen( appData.readBuffer);
+                // USB cuts off terminating zero's (POE.net)
+                appData.USB_INPUT_SIZE = strlen( appData.USB_INPUT_BUF) + 1;
+                // Update LCD with count bytes read
+                i = appData.USB_INPUT_SIZE;
                 appData.LCD_Line[0][17] = numChar[i%10];
                 i /= 10;
                 appData.LCD_Line[0][16] = numChar[i%10];
@@ -706,103 +802,166 @@ void APP_Tasks ( void )
                 appData.LCD_Line[0][15] = numChar[i%10];
                 i /= 10;
                 appData.LCD_Line[0][14] = numChar[i];
-                switch (appData.readBuffer[0]) {
-                    case 'U':
-                        //POE.net Message -> pass to interpreter
-                        POEnet_Interpret(&appData.readBuffer[1]);
-                        APP_LCD_Print( 1, 7, "              ");
-                        appData.state = APP_STATE_POENET_COMMAND;
-                        appData.POEnet_Return_AppState = APP_STATE_SCHEDULE_WRITE;
-                        break;
-                    case 'T':
-                        switch (appData.readBuffer[1]) {
-                            case '1':
-                                APP_LCD_ClearLine(1);
-                                APP_LCD_Print(1, 0, &appData.readBuffer[2]);
-                                break;
-                            case '2':
-                                APP_LCD_ClearLine(2);
-                                APP_LCD_Print(2, 0, &appData.readBuffer[2]);
-                                break;
-                            case '3':
-                                APP_LCD_ClearLine(3);
-                                APP_LCD_Print(3, 0, &appData.readBuffer[2]);
-                                break;
-                            default:
-                                strcpy(appData.writeBuffer, "NOK\n");
-                                appData.writeCount = strlen(appData.writeBuffer);
-                                appData.state = APP_STATE_SCHEDULE_WRITE;
-                                break;
-                        }
-                        // set a text message
-                        break;
-                    default:
-                        // ignore Message
-                        strcpy(appData.writeBuffer, "see http://wiki69.pst69.homeip.net/index.php/PIC32_USART for POE.net messages\n");
-                        appData.writeCount = strlen(appData.writeBuffer);
-                        appData.state = APP_STATE_SCHEDULE_WRITE;
-                        break;
-                }
-                ClearBuffer(appData.readBuffer);
+                // pass via LCDout to INPUTReady
+                appData.state = APP_LCD_UPDATE;
+                appData.LCD_Return_AppState = APP_STATE_POENET_INPUT_READY;
+                break;
             }
-            break;
-        case APP_STATE_SCHEDULE_WRITE:
-            if(APP_USBStateReset()) { break; }
-            // Setup the write 
-            appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
-            appData.isWriteComplete = false;
-            if (!appData.writeCount) {
-                USB_DEVICE_CDC_Write(appData.cdcInstance, &appData.writeTransferHandle,
-                        nokPrompt, 4, USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            } else {
-                USB_DEVICE_CDC_Write(appData.cdcInstance, &appData.writeTransferHandle,
-                        appData.writeBuffer, appData.writeCount, USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            }
-            appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
-            break;
-        case APP_STATE_WAIT_FOR_WRITE_COMPLETE:
-            if(APP_USBStateReset()) { break; }
-            // Check if a character was sent. The isWriteComplete
-            // flag gets updated in the CDC event handler
-            if (appData.isWriteComplete) {
-                ClearBuffer(appData.writeBuffer);
-                appData.writeCount = 0;
-                appData.state = APP_STATE_SCHEDULE_READ;
-            }
-            break;
 #endif // of ifdef APP_USE_USB
+#ifdef APP_USE_USART
+            // USART may be Secondary, so pass Input as compiled
+            if (appData.USART_INPUT_SIZE) {
+#ifdef APP_POEnet_SECONDARY
+                // pass to Buffer pass
+                appData.state = APP_STATE_POENET_INPUT_READY;
+#else
+                // pass to INPUTReady
+                appData.state = APP_STATE_POENET_INPUT_READY;
+#endif
+                break;
+            }
+#endif // of ifdef APP_USE_USB
+            break;
+        // POE.net input buffer filled
+        case APP_STATE_POENET_INPUT_READY:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+            switch (appData.POEnetPrimInputBuf[0]) {
+                case 'U':
+                    //POE.net Message -> pass to interpreter
+                    POEnet_Interpret(&appData.POEnetPrimInputBuf[1]);
+                    APP_LCD_Print( 1, 7, "              ");
+                    appData.LCD_Return_AppState = APP_STATE_POENET_COMMAND;
+                    appData.state = APP_LCD_UPDATE;
+                    break;
+                case 'T':
+                    //switch (appData.POEnetPrimInputBuf[1]) {
+                    //    case '1':
+                    //        APP_LCD_ClearLine(1);
+                    //        APP_LCD_Print(1, 0, &appData.POEnetPrimInputBuf[2]);
+                    //        break;
+                    //    case '2':
+                    //        APP_LCD_ClearLine(2);
+                    //        APP_LCD_Print(2, 0, &appData.POEnetPrimInputBuf[2]);
+                    //        break;
+                    //    case '3':
+                    //        APP_LCD_ClearLine(3);
+                    //        APP_LCD_Print(3, 0, &appData.POEnetPrimInputBuf[2]);
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
+                    APP_LCD_ClearLine(3);
+                    APP_LCD_Print(3, 0, &appData.POEnetPrimInputBuf[1]);
+                    ClearBuffer(&appData.POEnetPrimInputBuf[0]);
+                    appData.POEnetPrimInputSize = 0;
+                    appData.POEnetPrimInputIdx = 0;
+                    // set the text message
+                    appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
+                    appData.state = APP_LCD_UPDATE;
+                    break;
+                case 'B':
+                    appData.LCD_Backlight = !appData.LCD_Backlight;
+                    appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
+                    appData.state = APP_LCD_UPDATE;
+                    break;
+                default:
+                    // ignore Message
+                    ClearBuffer(&appData.POEnetPrimInputBuf[0]);
+                    appData.POEnetPrimInputSize = 0;
+                    appData.POEnetPrimInputIdx = 0;
+                    appData.state = APP_STATE_POENET_INPUT;
+#ifdef APP_USE_USB
+                    // if input comes by USB send hint on help
+                    strcpy(appData.USB_OUTPUT_BUF, "see http://wiki69.pst69.homeip.net/index.php/PIC32_USART for POE.net messages\n");
+                    appData.USB_OUTPUT_SIZE = strlen(appData.USB_OUTPUT_BUF) + 1;
+                    appData.state = APP_STATE_USB_WRITE;
+#endif // ifdef APP_USE_USB
+                    break;
+            }
+            break;
+        // POE.net command interpretation
         case APP_STATE_POENET_COMMAND:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
             POEnet_GetCommand(&appData.POEnetCommand[0]);
             APP_LCD_Print( 1, 8, &appData.POEnetCommand[0]);
             if (!strcmp(&appData.POEnetCommand[0],"net")) {
                 // handle net command
                 POEnet_GetNewNodeId(&appData.POEnet_NodeId);
             }
-            appData.writeBuffer[0] = 'U';
-            POEnet_Output(&appData.writeBuffer[1]);
-            appData.writeCount = strlen(appData.writeBuffer);
-            appData.LCD_Return_AppState = appData.POEnet_Return_AppState;
+            appData.POEnetPrimOutputBuf[0] = 'U';
+            POEnet_Output(&appData.POEnetPrimOutputBuf[1]);
+            appData.POEnetPrimOutputSize = strlen(appData.POEnetPrimOutputBuf) + 1;
+            appData.POEnetPrimOutputIdx = 0;
+            appData.LCD_Return_AppState = APP_STATE_POENET_OUTPUT_PREPARE;
             appData.state = APP_LCD_UPDATE;
             break;
+        // POE.net output phase
+        case APP_STATE_POENET_OUTPUT_PREPARE:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+#ifdef APP_POEnet_SECONDARY
+            // USB USART Bridge -> pass to USART
+            appData.LCD_Line[2][6] = '>';
+            // initiate USART transmission by writing 1st Byte
+            APP_USART_Write();
+            appData.state = APP_STATE_POENET_OUTPUT_READY;
+#else // ifdef APP_POEnet_SECONDARY
+#ifdef APP_USE_USB
+            // no secondary with USB -> single USB test node, pass Output to USB
+            appData.state = APP_STATE_USB_WRITE;
+            // APP_STATE_USB_WRITE passes back to APP_STATE_POENET_INPUT on completion
+#else // ifdef APP_USE_USB
+            // no secondary -> pass Output to USART TX 
+            // initiate USART transmission by writing 1st Byte
+            APP_USART_Write();
+            appData.state = APP_STATE_POENET_OUTPUT_READY;
+#endif // ifdef APP_USE_USB
+#endif // else APP_POEnet_SECONDARY
+            break;
+        // POE.net output phase finished
+        case APP_STATE_POENET_OUTPUT_READY:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+            // primary Out is always USART transmission -> check for fullfillment
+            if (appData.POEnetPrimOutputIdx == appData.POEnetPrimOutputSize) {
+                ClearBuffer(&appData.POEnetPrimOutputBuf[0]);
+                appData.POEnetPrimOutputSize = 0;
+                appData.POEnetPrimOutputIdx = 0;
+                appData.state = APP_STATE_POENET_INPUT;
+            }
+            break;
+#ifdef APP_POEnet_SECONDARY
+        case APP_STATE_POENET_PASS:
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
+            strcpy(&appData.POEnetSecInputBuf[0], &appData.POEnetSecOutputBuf[0]);
+            appData.POEnetSecOutputSize = appData.POEnetSecInputSize;
+            appData.POEnetSecOutputIdx = 0;
+            // if it is Secondary the output always goes to the USB
+            appData.state = APP_STATE_USB_WRITE;
+            break;
+#endif // ifdef APP_POEnet_SECONDARY
         case APP_LCD_UPDATE:
-            APP_CheckTimedLED();
+            if (APP_CheckTimer()) { break; }
+            // don't check USB on LCD cycles -> possible conflict with USB not yet initialized
+            //if(APP_USBStateReset()) { break; }
             if (APP_I2C_Ready()) {
                 APP_LCD_Update();
                 appData.state = appData.LCD_Return_AppState;
             }
             break;
         case APP_STATE_ERROR:
-            APP_CheckTimedLED();
+            if (APP_CheckTimer()) { break; }
             if (APP_RegisterTimedLED( 200)) {
                 LEDR_Clear;
                 appData.state = APP_STATE_HOLD;
             }
             break;
         case APP_STATE_HOLD:
-            APP_CheckTimedLED();
-#ifdef APP_USE_USB
-            if(APP_USBStateReset()) { break; }
-#endif // of ifdef APP_USE_USB
+            if (APP_USBStateReset()) { break; }
+            if (APP_CheckTimer()) { break; }
             break;
         // The default state should never be executed. 
         default:

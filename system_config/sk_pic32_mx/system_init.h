@@ -18,10 +18,13 @@ extern "C" {
 #endif
 
 #include "system_config.h"
+//#include "system_definitions.h"
 
 void SYS_Initialize ( void *data );
 
 void SYS_USB_DEVICE_ISR(void);
+
+//SYSTEM_OBJECTS sysObjects;
 
 #ifdef	__cplusplus
 }

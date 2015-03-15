@@ -33,22 +33,34 @@ typedef enum {
     APP_STATE_INIT,
     // Init LCD
     APP_STATE_LCD_INIT,
+#ifdef APP_USE_USART
+    // Init USART
+    APP_STATE_USART_INIT,
+#endif // of ifdef APP_USE_USART
 #ifdef APP_USE_USB
     // Init USB
     APP_STATE_USB_INIT,
     // USB Configuration (wait on host to activate this device)
     APP_STATE_USB_CONFIGURATION,
-    // Wait for a character receive
-    APP_STATE_SCHEDULE_READ,
-    // A character is received from host
-    APP_STATE_WAIT_FOR_READ_COMPLETE,
-    // Wait for the TX to get completed
-    APP_STATE_SCHEDULE_WRITE,
+    // Start a USB TX transaction
+    APP_STATE_USB_WRITE,
     // Wait for the write to complete
-    APP_STATE_WAIT_FOR_WRITE_COMPLETE,
+    APP_STATE_USB_WAIT_WRITE_COMPLETE,
 #endif // of ifdef APP_USE_USB
+    // POE.net input phase
+    APP_STATE_POENET_INPUT,
+    // POE.net input interpretation
+    APP_STATE_POENET_INPUT_READY,
     // POE.net command interpretation
     APP_STATE_POENET_COMMAND,
+    // POE.net output phase
+    APP_STATE_POENET_OUTPUT_PREPARE,
+    // POE.net output phase finished
+    APP_STATE_POENET_OUTPUT_READY,
+#ifdef APP_POEnet_SECONDARY
+    // POE.net pass secondary
+    APP_STATE_POENET_PASS,
+#endif // ifdef APP_POEnet_SECONDARY
     // LCD update
     APP_LCD_UPDATE,
     // (not used) Register timer callback
@@ -138,6 +150,7 @@ typedef struct
     // Timing structure
     APP_TIMING        time;
     int               lastSecond;
+    bool              pollSecond;
     // LCD I2C data
     LCD_Init_Sequence LCD_Init;
     I2C_States        I2C_State;
@@ -147,7 +160,22 @@ typedef struct
     uint8_t           LCD_Read[APP_LCD_I2C_READ_BUFFER_SIZE];
     int               LCD_ReadIx;
     char              LCD_Line[LCD_LINEBUFFERS][LCD_LINEBUFFER_SIZE];
-    APP_STATES        LCD_Return_AppState; 
+    bool              LCD_Backlight;
+    APP_STATES        LCD_Return_AppState;
+    char              POEnetPrimInputBuf[APP_BUFFER_SIZE];
+    int               POEnetPrimInputSize;
+    int               POEnetPrimInputIdx;
+    char              POEnetPrimOutputBuf[APP_BUFFER_SIZE];
+    int               POEnetPrimOutputSize;
+    int               POEnetPrimOutputIdx;
+#ifdef APP_POEnet_SECONDARY
+    char              POEnetSecInputBuf[APP_BUFFER_SIZE];
+    int               POEnetSecInputSize;
+    int               POEnetSecInputIdx;
+    char              POEnetSecOutputBuf[APP_BUFFER_SIZE];
+    int               POEnetSecOutputSize;
+    int               POEnetSecOutputIdx;
+#endif // of ifdef APP_POEnet_SECONDARY
 #ifdef APP_USE_USB
     // USB: Device layer handle returned by device layer open function
     USB_DEVICE_HANDLE    deviceHandle;
@@ -155,7 +183,8 @@ typedef struct
     // USB: Device configured state
     bool                 isConfigured;
     // USB: Read Data Buffer
-    char                 readBuffer[USB_BUFFER_SIZE];
+    //char                 readBuffer[USB_BUFFER_SIZE];
+    // -> one of the Input Buffers defined by USB_INPUT_BUF
     // USB: Set Line Coding Data
     USB_CDC_LINE_CODING  setLineCodingData;
     // USB: Get Line Coding Data
@@ -173,18 +202,20 @@ typedef struct
     // USB: True if a character was written
     bool                 isWriteComplete;
     // extend USB: output buffer
-    char                 writeBuffer[USB_BUFFER_SIZE];
-    int                  writeCount;
+    //char                 writeBuffer[USB_BUFFER_SIZE];
+    // -> one of the Output Buffers defined by USB_OUTPUT_BUF
+    //int                  writeCount;
+    // -> one of the Output Sizes defined by USB_OUTPUT_SIZE
 #endif // of ifdef APP_USE_USB
 #ifdef APP_USE_USART
     // USART 
-    char                 USARTreadBuffer[APP_USART_RX_BUFFER_SIZE];
-    int                  USARTreadIdx;
-    char                 USARTwriteBuffer[APP_USART_TX_BUFFER_SIZE];
-    int                  USARTwriteIdx;
+    // defined usage of Buffers by USART_INPUT_BUF, USART_INPUT_SIZE, USART_INPUT_IDX, USART_OUTPUT_BUF, USART_OUTPUT_SIZE, USART_OUTPUT_IDX
+    //char                 USARTreadBuffer[APP_USART_RX_BUFFER_SIZE];
+    //int                  USARTreadIdx;
+    //char                 USARTwriteBuffer[APP_USART_TX_BUFFER_SIZE];
+    //int                  USARTwriteIdx;
 #endif // of ifdef APP_USE_USART
     // POE.net handling
-    APP_STATES           POEnet_Return_AppState;
     char                 POEnetCommand[APP_STRING_SIZE];
     int                  POEnet_NodeId;
 } APP_DATA;

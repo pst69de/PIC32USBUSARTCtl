@@ -44,7 +44,7 @@
 #pragma config PMDL1WAY = OFF           // Peripheral Module Disable Configuration (Allow multiple reconfigurations)
 #pragma config IOL1WAY = OFF            // Peripheral Pin Select Configuration (Allow multiple reconfigurations)
 #pragma config FUSBIDIO = OFF           // USB USID Selection (Controlled by Port Function)
-#pragma config FVBUSONIO = OFF          // USB VBUS ON Selection (Controlled by Port Function)
+#pragma config FVBUSONIO = ON           // USB VBUS ON Selection (Controlled by Port Function)
 
 // DEVCFG2
 #pragma config FPLLIDIV = DIV_2         // PLL Input Divider (2x Divider)

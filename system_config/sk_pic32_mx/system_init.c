@@ -49,6 +49,7 @@
 #endif // ifndef __cplusplus
 */
 
+#include "system_init.h"
 #include "system_definitions.h"
 #include "system_config.h"
 #ifdef APP_USE_USB
@@ -452,11 +453,11 @@ void INT_Initialize(void) {
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_SUBPRIORITY_LEVEL0);
 #ifdef APP_USE_USART
     // set priority and enable USART RX
-    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_PRIORITY_LEVEL2);
-    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE, INT_SUBPRIORITY_LEVEL0);
+    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_UART2, INT_PRIORITY_LEVEL2);
+    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_UART2, INT_SUBPRIORITY_LEVEL0);
     // set priority and enable USART TX
-    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_PRIORITY_LEVEL1);
-    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT, INT_SUBPRIORITY_LEVEL0);
+    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_UART1, INT_PRIORITY_LEVEL1);
+    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_UART1, INT_SUBPRIORITY_LEVEL0);
 #endif // of ifdef APP_USE_USART
     // Enable the global interrupts
     PLIB_INT_Enable(APP_INT_ID);
@@ -468,7 +469,9 @@ void INT_Initialize(void) {
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
 #ifdef APP_USE_USART
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
 #endif
 }
@@ -487,8 +490,15 @@ void SYS_Startup(void) {
     PLIB_TMR_Start(APP_TMR_CLOCK);
 #ifdef APP_USE_USART
     // enable USARTs
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
+    PLIB_USART_Enable(APP_USART_TX_ID);
+    //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+    // if there is a hardware shortcut Transmitter should be ready before Receiver
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
     PLIB_USART_Enable(APP_USART_RX_ID);
-    PLIB_USART_Enable(APP_USART_TX_ID);    
+    //PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
 #endif
 }
 
@@ -505,7 +515,7 @@ void SYS_Initialize ( void *data )
     sysObjects.usbDevObject = USB_DEVICE_Initialize (USB_DEVICE_INDEX_0 ,
                                                     ( SYS_MODULE_INIT* ) & usbDevInitData);
     // Check if the object returned by the device layer is valid
-    SYS_ASSERT((SYS_MODULE_OBJ_INVALID != usbDevObject), "Invalid USB DEVICE object");
+    SYS_ASSERT((SYS_MODULE_OBJ_INVALID != sysObjects.usbDevObject), "Invalid USB DEVICE object");
 #endif
     // init I2C
     I2C_Initialize();

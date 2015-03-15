@@ -139,17 +139,29 @@ void __ISR( _TIMER_1_VECTOR, ipl3soft ) _InterruptHandler_TMR_1(void) {
 #ifdef APP_USE_USART
 // Vector for UART 2 RX , priority 2, software controlled register switching (on MX1xx/MX2xx MCUs)
 void __ISR( _UART_2_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
-    // App Timing
-    APP_USART_Read();
-    // Clear the interrupt flag
+    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_ERROR)) {
+        LEDR_Set;
+    }
+    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE)) {
+        APP_USART_Read();
+    }
+    // Clear the interrupt flags
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT);
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
 }
 
 // Vector for UART 1 TX , priority 1, software controlled register switching (on MX1xx/MX2xx MCUs)
 void __ISR( _UART_1_VECTOR, ipl1soft ) _InterruptHandler_U1TX(void) {
-    // App Timing
-    APP_USART_Write();
+    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_1_ERROR)) {
+        LEDR_Set;
+    }
+    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT)) {
+        APP_USART_Write();
+    }
     // Clear the interrupt flag
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_RECEIVE);
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
 }
 #endif
