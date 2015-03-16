@@ -407,31 +407,43 @@ void I2C_Initialize(void) {
 
 #ifdef APP_USE_USART
 void USART_Initialize(void) {
-    // USART RX
+    // USART 2 RX
     PLIB_USART_Disable(APP_USART_RX_ID);
     // Prepare Port
     PLIB_PORTS_PinClear(APP_USART_RX_PORTS_ID, APP_USART_RX_PORT_CHANNEL, APP_USART_RX_PORT_PIN);
     PLIB_PORTS_PinDirectionInputSet(APP_USART_RX_PORTS_ID, APP_USART_RX_PORT_CHANNEL, APP_USART_RX_PORT_PIN);
     PLIB_PORTS_RemapInput(APP_USART_RX_PORTS_ID, APP_USART_RX_REMAP_FUNC, APP_USART_RX_REMAP_PIN);
-    // USART (RX) Config
+    // vv TX on same USART
+    // USART 2 TX
+    // Prepare Port
+    PLIB_PORTS_PinClear(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
+    PLIB_PORTS_PinDirectionOutputSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
+    PLIB_PORTS_RemapOutput(APP_USART_TX_PORTS_ID, APP_USART_TX_REMAP_FUNC, APP_USART_TX_REMAP_PIN);
+    // ^^ TX on same USART
+    // USART (RX/TX) Config
     PLIB_USART_OperationModeSelect(APP_USART_RX_ID, APP_USART_RX_OPER);
     PLIB_USART_HandshakeModeSelect(APP_USART_RX_ID, APP_USART_RX_HAND);
     PLIB_USART_BaudRateSet(APP_USART_RX_ID, APP_PBCLK_FREQ, APP_USART_RX_BAUD);
     // Select 8 data bits, No parity and one stop bit
     PLIB_USART_LineControlModeSelect(APP_USART_RX_ID, APP_USART_RX_MODE);
+    // vv TX on same USART
+    PLIB_USART_TransmitterInterruptModeSelect(APP_USART_TX_ID, USART_TRANSMIT_FIFO_EMPTY);
+    // ^^ TX on same USART
+    PLIB_USART_ReceiverInterruptModeSelect(APP_USART_RX_ID, USART_RECEIVE_FIFO_ONE_CHAR);
     
-    // USART 1 TX
-    PLIB_USART_Disable(APP_USART_TX_ID);
-    // Prepare Port
-    PLIB_PORTS_PinClear(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    PLIB_PORTS_PinDirectionOutputSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    PLIB_PORTS_RemapOutput(APP_USART_TX_PORTS_ID, APP_USART_TX_REMAP_FUNC, APP_USART_TX_REMAP_PIN);
-    // USART (TX) Config
-    PLIB_USART_OperationModeSelect(APP_USART_TX_ID, APP_USART_TX_OPER);
-    PLIB_USART_HandshakeModeSelect(APP_USART_TX_ID, APP_USART_TX_HAND);
-    PLIB_USART_BaudRateSet(APP_USART_TX_ID, APP_PBCLK_FREQ, APP_USART_TX_BAUD);
-    // Select 8 data bits, No parity and one stop bit
-    PLIB_USART_LineControlModeSelect(APP_USART_TX_ID, APP_USART_TX_MODE);
+    //// USART 1 TX
+    //PLIB_USART_Disable(APP_USART_TX_ID);
+    //// Prepare Port
+    //PLIB_PORTS_PinClear(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
+    //PLIB_PORTS_PinDirectionOutputSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
+    //PLIB_PORTS_RemapOutput(APP_USART_TX_PORTS_ID, APP_USART_TX_REMAP_FUNC, APP_USART_TX_REMAP_PIN);
+    //// USART (TX) Config
+    //PLIB_USART_OperationModeSelect(APP_USART_TX_ID, APP_USART_TX_OPER);
+    //PLIB_USART_HandshakeModeSelect(APP_USART_TX_ID, APP_USART_TX_HAND);
+    //PLIB_USART_BaudRateSet(APP_USART_TX_ID, APP_PBCLK_FREQ, APP_USART_TX_BAUD);
+    //// Select 8 data bits, No parity and one stop bit
+    //PLIB_USART_LineControlModeSelect(APP_USART_TX_ID, APP_USART_TX_MODE);
+    //PLIB_USART_TransmitterInterruptModeSelect(APP_USART_TX_ID, USART_TRANSMIT_FIFO_EMPTY);
     
     // enabling USARTs in SYS_Startup
 }
@@ -470,9 +482,13 @@ void INT_Initialize(void) {
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
 #ifdef APP_USE_USART
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
+    // vv TX on same USART
+    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT);
+    // ^^ TX on same USART
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
-    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
-    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
+    
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
 #endif
 }
 
@@ -490,12 +506,15 @@ void SYS_Startup(void) {
     PLIB_TMR_Start(APP_TMR_CLOCK);
 #ifdef APP_USE_USART
     // enable USARTs
-    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
-    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
-    PLIB_USART_Enable(APP_USART_TX_ID);
+    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
+    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
+    //PLIB_USART_Enable(APP_USART_TX_ID);
     //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
     // if there is a hardware shortcut Transmitter should be ready before Receiver
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
+    // vv TX on same USART
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT);
+    // ^^ TX on same USART
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
     PLIB_USART_Enable(APP_USART_RX_ID);
     //PLIB_USART_ReceiverEnable(APP_USART_RX_ID);

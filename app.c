@@ -331,7 +331,7 @@ void APP_I2C_AddWrite( uint8_t WriteIn) {
 void APP_I2C_M_Write(void) {
     appData.I2C_State = I2C_MASTER_WRITE;
     appData.I2C_Transfer = I2C_MS_Start;
-    LEDY_Set;
+    //LEDY_Set;
     PLIB_I2C_MasterStart(APP_LCD_I2C_ID);
 }
 
@@ -394,7 +394,7 @@ void APP_I2C_Process(void) {
                     break;
                 case I2C_MS_Stop:
                     // when this occurs, all is done, go back to wait
-                    LEDY_Clear;
+                    //LEDY_Clear;
                     appData.I2C_State = I2C_MASTER_IDLE;
                     appData.I2C_Transfer = I2C_Idle;
                     break;
@@ -661,7 +661,7 @@ void APP_Tasks ( void )
         case APP_STATE_INIT:
             // Turn Off LED
             LEDR_Clear;
-            LEDY_Clear;
+            //LEDY_Clear;
             LEDG_Set;
             appData.state = APP_STATE_LCD_INIT;
             break;
@@ -767,7 +767,7 @@ void APP_Tasks ( void )
         case APP_STATE_USART_INIT:
             if (APP_CheckTimer()) { break; }
             appData.LCD_Line[2][8] = 'T';
-            //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+            PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
             appData.LCD_Line[2][11] = 'R';
             PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
             // goto Input afterwards

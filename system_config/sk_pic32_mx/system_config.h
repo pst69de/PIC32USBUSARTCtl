@@ -231,23 +231,30 @@ extern "C" {
 // general RX config
 #define APP_USART_RX_BUFFER_SIZE   APP_BUFFER_SIZE
 
-// Defs USART TX (is unit 1)
-#define APP_USART_TX_ID            USART_ID_1
-// USART TX Port
+//// Defs USART TX (is unit 1)
+//#define APP_USART_TX_ID            USART_ID_1
+//// USART TX Port
+//#define APP_USART_TX_PORTS_ID      PORTS_ID_0
+//#define APP_USART_TX_PORT_CHANNEL  PORT_CHANNEL_B
+//#define APP_USART_TX_PORT_PIN      PORTS_BIT_POS_7
+//#define APP_USART_TX_REMAP_PIN     OUTPUT_PIN_RPB7
+////#define APP_USART_TX_PORT_PIN      PORTS_BIT_POS_15
+////#define APP_USART_TX_REMAP_PIN     OUTPUT_PIN_RPB15
+//#define APP_USART_TX_REMAP_FUNC    OUTPUT_FUNC_U1TX
+// Defs USART TX (is unit 2)
+#define APP_USART_TX_ID            APP_USART_RX_ID
 #define APP_USART_TX_PORTS_ID      PORTS_ID_0
 #define APP_USART_TX_PORT_CHANNEL  PORT_CHANNEL_B
-#define APP_USART_TX_PORT_PIN      PORTS_BIT_POS_7
-#define APP_USART_TX_REMAP_PIN     OUTPUT_PIN_RPB7
-//#define APP_USART_TX_PORT_PIN      PORTS_BIT_POS_15
-//#define APP_USART_TX_REMAP_PIN     OUTPUT_PIN_RPB15
-#define APP_USART_TX_REMAP_FUNC    OUTPUT_FUNC_U1TX
+#define APP_USART_TX_PORT_PIN      PORTS_BIT_POS_14
+#define APP_USART_TX_REMAP_PIN     OUTPUT_PIN_RPB14
+#define APP_USART_TX_REMAP_FUNC    OUTPUT_FUNC_U2TX
 // USART TX Module (keep the same if using the same module for RX & TX)
-#define APP_USART_TX_BAUD          9600
-#define APP_USART_TX_MODE          USART_8N1
-#define APP_USART_TX_OPER          USART_ENABLE_TX_RX_USED // no flow control
-#define APP_USART_TX_HAND          USART_HANDSHAKE_MODE_SIMPLEX // no flow control
+#define APP_USART_TX_BAUD          APP_USART_RX_BAUD
+#define APP_USART_TX_MODE          APP_USART_RX_MODE
+#define APP_USART_TX_OPER          APP_USART_RX_OPER // no flow control
+#define APP_USART_TX_HAND          APP_USART_RX_HAND // no flow control
 // general TX config
-#define APP_USART_TX_BUFFER_SIZE   1024
+#define APP_USART_TX_BUFFER_SIZE   APP_BUFFER_SIZE
 #endif // of ifdef APP_USE_USART
 
 // *****************************************************************************
