@@ -358,7 +358,7 @@ void APP_I2C_Process(void) {
                 case I2C_MS_Address:
                     // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
                     if (!PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID)) {
-                        LEDR_Set;
+                        //LEDR_Set;
                     } else {
                         if ( PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
                             appData.I2C_Transfer = I2C_MS_Transmit;
@@ -371,7 +371,7 @@ void APP_I2C_Process(void) {
                 case I2C_MS_Transmit:
                     // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
                     if (!PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID)) {
-                        LEDR_Set;
+                        //LEDR_Set;
                     } else {
                         if (PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
                             if (appData.LCD_WriteIx > 0) {
@@ -615,6 +615,9 @@ void APP_USART_Read(void) {
     while (PLIB_USART_ReceiverDataIsAvailable(APP_USART_RX_ID)) {
         uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_USART_RX_ID);
         appData.LCD_Line[2][12] = (char)readByte;
+        if (appData.USART_INPUT_IDX < 20) {
+            appData.LCD_Line[3][appData.USART_INPUT_IDX] = (char)readByte;
+        }
         appData.USART_INPUT_BUF[appData.USART_INPUT_IDX++] = readByte;
         // POE.net: zero is sent for termination
         if (!readByte) {
@@ -630,10 +633,11 @@ void APP_USART_Write(void) {
         appData.USART_OUTPUT_SIZE = 0;
         appData.USART_OUTPUT_IDX = 0;
         appData.LCD_Line[2][8] = 'T';
+        PLIB_USART_TransmitterDisable(APP_USART_TX_ID);
     }
     if (appData.USART_OUTPUT_SIZE > 0) {
         appData.LCD_Line[2][8] = '*';
-        while (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USART_OUTPUT_IDX < appData.USART_OUTPUT_SIZE)) {
+        if (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USART_OUTPUT_IDX < appData.USART_OUTPUT_SIZE)) {
             appData.LCD_Line[2][9] = appData.USART_OUTPUT_BUF[ appData.USART_OUTPUT_IDX];
             PLIB_USART_TransmitterByteSend(APP_USART_TX_ID, appData.USART_OUTPUT_BUF[ appData.USART_OUTPUT_IDX++]);
         }
@@ -661,16 +665,17 @@ void APP_Tasks ( void )
         case APP_STATE_INIT:
             // Turn Off LED
             LEDR_Clear;
-            //LEDY_Clear;
-            LEDG_Set;
+            LEDY_Clear;
+            //LEDG_Set;
+            LEDG_Clear;
             appData.state = APP_STATE_LCD_INIT;
             break;
         case APP_STATE_LCD_INIT:
             if (APP_LCD_Init()) {
-                LEDG_Clear;
+                //LEDG_Clear;
                 // -> use of sprintf for string formatting
                 // Time representation
-                APP_LCD_Print( 0, 0, " 00:00:00 --- 0000");
+                APP_LCD_Print( 0, 0, " 00:00:00 --- #0000");
                 APP_LCD_Print( 1, 0, "POEnet");
 #ifdef APP_USE_USART
                 APP_LCD_Print( 2, 0, "USART");
@@ -697,7 +702,7 @@ void APP_Tasks ( void )
         case APP_STATE_USB_INIT:
             if (APP_CheckTimer()) { break; }
             // Signal init by setting error LED
-            LEDR_Set;
+            //LEDR_Set;
             // Open the device layer 
             appData.deviceHandle = USB_DEVICE_Open( USB_DEVICE_INDEX_0, DRV_IO_INTENT_READWRITE );
             if (appData.deviceHandle != USB_DEVICE_HANDLE_INVALID) {
@@ -718,13 +723,13 @@ void APP_Tasks ( void )
             // Check if the device was configured 
             if(appData.isConfigured) {
                 // Clear error LED
-                LEDR_Clear;
+                //LEDR_Clear;
                 // Fillup Display with USB Status
                 appData.LCD_Line[0][12] = 'B';
                 APP_LCD_Print( 1, 7, "ready");
                 ClearBuffer(&appData.USB_INPUT_BUF[0]);
                 // If the device is configured then lets start reading
-                LEDG_Set; // Set acceptance LED
+                //LEDG_Set; // Set acceptance LED
 #ifdef APP_USE_USART
                 // if there is the USART run their init
                 appData.LCD_Return_AppState = APP_STATE_USART_INIT;
@@ -741,6 +746,16 @@ void APP_Tasks ( void )
             // Setup the write 
             appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
             appData.isWriteComplete = false;
+            // Update LCD with count bytes to write
+            appData.LCD_Line[0][14] = '>';
+            i = appData.USB_OUTPUT_SIZE;
+            appData.LCD_Line[0][18] = numChar[i%10];
+            i /= 10;
+            appData.LCD_Line[0][17] = numChar[i%10];
+            i /= 10;
+            appData.LCD_Line[0][16] = numChar[i%10];
+            i /= 10;
+            appData.LCD_Line[0][15] = numChar[i];
             if (!appData.USB_OUTPUT_SIZE) {
                 USB_DEVICE_CDC_Write(appData.cdcInstance, &appData.writeTransferHandle,
                         nokPrompt, 4, USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
@@ -767,7 +782,7 @@ void APP_Tasks ( void )
         case APP_STATE_USART_INIT:
             if (APP_CheckTimer()) { break; }
             appData.LCD_Line[2][8] = 'T';
-            PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+            //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
             appData.LCD_Line[2][11] = 'R';
             PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
             // goto Input afterwards
@@ -783,7 +798,7 @@ void APP_Tasks ( void )
             // USB is always Primary, so pass Input to command interpretation
             if (appData.isReadComplete) {
                 appData.isReadComplete = false;
-                LEDG_Clear; // Clear acceptance LED
+                //LEDG_Clear; // Clear acceptance LED
                 appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
                 USB_DEVICE_CDC_Read (appData.cdcInstance, &appData.readTransferHandle,
                         appData.USB_INPUT_BUF, USB_BUFFER_SIZE);
@@ -794,14 +809,15 @@ void APP_Tasks ( void )
                 // USB cuts off terminating zero's (POE.net)
                 appData.USB_INPUT_SIZE = strlen( appData.USB_INPUT_BUF) + 1;
                 // Update LCD with count bytes read
+                appData.LCD_Line[0][14] = '<';
                 i = appData.USB_INPUT_SIZE;
+                appData.LCD_Line[0][18] = numChar[i%10];
+                i /= 10;
                 appData.LCD_Line[0][17] = numChar[i%10];
                 i /= 10;
                 appData.LCD_Line[0][16] = numChar[i%10];
                 i /= 10;
-                appData.LCD_Line[0][15] = numChar[i%10];
-                i /= 10;
-                appData.LCD_Line[0][14] = numChar[i];
+                appData.LCD_Line[0][15] = numChar[i];
                 // pass via LCDout to INPUTReady
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_POENET_INPUT_READY;
@@ -905,7 +921,8 @@ void APP_Tasks ( void )
             // USB USART Bridge -> pass to USART
             appData.LCD_Line[2][6] = '>';
             // initiate USART transmission by writing 1st Byte
-            APP_USART_Write();
+            //APP_USART_Write();
+            PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
             appData.state = APP_STATE_POENET_OUTPUT_READY;
 #else // ifdef APP_POEnet_SECONDARY
 #ifdef APP_USE_USB
@@ -915,7 +932,8 @@ void APP_Tasks ( void )
 #else // ifdef APP_USE_USB
             // no secondary -> pass Output to USART TX 
             // initiate USART transmission by writing 1st Byte
-            APP_USART_Write();
+            //APP_USART_Write();
+            PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
             appData.state = APP_STATE_POENET_OUTPUT_READY;
 #endif // ifdef APP_USE_USB
 #endif // else APP_POEnet_SECONDARY
@@ -936,8 +954,10 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_PASS:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
-            strcpy(&appData.POEnetSecInputBuf[0], &appData.POEnetSecOutputBuf[0]);
+            strcpy( &appData.POEnetSecOutputBuf[0], &appData.POEnetSecInputBuf[0]);
             appData.POEnetSecOutputSize = appData.POEnetSecInputSize;
+            // put a LineFeed at the end of USB transmission
+            appData.POEnetSecOutputBuf[appData.POEnetSecOutputSize - 1] = '\n';
             appData.POEnetSecOutputIdx = 0;
             // if it is Secondary the output always goes to the USB
             appData.state = APP_STATE_USB_WRITE;

@@ -119,7 +119,7 @@ void __ISR( _I2C_1_VECTOR, ipl4soft ) _InterruptHandler_I2C_1(void) {
         APP_I2C_Process();
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_I2C_1_ERROR)) {
-        LEDR_Set;
+        //LEDR_Set;
     }
     // Clear the interrupt flag
     //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_VECTOR_I2C1);
@@ -140,12 +140,14 @@ void __ISR( _TIMER_1_VECTOR, ipl3soft ) _InterruptHandler_TMR_1(void) {
 // Vector for UART 2 RX / TX , priority 2, software controlled register switching (on MX1xx/MX2xx MCUs)
 void __ISR( _UART_2_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_ERROR)) {
-        LEDY_Set;
+        LEDR_Set;
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT)) {
+        LEDG_Set;
         APP_USART_Write();
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE)) {
+        LEDY_Set;
         APP_USART_Read();
     }
     // Clear the interrupt flags

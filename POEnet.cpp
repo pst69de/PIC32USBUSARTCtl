@@ -16,14 +16,14 @@
 #include "app.h"
 
 
-tinyxml2::XMLDocument POEnetCommand;
+tinyxml2::XMLDocument POEnetCommand( true, tinyxml2::COLLAPSE_WHITESPACE);
 
 void POEnet_Interpret(const char *buffer) {
     POEnetCommand.Parse(buffer);
 }
 
 void POEnet_Output(char *buffer) {
-    tinyxml2::XMLPrinter myOut;
+    tinyxml2::XMLPrinter myOut(true);
     POEnetCommand.Print(&myOut);
     strcpy(buffer,myOut.CStr());
     POEnetCommand.Clear();
