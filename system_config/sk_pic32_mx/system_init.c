@@ -517,6 +517,10 @@ void SYS_Startup(void) {
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT);
     // ^^ TX on same USART
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
+    // Transmitter should be disabled as long there is no data to send
+    // this also keeps the TX under PORT control,
+    // which should provide a high signal for the line
+    PLIB_USART_TransmitterDisable(APP_USART_TX_ID);    
     PLIB_USART_Enable(APP_USART_RX_ID);
     //PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
 #endif
