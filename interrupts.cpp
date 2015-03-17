@@ -143,11 +143,9 @@ void __ISR( _UART_2_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
         LEDR_Set;
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT)) {
-        LEDG_Set;
         APP_USART_Write();
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE)) {
-        LEDY_Set;
         APP_USART_Read();
     }
     // Clear the interrupt flags

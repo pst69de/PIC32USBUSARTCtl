@@ -614,11 +614,13 @@ void APP_USART_Read(void) {
     appData.LCD_Line[0][18] = 'R';
     while (PLIB_USART_ReceiverDataIsAvailable(APP_USART_RX_ID)) {
         uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_USART_RX_ID);
+        char dispChar = (char)readByte;
+        if (!readByte) { dispChar = (char)0xdb; }
         if (appData.USART_INPUT_IDX < 40) {
             if (appData.USART_INPUT_IDX < 20) {
-                appData.LCD_Line[2][appData.USART_INPUT_IDX] = (char)readByte;
+                appData.LCD_Line[2][appData.USART_INPUT_IDX] = dispChar;
             } else {
-                appData.LCD_Line[3][appData.USART_INPUT_IDX - 20] = (char)readByte;
+                appData.LCD_Line[3][appData.USART_INPUT_IDX - 20] = dispChar;
             }
         }
         appData.USART_INPUT_BUF[appData.USART_INPUT_IDX++] = readByte;
@@ -752,7 +754,7 @@ void APP_Tasks ( void )
             appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
             appData.isWriteComplete = false;
             // Update LCD with count bytes to write
-            appData.LCD_Line[0][13] = '>';
+            appData.LCD_Line[0][13] = '<';
             i = appData.USB_OUTPUT_SIZE;
             appData.LCD_Line[0][16] = numChar[i%10];
             i /= 10;
@@ -776,7 +778,9 @@ void APP_Tasks ( void )
             // Check if a character was sent. The isWriteComplete
             // flag gets updated in the CDC event handler
             if (appData.isWriteComplete) {
+                LEDY_Set;
                 ClearBuffer(appData.USB_OUTPUT_BUF);
+                appData.USB_OUTPUT_IDX = 0;
                 appData.USB_OUTPUT_SIZE = 0;
                 appData.state = APP_STATE_POENET_INPUT;
             }
@@ -804,6 +808,7 @@ void APP_Tasks ( void )
             // USB is always Primary, so pass Input to command interpretation
             if (appData.isReadComplete) {
                 appData.isReadComplete = false;
+                LEDY_Clear;
                 //LEDG_Clear; // Clear acceptance LED
                 appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
                 USB_DEVICE_CDC_Read (appData.cdcInstance, &appData.readTransferHandle,
@@ -814,6 +819,7 @@ void APP_Tasks ( void )
                 }
                 // USB cuts off terminating zero's (POE.net)
                 appData.USB_INPUT_SIZE = strlen( appData.USB_INPUT_BUF) + 1;
+                appData.USB_INPUT_IDX = 0;
                 // Update LCD with count bytes read
                 appData.LCD_Line[0][13] = '<';
                 i = appData.USB_OUTPUT_SIZE;
@@ -973,6 +979,9 @@ void APP_Tasks ( void )
             // put a LineFeed at the end of USB transmission instead
             appData.POEnetSecOutputBuf[appData.POEnetSecOutputSize - 1] = '\n';
             appData.POEnetSecOutputIdx = 0;
+            ClearBuffer(&appData.POEnetSecInputBuf[0]);
+            appData.POEnetSecInputSize = 0;
+            appData.POEnetSecInputIdx = 0;
             // if it is Secondary the output always goes to the USB
             appData.state = APP_STATE_USB_WRITE;
             break;
