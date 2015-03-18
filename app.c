@@ -686,8 +686,9 @@ void APP_Tasks ( void )
                 // # (LCD_Line[0][13])      = > = Received; < = Sending
                 // 000 (LCD_Line[0][14-16]) = count Bytes 
                 // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
+                // POE.net status representation
                 APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
-                APP_LCD_Print( 1, 0, "POEnet");
+                APP_LCD_Print( 1, 0, "POEnet _______ 00000");
 #ifdef APP_USE_UART
                 APP_LCD_Print( 2, 0, "UART");
 #endif // ifdef APP_USE_UART
@@ -811,7 +812,9 @@ void APP_Tasks ( void )
             appData.POEnetPrimOutputSize = strlen((&appData.POEnetPrimOutputBuf[0]) + 1;
             appData.POEnetPrimOutputIdx = 0;            
 #endif // else APP_POEnet_SECONDARY
-            appData.state = APP_STATE_POENET_OUTPUT_PREPARE;
+            APP_LCD_Print( 1, 8, &POEnet_reset[0]);
+            appData.LCD_Return_AppState = APP_STATE_POENET_OUTPUT_PREPARE;
+            appData.state = APP_LCD_UPDATE;
             break;
         // POE.net input phase
         case APP_STATE_POENET_INPUT:
@@ -876,7 +879,7 @@ void APP_Tasks ( void )
                 case 'U':
                     //POE.net Message -> pass to interpreter
                     POEnet_Interpret(&appData.POEnetPrimInputBuf[1]);
-                    APP_LCD_Print( 1, 7, "              ");
+                    APP_LCD_Print( 1, 7, "       ");
                     appData.LCD_Return_AppState = APP_STATE_POENET_COMMAND;
                     appData.state = APP_LCD_UPDATE;
                     break;

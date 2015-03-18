@@ -47,8 +47,13 @@ void POEnet_Output(char *buffer) {
 }
 
 void POEnet_GetCommand(char *tostring) {
-    char myCommand[16];
-    strcpy(tostring, POEnetCommand.RootElement()->Name());
+    char myCommand[APP_STRING_SIZE];
+    strcpy(myCommand, POEnetCommand.RootElement()->Name());
+    if (!strcmp(&myCommand[0], &POEnet_reset[0])) {
+        strcpy(tostring, &POEnet_noop[0]);
+    } else {
+        strcpy(tostring, &myCommand[0]);
+    }
 }
 
 void POEnet_GetNewNodeId(int *nodeid) {
