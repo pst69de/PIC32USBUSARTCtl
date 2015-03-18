@@ -804,7 +804,7 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_RESET:
 #ifdef APP_POEnet_SECONDARY
             strcpy(&appData.POEnetSecOutputBuf[0], "U<reset/>\0");
-            appData.POEnetSecOutputSize = strlen((&appData.POEnetSecOutputBuf[0]) + 1;
+            appData.POEnetSecOutputSize = strlen(&appData.POEnetSecOutputBuf[0]) + 1;
             appData.POEnetSecOutputIdx = 0;
 #else // ifdef APP_POEnet_SECONDARY
             strcpy(&appData.POEnetPrimOutputBuf[0], "U<reset/>\0");
@@ -932,7 +932,7 @@ void APP_Tasks ( void )
             if (APP_CheckTimer()) { break; }
             POEnet_GetCommand(&appData.POEnetCommand[0]);
             APP_LCD_Print( 1, 8, &appData.POEnetCommand[0]);
-            if (!strcmp(&appData.POEnetCommand[0],"net")) {
+            if (!strcmp(&appData.POEnetCommand[0],&POEnet_net[0])) {
                 // handle net command
                 POEnet_GetNewNodeId(&appData.POEnet_NodeId);
             }

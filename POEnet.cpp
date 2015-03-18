@@ -13,13 +13,30 @@
 #include <string.h>
 #include "POEnet.h"
 #include "tinyxml2.h"
+#include "system_config.h"
 #include "app.h"
 
 
 tinyxml2::XMLDocument POEnetCommand( true, tinyxml2::COLLAPSE_WHITESPACE);
+// const char for non-relevant command
+const char POEnet_noop[] = "noop";
+const char POEnet_reset[] = "reset";
+const char POEnet_net[] = "net";
+const char POEnet_node[] = "node";
+const char POEnet_time[] = "time";
+const char POEnet_digital[] = "digital";
+const char POEnet_analog[] = "analog";
+const char POEnet_switch[] = "switch";
+const char POEnet_pwm[] = "pwm";
+const char POEnet_text[] = "text";
+const char POEnet_action[] = "action";
 
 void POEnet_Interpret(const char *buffer) {
     POEnetCommand.Parse(buffer);
+}
+
+bool POEnet_GetError(char *tostring) {
+    return false; // no error
 }
 
 void POEnet_Output(char *buffer) {
@@ -30,6 +47,7 @@ void POEnet_Output(char *buffer) {
 }
 
 void POEnet_GetCommand(char *tostring) {
+    char myCommand[16];
     strcpy(tostring, POEnetCommand.RootElement()->Name());
 }
 
@@ -54,3 +72,6 @@ void POEnet_GetNewNodeId(int *nodeid) {
     }
 }
 
+void POEnet_SetNodeProperty(char *name, int propId, char *attributeList) {
+    
+}
