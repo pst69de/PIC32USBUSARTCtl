@@ -136,17 +136,17 @@ void __ISR( _TIMER_1_VECTOR, ipl3soft ) _InterruptHandler_TMR_1(void) {
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_TIMER_1);
 }
 
-#ifdef APP_USE_USART
+#ifdef APP_USE_UART
 // Vector for UART 2 RX / TX , priority 2, software controlled register switching (on MX1xx/MX2xx MCUs)
 void __ISR( _UART_2_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_ERROR)) {
         LEDR_Set;
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT)) {
-        APP_USART_Write();
+        APP_UART_Write();
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE)) {
-        APP_USART_Read();
+        APP_UART_Read();
     }
     // Clear the interrupt flags
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
@@ -160,7 +160,7 @@ void __ISR( _UART_2_VECTOR, ipl2soft ) _InterruptHandler_U2RX(void) {
 //        LEDR_Set;
 //    }
 //    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT)) {
-//        APP_USART_Write();
+//        APP_UART_Write();
 //    }
 //    // Clear the interrupt flag
 //    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_ERROR);

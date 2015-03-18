@@ -86,17 +86,17 @@ void APP_Initialize ( void )
     appData.USB_OUTPUT_SIZE = 0;
     appData.USB_OUTPUT_IDX = 0;
 #endif // of ifdef APP_USE_USB
-#ifdef APP_USE_USART
-    // USART init
-    ClearBuffer(&appData.USART_INPUT_BUF[0]);
-    //for (i = 0; i < APP_USART_RX_BUFFER_SIZE; i++) { appData.USARTreadBuffer[i] = 0;};
-    appData.USART_INPUT_SIZE = 0;
-    appData.USART_INPUT_IDX = 0;
-    ClearBuffer(&appData.USART_OUTPUT_BUF[0]);
-    //for (i = 0; i < APP_USART_TX_BUFFER_SIZE; i++) { appData.USARTwriteBuffer[i] = 0;};
-    appData.USART_OUTPUT_SIZE = 0;
-    appData.USART_OUTPUT_IDX = 0;
-#endif // of ifdef APP_USE_USART
+#ifdef APP_USE_UART
+    // UART init
+    ClearBuffer(&appData.UART_INPUT_BUF[0]);
+    //for (i = 0; i < APP_UART_RX_BUFFER_SIZE; i++) { appData.UARTreadBuffer[i] = 0;};
+    appData.UART_INPUT_SIZE = 0;
+    appData.UART_INPUT_IDX = 0;
+    ClearBuffer(&appData.UART_OUTPUT_BUF[0]);
+    //for (i = 0; i < APP_UART_TX_BUFFER_SIZE; i++) { appData.UARTwriteBuffer[i] = 0;};
+    appData.UART_OUTPUT_SIZE = 0;
+    appData.UART_OUTPUT_IDX = 0;
+#endif // of ifdef APP_USE_UART
     // POE.net handling
     ClearString(&appData.POEnetCommand[0]);
     appData.POEnet_NodeId = -1;
@@ -607,47 +607,47 @@ bool APP_LCD_Ready(void) {
     return (appData.LCD_Init == LCD_ready);
 }
 
-#ifdef APP_USE_USART
-// USART routines 
+#ifdef APP_USE_UART
+// UART routines 
 // INT Handling Read
-void APP_USART_Read(void) {
-    appData.LCD_Line[0][18] = 'R';
-    while (PLIB_USART_ReceiverDataIsAvailable(APP_USART_RX_ID)) {
-        uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_USART_RX_ID);
+void APP_UART_Read(void) {
+    appData.LCD_Line[0][18] = '*';
+    while (PLIB_USART_ReceiverDataIsAvailable(APP_UART_RX_ID)) {
+        uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_UART_RX_ID);
         char dispChar = (char)readByte;
         if (!readByte) { dispChar = (char)0xdb; }
-        if (appData.USART_INPUT_IDX < 40) {
-            if (appData.USART_INPUT_IDX < 20) {
-                appData.LCD_Line[2][appData.USART_INPUT_IDX] = dispChar;
+        if (appData.UART_INPUT_IDX < 40) {
+            if (appData.UART_INPUT_IDX < 20) {
+                appData.LCD_Line[2][appData.UART_INPUT_IDX] = dispChar;
             } else {
-                appData.LCD_Line[3][appData.USART_INPUT_IDX - 20] = dispChar;
+                appData.LCD_Line[3][appData.UART_INPUT_IDX - 20] = dispChar;
             }
         }
-        appData.USART_INPUT_BUF[appData.USART_INPUT_IDX++] = readByte;
+        appData.UART_INPUT_BUF[appData.UART_INPUT_IDX++] = readByte;
         // POE.net: zero is sent for termination
         if (!readByte) {
-            appData.USART_INPUT_SIZE = appData.USART_INPUT_IDX;
-            appData.LCD_Line[0][18] = '*';
+            appData.UART_INPUT_SIZE = appData.UART_INPUT_IDX;
+            appData.LCD_Line[0][18] = 'R';
         }
     }
 }
 
 // INT Handling Write 
-void APP_USART_Write(void) {
-    if (appData.USART_OUTPUT_IDX == appData.USART_OUTPUT_SIZE) {
-        appData.USART_OUTPUT_SIZE = 0;
-        appData.USART_OUTPUT_IDX = 0;
-        appData.LCD_Line[0][19] = '*';
-        PLIB_USART_TransmitterDisable(APP_USART_TX_ID);
-    }
-    if (appData.USART_OUTPUT_SIZE > 0) {
+void APP_UART_Write(void) {
+    if (appData.UART_OUTPUT_IDX == appData.UART_OUTPUT_SIZE) {
+        appData.UART_OUTPUT_SIZE = 0;
+        appData.UART_OUTPUT_IDX = 0;
         appData.LCD_Line[0][19] = 'T';
-        if (!PLIB_USART_TransmitterBufferIsFull(APP_USART_TX_ID) & (appData.USART_OUTPUT_IDX < appData.USART_OUTPUT_SIZE)) {
-            PLIB_USART_TransmitterByteSend(APP_USART_TX_ID, appData.USART_OUTPUT_BUF[ appData.USART_OUTPUT_IDX++]);
+        PLIB_USART_TransmitterDisable(APP_UART_TX_ID);
+    }
+    if (appData.UART_OUTPUT_SIZE > 0) {
+        appData.LCD_Line[0][19] = '*';
+        if (!PLIB_USART_TransmitterBufferIsFull(APP_UART_TX_ID) & (appData.UART_OUTPUT_IDX < appData.UART_OUTPUT_SIZE)) {
+            PLIB_USART_TransmitterByteSend(APP_UART_TX_ID, appData.UART_OUTPUT_BUF[ appData.UART_OUTPUT_IDX++]);
         }
     }
 }
-#endif // of ifdef APP_USE_USART
+#endif // of ifdef APP_USE_UART
 
 //***************************************************
 // This is the standard texts replied to host
@@ -685,21 +685,21 @@ void APP_Tasks ( void )
                 // B (LCD_Line[0][12])      = Device attached (Vbus is powered)
                 // # (LCD_Line[0][13])      = > = Received; < = Sending
                 // 000 (LCD_Line[0][14-16]) = count Bytes 
-                // ** (LCD_Line[0][18-19])  = R = USART Receive; T = USART Transmit
-                APP_LCD_Print( 0, 0, " 00:00:00 ---#000 **");
+                // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
+                APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
                 APP_LCD_Print( 1, 0, "POEnet");
-#ifdef APP_USE_USART
-                APP_LCD_Print( 2, 0, "USART");
-#endif // ifdef APP_USE_USART
+#ifdef APP_USE_UART
+                APP_LCD_Print( 2, 0, "UART");
+#endif // ifdef APP_USE_UART
                 APP_LCD_Print( 3, 0, "LCD");
-#ifdef APP_USE_USART
-                // init USART before USB
-                appData.LCD_Return_AppState = APP_STATE_USART_INIT;
+#ifdef APP_USE_UART
+                // init UART before USB
+                appData.LCD_Return_AppState = APP_STATE_UART_INIT;
 #else
                 appData.LCD_Return_AppState = APP_STATE_HOLD;
-#endif // ifdef APP_USE_USART
+#endif // ifdef APP_USE_UART
 #ifdef APP_USE_USB
-                // use of USB overrides Init of USART
+                // use of USB overrides Init of UART
                 appData.LCD_Return_AppState = APP_STATE_USB_INIT;
 #endif // of else APP_USE_USB
                 appData.state = APP_LCD_UPDATE;
@@ -737,13 +737,13 @@ void APP_Tasks ( void )
                 ClearBuffer(&appData.USB_INPUT_BUF[0]);
                 // If the device is configured then lets start reading
                 //LEDG_Set; // Set acceptance LED
-#ifdef APP_USE_USART
-                // if there is the USART run their init
-                appData.LCD_Return_AppState = APP_STATE_USART_INIT;
-#else // ifdef APP_USE_USART
+#ifdef APP_USE_UART
+                // if there is the UART run their init
+                appData.LCD_Return_AppState = APP_STATE_UART_INIT;
+#else // ifdef APP_USE_UART
                 // or start waiting on input
                 appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
-#endif // else APP_USE_USART
+#endif // else APP_USE_UART
                 appData.state = APP_LCD_UPDATE;
             }
             break;
@@ -786,20 +786,33 @@ void APP_Tasks ( void )
             }
             break;
 #endif // of ifdef APP_USE_USB
-#ifdef APP_USE_USART
-        // Init USART
-        case APP_STATE_USART_INIT:
+#ifdef APP_USE_UART
+        // Init UART
+        case APP_STATE_UART_INIT:
             if (APP_CheckTimer()) { break; }
-            // if USART Transmitter is enabled, it automatically asks 
+            // if UART Transmitter is enabled, it automatically asks 
             // for the 1st byte via Interrupt, so wait for the
             // transmission to be complete (in APP_STATE_POENET_OUTPUT_PREPARE)
-            //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
-            PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
+            //PLIB_UART_TransmitterEnable(APP_UART_TX_ID);
+            PLIB_USART_ReceiverEnable(APP_UART_RX_ID);
             // goto Input afterwards
             appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
             appData.state = APP_LCD_UPDATE;
             break;
-#endif // of ifdef APP_USE_USART
+#endif // of ifdef APP_USE_UART
+        // POE.net reset message
+        case APP_STATE_POENET_RESET:
+#ifdef APP_POEnet_SECONDARY
+            strcpy(&appData.POEnetSecOutputBuf[0], "U<reset/>\0");
+            appData.POEnetSecOutputSize = strlen((&appData.POEnetSecOutputBuf[0]) + 1;
+            appData.POEnetSecOutputIdx = 0;
+#else // ifdef APP_POEnet_SECONDARY
+            strcpy(&appData.POEnetPrimOutputBuf[0], "U<reset/>\0");
+            appData.POEnetPrimOutputSize = strlen((&appData.POEnetPrimOutputBuf[0]) + 1;
+            appData.POEnetPrimOutputIdx = 0;            
+#endif // else APP_POEnet_SECONDARY
+            appData.state = APP_STATE_POENET_OUTPUT_PREPARE;
+            break;
         // POE.net input phase
         case APP_STATE_POENET_INPUT:
             if (APP_USBStateReset()) { break; }
@@ -836,14 +849,14 @@ void APP_Tasks ( void )
                 break;
             }
 #endif // of ifdef APP_USE_USB
-#ifdef APP_USE_USART
-            // USART may be Secondary, so pass Input as compiled
+#ifdef APP_USE_UART
+            // UART may be Secondary, so pass Input as compiled
             // only if there is no USB processing needed
             // *****************************************************************
             // maybe there is the need of a more advanced state switching 
             // as USB inputs override backtransmissions from serial (to be send by USB)
             // *****************************************************************
-            if ((appData.state == APP_STATE_POENET_INPUT) & (appData.USART_INPUT_SIZE)) {
+            if ((appData.state == APP_STATE_POENET_INPUT) & (appData.UART_INPUT_SIZE)) {
 #ifdef APP_POEnet_SECONDARY
                 // pass to Buffer pass
                 appData.state = APP_STATE_POENET_PASS;
@@ -906,7 +919,7 @@ void APP_Tasks ( void )
                     appData.state = APP_STATE_POENET_INPUT;
 #ifdef APP_USE_USB
                     // if input comes by USB send hint on help
-                    strcpy(appData.USB_OUTPUT_BUF, "see http://wiki69.pst69.homeip.net/index.php/PIC32_USART for POE.net messages\n");
+                    strcpy(appData.USB_OUTPUT_BUF, "see http://wiki69.pst69.homeip.net/index.php/PIC32_UART for POE.net messages\n");
                     appData.USB_OUTPUT_SIZE = strlen(appData.USB_OUTPUT_BUF) + 1;
                     appData.state = APP_STATE_USB_WRITE;
 #endif // ifdef APP_USE_USB
@@ -935,13 +948,13 @@ void APP_Tasks ( void )
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
 #ifdef APP_POEnet_SECONDARY
-            // USB USART Bridge -> pass to USART
+            // USB UART Bridge -> pass to UART
             appData.LCD_Line[2][6] = '>';
-            // initiate USART transmission by writing 1st Byte
-            //APP_USART_Write();
-            // if USART Transmitter is enabled, it automatically asks 
+            // initiate UART transmission by writing 1st Byte
+            //APP_UART_Write();
+            // if UART Transmitter is enabled, it automatically asks 
             // for the 1st byte via Interrupt
-            PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+            PLIB_USART_TransmitterEnable(APP_UART_TX_ID);
             appData.state = APP_STATE_POENET_OUTPUT_READY;
 #else // ifdef APP_POEnet_SECONDARY
 #ifdef APP_USE_USB
@@ -949,10 +962,10 @@ void APP_Tasks ( void )
             appData.state = APP_STATE_USB_WRITE;
             // APP_STATE_USB_WRITE passes back to APP_STATE_POENET_INPUT on completion
 #else // ifdef APP_USE_USB
-            // no secondary -> pass Output to USART TX 
-            // initiate USART transmission by writing 1st Byte
-            //APP_USART_Write();
-            PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+            // no secondary -> pass Output to UART TX 
+            // initiate UART transmission by writing 1st Byte
+            //APP_UART_Write();
+            PLIB_UART_TransmitterEnable(APP_UART_TX_ID);
             appData.state = APP_STATE_POENET_OUTPUT_READY;
 #endif // else APP_USE_USB
 #endif // else APP_POEnet_SECONDARY
@@ -961,7 +974,7 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_OUTPUT_READY:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
-            // primary Out is always USART transmission -> check for fullfillment
+            // primary Out is always UART transmission -> check for fullfillment
             if (appData.POEnetPrimOutputIdx == appData.POEnetPrimOutputSize) {
                 ClearBuffer(&appData.POEnetPrimOutputBuf[0]);
                 appData.POEnetPrimOutputSize = 0;

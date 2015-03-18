@@ -33,10 +33,6 @@ typedef enum {
     APP_STATE_INIT,
     // Init LCD
     APP_STATE_LCD_INIT,
-#ifdef APP_USE_USART
-    // Init USART
-    APP_STATE_USART_INIT,
-#endif // of ifdef APP_USE_USART
 #ifdef APP_USE_USB
     // Init USB
     APP_STATE_USB_INIT,
@@ -47,6 +43,12 @@ typedef enum {
     // Wait for the write to complete
     APP_STATE_USB_WAIT_WRITE_COMPLETE,
 #endif // of ifdef APP_USE_USB
+#ifdef APP_USE_UART
+    // Init UART
+    APP_STATE_UART_INIT,
+#endif // of ifdef APP_USE_UART
+    // after init's send reset
+    APP_STATE_POENET_RESET,
     // POE.net input phase
     APP_STATE_POENET_INPUT,
     // POE.net input interpretation
@@ -207,14 +209,14 @@ typedef struct
     //int                  writeCount;
     // -> one of the Output Sizes defined by USB_OUTPUT_SIZE
 #endif // of ifdef APP_USE_USB
-#ifdef APP_USE_USART
-    // USART 
-    // defined usage of Buffers by USART_INPUT_BUF, USART_INPUT_SIZE, USART_INPUT_IDX, USART_OUTPUT_BUF, USART_OUTPUT_SIZE, USART_OUTPUT_IDX
-    //char                 USARTreadBuffer[APP_USART_RX_BUFFER_SIZE];
-    //int                  USARTreadIdx;
-    //char                 USARTwriteBuffer[APP_USART_TX_BUFFER_SIZE];
-    //int                  USARTwriteIdx;
-#endif // of ifdef APP_USE_USART
+#ifdef APP_USE_UART
+    // UART 
+    // defined usage of Buffers by UART_INPUT_BUF, UART_INPUT_SIZE, UART_INPUT_IDX, UART_OUTPUT_BUF, UART_OUTPUT_SIZE, UART_OUTPUT_IDX
+    //char                 UARTreadBuffer[APP_UART_RX_BUFFER_SIZE];
+    //int                  UARTreadIdx;
+    //char                 UARTwriteBuffer[APP_UART_TX_BUFFER_SIZE];
+    //int                  UARTwriteIdx;
+#endif // of ifdef APP_USE_UART
     // POE.net handling
     char                 POEnetCommand[APP_STRING_SIZE];
     int                  POEnet_NodeId;
@@ -308,11 +310,11 @@ bool APP_LCD_Init(void);
 
 bool APP_LCD_Ready(void);
 
-#ifdef APP_USE_USART
-void APP_USART_Read(void);
+#ifdef APP_USE_UART
+void APP_UART_Read(void);
 
-void APP_USART_Write(void);
-#endif // of ifdef APP_USE_USART
+void APP_UART_Write(void);
+#endif // of ifdef APP_USE_UART
 
 void APP_Tasks ( void );
 

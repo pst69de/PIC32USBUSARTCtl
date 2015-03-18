@@ -405,50 +405,50 @@ void I2C_Initialize(void) {
     // Enable the module -> in SYS_Startup
 }
 
-#ifdef APP_USE_USART
-void USART_Initialize(void) {
-    // USART 2 RX
-    PLIB_USART_Disable(APP_USART_RX_ID);
+#ifdef APP_USE_UART
+void UART_Initialize(void) {
+    // UART 2 RX
+    PLIB_USART_Disable(APP_UART_RX_ID);
     // Prepare Port
-    PLIB_PORTS_PinClear(APP_USART_RX_PORTS_ID, APP_USART_RX_PORT_CHANNEL, APP_USART_RX_PORT_PIN);
-    PLIB_PORTS_PinDirectionInputSet(APP_USART_RX_PORTS_ID, APP_USART_RX_PORT_CHANNEL, APP_USART_RX_PORT_PIN);
-    PLIB_PORTS_RemapInput(APP_USART_RX_PORTS_ID, APP_USART_RX_REMAP_FUNC, APP_USART_RX_REMAP_PIN);
-    // vv TX on same USART
-    // USART 2 TX
+    PLIB_PORTS_PinClear(APP_UART_RX_PORTS_ID, APP_UART_RX_PORT_CHANNEL, APP_UART_RX_PORT_PIN);
+    PLIB_PORTS_PinDirectionInputSet(APP_UART_RX_PORTS_ID, APP_UART_RX_PORT_CHANNEL, APP_UART_RX_PORT_PIN);
+    PLIB_PORTS_RemapInput(APP_UART_RX_PORTS_ID, APP_UART_RX_REMAP_FUNC, APP_UART_RX_REMAP_PIN);
+    // vv TX on same UART
+    // UART 2 TX
     // Prepare Port
-    PLIB_PORTS_PinClear(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    PLIB_PORTS_PinDirectionOutputSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    PLIB_PORTS_RemapOutput(APP_USART_TX_PORTS_ID, APP_USART_TX_REMAP_FUNC, APP_USART_TX_REMAP_PIN);
-    PLIB_PORTS_PinSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    // ^^ TX on same USART
-    // USART (RX/TX) Config
-    PLIB_USART_OperationModeSelect(APP_USART_RX_ID, APP_USART_RX_OPER);
-    PLIB_USART_HandshakeModeSelect(APP_USART_RX_ID, APP_USART_RX_HAND);
-    PLIB_USART_BaudRateSet(APP_USART_RX_ID, APP_PBCLK_FREQ, APP_USART_RX_BAUD);
+    PLIB_PORTS_PinClear(APP_UART_TX_PORTS_ID, APP_UART_TX_PORT_CHANNEL, APP_UART_TX_PORT_PIN);
+    PLIB_PORTS_PinDirectionOutputSet(APP_UART_TX_PORTS_ID, APP_UART_TX_PORT_CHANNEL, APP_UART_TX_PORT_PIN);
+    PLIB_PORTS_RemapOutput(APP_UART_TX_PORTS_ID, APP_UART_TX_REMAP_FUNC, APP_UART_TX_REMAP_PIN);
+    PLIB_PORTS_PinSet(APP_UART_TX_PORTS_ID, APP_UART_TX_PORT_CHANNEL, APP_UART_TX_PORT_PIN);
+    // ^^ TX on same UART
+    // UART (RX/TX) Config
+    PLIB_USART_OperationModeSelect(APP_UART_RX_ID, APP_UART_RX_OPER);
+    PLIB_USART_HandshakeModeSelect(APP_UART_RX_ID, APP_UART_RX_HAND);
+    PLIB_USART_BaudRateSet(APP_UART_RX_ID, APP_PBCLK_FREQ, APP_UART_RX_BAUD);
     // Select 8 data bits, No parity and one stop bit
-    PLIB_USART_LineControlModeSelect(APP_USART_RX_ID, APP_USART_RX_MODE);
-    // vv TX on same USART
-    PLIB_USART_TransmitterInterruptModeSelect(APP_USART_TX_ID, USART_TRANSMIT_FIFO_EMPTY);
-    // ^^ TX on same USART
-    PLIB_USART_ReceiverInterruptModeSelect(APP_USART_RX_ID, USART_RECEIVE_FIFO_ONE_CHAR);
+    PLIB_USART_LineControlModeSelect(APP_UART_RX_ID, APP_UART_RX_MODE);
+    // vv TX on same UART
+    PLIB_USART_TransmitterInterruptModeSelect(APP_UART_TX_ID, USART_TRANSMIT_FIFO_EMPTY);
+    // ^^ TX on same UART
+    PLIB_USART_ReceiverInterruptModeSelect(APP_UART_RX_ID, USART_RECEIVE_FIFO_ONE_CHAR);
     
-    //// USART 1 TX
-    //PLIB_USART_Disable(APP_USART_TX_ID);
+    //// UART 1 TX
+    //PLIB_USART_Disable(APP_UART_TX_ID);
     //// Prepare Port
-    //PLIB_PORTS_PinClear(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    //PLIB_PORTS_PinDirectionOutputSet(APP_USART_TX_PORTS_ID, APP_USART_TX_PORT_CHANNEL, APP_USART_TX_PORT_PIN);
-    //PLIB_PORTS_RemapOutput(APP_USART_TX_PORTS_ID, APP_USART_TX_REMAP_FUNC, APP_USART_TX_REMAP_PIN);
-    //// USART (TX) Config
-    //PLIB_USART_OperationModeSelect(APP_USART_TX_ID, APP_USART_TX_OPER);
-    //PLIB_USART_HandshakeModeSelect(APP_USART_TX_ID, APP_USART_TX_HAND);
-    //PLIB_USART_BaudRateSet(APP_USART_TX_ID, APP_PBCLK_FREQ, APP_USART_TX_BAUD);
+    //PLIB_PORTS_PinClear(APP_UART_TX_PORTS_ID, APP_UART_TX_PORT_CHANNEL, APP_UART_TX_PORT_PIN);
+    //PLIB_PORTS_PinDirectionOutputSet(APP_UART_TX_PORTS_ID, APP_UART_TX_PORT_CHANNEL, APP_UART_TX_PORT_PIN);
+    //PLIB_PORTS_RemapOutput(APP_UART_TX_PORTS_ID, APP_UART_TX_REMAP_FUNC, APP_UART_TX_REMAP_PIN);
+    //// UART (TX) Config
+    //PLIB_USART_OperationModeSelect(APP_UART_TX_ID, APP_UART_TX_OPER);
+    //PLIB_USART_HandshakeModeSelect(APP_UART_TX_ID, APP_UART_TX_HAND);
+    //PLIB_USART_BaudRateSet(APP_UART_TX_ID, APP_PBCLK_FREQ, APP_UART_TX_BAUD);
     //// Select 8 data bits, No parity and one stop bit
-    //PLIB_USART_LineControlModeSelect(APP_USART_TX_ID, APP_USART_TX_MODE);
-    //PLIB_USART_TransmitterInterruptModeSelect(APP_USART_TX_ID, USART_TRANSMIT_FIFO_EMPTY);
+    //PLIB_USART_LineControlModeSelect(APP_UART_TX_ID, APP_UART_TX_MODE);
+    //PLIB_USART_TransmitterInterruptModeSelect(APP_UART_TX_ID, UART_TRANSMIT_FIFO_EMPTY);
     
-    // enabling USARTs in SYS_Startup
+    // enabling UARTs in SYS_Startup
 }
-#endif // of ifdef APP_USE_USART
+#endif // of ifdef APP_USE_UART
 
 void INT_Initialize(void) {
     // enable the multi vector
@@ -464,14 +464,14 @@ void INT_Initialize(void) {
     // set priority and enable Timer1
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_PRIORITY_LEVEL3);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_SUBPRIORITY_LEVEL0);
-#ifdef APP_USE_USART
-    // set priority and enable USART RX
+#ifdef APP_USE_UART
+    // set priority and enable UART RX
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_UART2, INT_PRIORITY_LEVEL2);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_UART2, INT_SUBPRIORITY_LEVEL0);
-    // set priority and enable USART TX
+    // set priority and enable UART TX
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_UART1, INT_PRIORITY_LEVEL1);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_UART1, INT_SUBPRIORITY_LEVEL0);
-#endif // of ifdef APP_USE_USART
+#endif // of ifdef APP_USE_UART
     // Enable the global interrupts
     PLIB_INT_Enable(APP_INT_ID);
 #ifdef APP_USE_USB
@@ -481,15 +481,15 @@ void INT_Initialize(void) {
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
-#ifdef APP_USE_USART
+#ifdef APP_USE_UART
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
-    // vv TX on same USART
+    // vv TX on same UART
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT);
-    // ^^ TX on same USART
+    // ^^ TX on same UART
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
     
-    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
-    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_UART_1_ERROR);
+    //PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_UART_1_TRANSMIT);
 #endif
 }
 
@@ -505,24 +505,24 @@ void SYS_Startup(void) {
     // system clock 
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_TIMER_1);
     PLIB_TMR_Start(APP_TMR_CLOCK);
-#ifdef APP_USE_USART
-    // enable USARTs
-    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_ERROR);
-    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_1_TRANSMIT);
-    //PLIB_USART_Enable(APP_USART_TX_ID);
-    //PLIB_USART_TransmitterEnable(APP_USART_TX_ID);
+#ifdef APP_USE_UART
+    // enable UARTs
+    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_UART_1_ERROR);
+    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_UART_1_TRANSMIT);
+    //PLIB_UART_Enable(APP_UART_TX_ID);
+    //PLIB_UART_TransmitterEnable(APP_UART_TX_ID);
     // if there is a hardware shortcut Transmitter should be ready before Receiver
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
-    // vv TX on same USART
+    // vv TX on same UART
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_TRANSMIT);
-    // ^^ TX on same USART
+    // ^^ TX on same UART
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_USART_2_RECEIVE);
     // Transmitter should be disabled as long there is no data to send
     // this also keeps the TX under PORT control,
     // which should provide a high signal for the line
-    PLIB_USART_TransmitterDisable(APP_USART_TX_ID);    
-    PLIB_USART_Enable(APP_USART_RX_ID);
-    //PLIB_USART_ReceiverEnable(APP_USART_RX_ID);
+    PLIB_USART_TransmitterDisable(APP_UART_TX_ID);
+    PLIB_USART_Enable(APP_UART_RX_ID);
+    //PLIB_UART_ReceiverEnable(APP_UART_RX_ID);
 #endif
 }
 
@@ -543,9 +543,9 @@ void SYS_Initialize ( void *data )
 #endif
     // init I2C
     I2C_Initialize();
-#ifdef APP_USE_USART
-    // init USART
-    USART_Initialize();
+#ifdef APP_USE_UART
+    // init UART
+    UART_Initialize();
 #endif
     /* TODO:  Initialize all modules and the application. */
 
