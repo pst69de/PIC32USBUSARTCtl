@@ -140,6 +140,35 @@ extern "C" {
 
 // defs I2C 1 for LCD 
 #define APP_LCD_I2C_ID            I2C_ID_1
+#define APP_LCD_INT_PRIORITY      INT_PRIORITY_LEVEL4
+
+#ifdef APP_LCD_I2C_ID
+#define APP_LCD_InterruptPriority(iid)  LCD_InterruptPriority((iid))
+#define APP_LCD_InterruptEnable(iid)    LCD_InterruptEnable((iid))
+#define APP_LCD_SYS_Startup(iid)        LCD_SYS_Startup((iid))
+#define APP_LCD_Initialize(pbf)         LCD_Initialize((pbf))
+#define APP_LCD_Init(ms)          LCD_Init((ms))
+#define APP_LCD_Ready             LCD_Ready()
+#define APP_LCD_ClearLine(l)      LCD_ClearLine((l))
+#define APP_LCD_PrintChar(l,p,c)  LCD_PrintChar((l),(p),(c))
+#define APP_LCD_Print(l,p,s)      LCD_Print((l),(p),(s))
+#define APP_LCD_Backlight         LCD_Backlight
+#define APP_LCD_I2C_Ready         LCD_I2C_Ready()
+#define APP_LCD_Update            LCD_Update()
+#else
+#define APP_LCD_InterruptPriority(iid)  
+#define APP_LCD_InterruptEnable(iid)    
+#define APP_LCD_SYS_Startup(iid)        
+#define APP_LCD_Initialize(pbf)         
+#define APP_LCD_Init(ms)          true
+#define APP_LCD_Ready             false
+#define APP_LCD_ClearLine(l)      
+#define APP_LCD_PrintChar(l,p,c)  
+#define APP_LCD_Print(l,p,s)      
+#define APP_LCD_Backlight         appData.LCD_Dummy_switch
+#define APP_LCD_I2C_Ready         true
+#define APP_LCD_Update            
+#endif
 
 // defs UART 1/2 for COM
 #ifdef APP_USE_UART

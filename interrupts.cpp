@@ -27,6 +27,7 @@
 #include "app.h"
 #include "system_definitions.h"
 #include "system_init.h"
+#include "POEi2clcd.h"
 
 /* All the files in the C++ standard library declare its entities
  * within the std namespace. */
@@ -113,20 +114,37 @@ void __ISR ( _USB_1_VECTOR,ipl5soft ) _InterruptHandler_USB ( void )
 }
 #endif
 
+#ifdef APP_LCD_I2C_ID
+#if APP_LCD_I2C_ID == I2C_ID_1
 // Vector for I2C 1, priority 4, software controlled register switching (on MX1xx/MX2xx MCUs)
-void __ISR( _I2C_1_VECTOR, ipl4soft ) _InterruptHandler_I2C_1(void) {
+void __ISR( _I2C_1_VECTOR, ipl4soft ) _InterruptHandler_I2C(void) {
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_I2C_1_MASTER)) {
-        APP_I2C_Process();
+        LCD_I2C_Process();
     }
     if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_I2C_1_ERROR)) {
         //LEDR_Set;
     }
     // Clear the interrupt flag
-    //PLIB_INT_SourceFlagClear(APP_INT_ID, INT_VECTOR_I2C1);
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_ERROR);
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
 }
+#else // if APP_LCD_I2C_ID == I2C_ID_1
+// Vector for I2C 2, priority 4, software controlled register switching (on MX1xx/MX2xx MCUs)
+void __ISR( _I2C_2_VECTOR, ipl4soft ) _InterruptHandler_I2C(void) {
+    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_I2C_2_MASTER)) {
+        LCD_I2C_Process();
+    }
+    if (PLIB_INT_SourceFlagGet(APP_INT_ID, INT_SOURCE_I2C_2_ERROR)) {
+        //LEDR_Set;
+    }
+    // Clear the interrupt flag
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_2_ERROR);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_2_SLAVE);
+    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_2_MASTER);
+}
+#endif // else APP_LCD_I2C_ID == I2C_ID_1
+#endif // ifdef APP_LCD_I2C_ID
 
 // Vector for timer 1, priority 3, software controlled register switching (on MX1xx/MX2xx MCUs)
 void __ISR( _TIMER_1_VECTOR, ipl3soft ) _InterruptHandler_TMR_1(void) {

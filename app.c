@@ -16,6 +16,10 @@
 #include "system_definitions.h"
 #include "POEnet.h"
 
+#ifdef APP_LCD_I2C_ID
+#include "POEi2clcd.h"
+#endif // ifdef APP_LCD_I2C_ID
+
 // helper routines
 void ClearBuffer(char *buffer) {
     buffer = memset(buffer, '\0', APP_BUFFER_SIZE);
@@ -57,15 +61,6 @@ void APP_Initialize ( void )
     appData.timerCount = 0;
     appData.timerRepeat = 0;
     appData.timerExpired = false;
-    // LCD I2C data 
-    appData.I2C_State = I2C_UNINITIALIZED;
-    appData.I2C_Transfer = I2C_Idle;
-    for (i = 0; i < APP_LCD_I2C_WRITE_BUFFER_SIZE; i++) { appData.LCD_Write[i] = 0;};
-    appData.LCD_WriteIx = 0;
-    for (i = 0; i < APP_LCD_I2C_READ_BUFFER_SIZE; i++) { appData.LCD_Read[i] = 0;};
-    appData.LCD_ReadIx = 0;
-    for (i = 0; i < LCD_LINEBUFFERS; i++) { APP_LCD_ClearLine(i); }
-    appData.LCD_Backlight = false;
 #ifdef APP_USE_USB
     // USB Inits
     appData.deviceHandle = -1;
@@ -124,16 +119,16 @@ void APP_TimingCallback ( void ) {
                     appData.time.Days++;
                 }
                 // Set Hours to Time field
-                appData.LCD_Line[0][2] = numChar[appData.time.Hours % 10];
-                appData.LCD_Line[0][1] = numChar[appData.time.Hours / 10];
+                APP_LCD_PrintChar(0,2,numChar[appData.time.Hours % 10]);
+                APP_LCD_PrintChar(0,1,numChar[appData.time.Hours / 10]);
             }
             // Set Minutes to Time field
-            appData.LCD_Line[0][5] = numChar[appData.time.Minutes % 10];
-            appData.LCD_Line[0][4] = numChar[appData.time.Minutes / 10];
+            APP_LCD_PrintChar(0,5,numChar[appData.time.Minutes % 10]);
+            APP_LCD_PrintChar(0,4,numChar[appData.time.Minutes / 10]);
         }
         // Set Seconds to Time field
-        appData.LCD_Line[0][8] = numChar[appData.time.Seconds % 10];
-        appData.LCD_Line[0][7] = numChar[appData.time.Seconds / 10];
+        APP_LCD_PrintChar(0,8,numChar[appData.time.Seconds % 10]);
+        APP_LCD_PrintChar(0,7,numChar[appData.time.Seconds / 10]);
         appData.pollSecond = true;
     }
     if (appData.timerCount > 0) {
@@ -166,7 +161,7 @@ bool APP_CheckTimer (void) {
     }
     if (appData.pollSecond) {
         appData.pollSecond = false;
-        if (APP_LCD_Ready()) {
+        if (APP_LCD_Ready) {
             if (appData.state != APP_LCD_UPDATE) {
                 appData.LCD_Return_AppState = appData.state;
                 appData.state = APP_LCD_UPDATE;
@@ -190,8 +185,8 @@ bool APP_USBStateReset(void) {
     // This function returns true if the device was reset
     if(!appData.isConfigured) {
         // Clear Display from USB Status
-        appData.LCD_Line[0][11] = '-';
-        appData.LCD_Line[0][12] = '-';
+        APP_LCD_PrintChar(0,11,'-');
+        APP_LCD_PrintChar(0,12,'-');
         appData.state = APP_LCD_UPDATE;
         appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
         //appData.state = APP_STATE_USB_CONFIGURATION;
@@ -227,18 +222,18 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event,
                         APP_USBDeviceCDCEventHandler, (uintptr_t)&appData);
                 // Mark that the device is now configured 
                 appData.isConfigured = true;
-                appData.LCD_Line[0][11] = 'S';
+                APP_LCD_PrintChar(0,11,'S');
             }
             break;
         case USB_DEVICE_EVENT_POWER_DETECTED:
             // VBUS was detected. We can attach the device 
             USB_DEVICE_Attach(appData.deviceHandle);
-            appData.LCD_Line[0][12] = 'B';
+            APP_LCD_PrintChar(0,12,'B');
             break;
         case USB_DEVICE_EVENT_POWER_REMOVED:
             // VBUS is not available any more. Detach the device. 
             USB_DEVICE_Detach(appData.deviceHandle);
-            appData.LCD_Line[0][12] = '-';
+            APP_LCD_PrintChar(0,12,'-');
             break;
         case USB_DEVICE_EVENT_SUSPENDED:
             break;
@@ -321,313 +316,29 @@ USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler (
 }
 #endif // of ifdef APP_USE_USB
 
-// LCD I2C Routines
-// I2C write buffer filling in LIFO mode
-void APP_I2C_AddWrite( uint8_t WriteIn) {
-    appData.LCD_Write[appData.LCD_WriteIx] = WriteIn;
-    appData.LCD_WriteIx++;
-}
-
-void APP_I2C_M_Write(void) {
-    appData.I2C_State = I2C_MASTER_WRITE;
-    appData.I2C_Transfer = I2C_MS_Start;
-    //LEDY_Set;
-    PLIB_I2C_MasterStart(APP_LCD_I2C_ID);
-}
-
-void APP_I2C_Process(void) {
-    uint8_t Xfer;
-    switch ( appData.I2C_State) {
-        case I2C_UNINITIALIZED:
-            break;
-        case I2C_MASTER_IDLE:
-            break;
-        case I2C_MASTER_WRITE:
-            switch (appData.I2C_Transfer) {
-                case I2C_MS_Start:
-                    // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
-                    if (PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
-                        // top byte in buffer should always be a formatted i2c slave address
-                        appData.I2C_Transfer = I2C_MS_Address;
-                        appData.LCD_WriteIx--;
-                        Xfer = appData.LCD_Write[appData.LCD_WriteIx];
-                        PLIB_I2C_StartClear(APP_LCD_I2C_ID);
-                        PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, Xfer);
-                    }
-                    break;
-                case I2C_MS_Address:
-                    // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
-                    if (!PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID)) {
-                        //LEDR_Set;
-                    } else {
-                        if ( PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
-                            appData.I2C_Transfer = I2C_MS_Transmit;
-                            appData.LCD_WriteIx--;
-                            Xfer = appData.LCD_Write[appData.LCD_WriteIx];
-                            PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, Xfer);
-                        }
-                    }
-                    break;
-                case I2C_MS_Transmit:
-                    // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
-                    if (!PLIB_I2C_TransmitterByteWasAcknowledged(APP_LCD_I2C_ID)) {
-                        //LEDR_Set;
-                    } else {
-                        if (PLIB_I2C_TransmitterIsReady(APP_LCD_I2C_ID)) {
-                            if (appData.LCD_WriteIx > 0) {
-                                appData.LCD_WriteIx--;
-                                Xfer = appData.LCD_Write[appData.LCD_WriteIx];
-                                PLIB_I2C_TransmitterByteSend(APP_LCD_I2C_ID, Xfer);
-                                // keep appData.LCD_Transfer = I2C_MS_Transmit
-                            } else {
-                                // if (appData.LCD_WriteIx > 0) { PLIB_I2C_MasterStartRepeat(APP_LCD_I2C_ID); not used in this purpose
-                                PLIB_I2C_MasterStop(APP_LCD_I2C_ID);
-                                appData.I2C_Transfer = I2C_MS_Stop;
-                            }
-                        // ] else { -> if PLIB_I2C_TransmitterByteWasAcknowledged doesn't happen transfer should be restarted and after some tries given up
-                        // i assume all goes well ;)
-                        }
-                    }
-                    break;
-                case I2C_MS_Repeat:
-                    // only used for a write/read cycle or for subsequent writes to multiple slaves
-                    break;
-                case I2C_MS_Stop:
-                    // when this occurs, all is done, go back to wait
-                    //LEDY_Clear;
-                    appData.I2C_State = I2C_MASTER_IDLE;
-                    appData.I2C_Transfer = I2C_Idle;
-                    break;
-            }
-            break;
-        case I2C_MASTER_WRITE_READ:
-            // needs a repeatable and modifiable address variable (switch of RW bit in address)
-            // needs an acknowledge after read byte
-            break;
-        case I2C_MASTER_READ:
-            // needs a repeatable and modifiable address variable (switch of RW bit in address)
-            // needs an acknowledge after read byte
-            break;
-        case I2C_SLAVE_IDLE:
-            // data coming in -> switch to appropriate mode
-            break;
-        case I2C_SLAVE_READ:
-            break;
-        case I2C_SLAVE_READ_WRITE:
-            break;
-        case I2C_SLAVE_WRITE:
-            break;
-        // The default state should never be executed.
-        default:
-            break;
-    }
-}
-
-bool APP_I2C_Ready(void) {
-    return (appData.I2C_State == I2C_MASTER_IDLE);
-}
-
-// as described in system_config.h high nibble first and with LIFO ordering
-void APP_LCD_AddCharWrite( char aChar) {
-    uint8_t intChar = (uint8_t)aChar;
-    APP_I2C_AddWrite( LCD_DATA | LCD_RW_WRITE | LCD_E_WRITE | ((intChar & 0x0f) << 4));
-    APP_I2C_AddWrite( LCD_DATA | LCD_RW_WRITE | LCD_E_PREPARE | ((intChar & 0x0f) << 4));
-    APP_I2C_AddWrite( LCD_DATA | LCD_RW_WRITE | LCD_E_WRITE | (intChar & 0xf0));
-    APP_I2C_AddWrite( LCD_DATA | LCD_RW_WRITE | LCD_E_PREPARE | (intChar & 0xf0));
-}
-
-void APP_LCD_Update(void) {
-    uint8_t c;
-    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
-        APP_LCD_AddCharWrite(appData.LCD_Line[3][c-1]);
-    }
-    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
-        APP_LCD_AddCharWrite(appData.LCD_Line[1][c-1]);
-    }
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME2_L);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME2_L);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME2_H);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME2_H);
-    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
-        APP_LCD_AddCharWrite(appData.LCD_Line[2][c-1]);
-    }
-    for (c = LCD_LINEBUFFER_SIZE; c > 0; c--) {
-        APP_LCD_AddCharWrite(appData.LCD_Line[0][c-1]);
-    }
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME1_L);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME1_L);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_SET_HOME1_H);
-    APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_SET_HOME1_H);
-    APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-    if (appData.LCD_Backlight) {
-        appData.LCD_Write[0] |= LCD_BACKLIGHT;
-    }
-    APP_I2C_M_Write();
-}
-
-void APP_LCD_ClearLine( uint8_t line) {
-    uint8_t i;
-    for (i = 0; i < LCD_LINEBUFFER_SIZE; i++) { appData.LCD_Line[line][i] = ' ';}
-} 
-
-void APP_LCD_Print(uint8_t line, uint8_t pos, char* string) {
-    uint8_t i, len;
-    len = strlen(string);
-    if (len + pos > LCD_LINEBUFFER_SIZE) { len = LCD_LINEBUFFER_SIZE - pos; }
-    for (i = 0; i < len; i++) {
-        appData.LCD_Line[line][i + pos] = *(string+i);
-    }
-}
-
-bool APP_LCD_Init(void) {
-    if (appData.I2C_State == I2C_UNINITIALIZED) {
-        appData.I2C_State = I2C_MASTER_IDLE;
-        appData.time.Wait = 20; // Wait at least 20 ms after power on
-        appData.LCD_Init = LCD_wait_on;
-    }
-    switch (appData.LCD_Init) {
-        case LCD_wait_on:
-            if (!appData.time.Wait) {
-                // data & address always LIFO
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_8BIT_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_init_8bit;
-            }
-            break;
-        case LCD_init_8bit:
-            if (APP_I2C_Ready()) {
-                appData.time.Wait = 4; // Wait at least 4 ms after 8bit switch
-                appData.LCD_Init = LCD_wait_8bit;
-            }
-            break;
-        case LCD_wait_8bit:
-            if (!appData.time.Wait) {
-                // data & address always LIFO
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_8BIT_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_switch_8bit;
-            }
-            break;
-        case LCD_switch_8bit:
-            if (APP_I2C_Ready()) {
-                appData.time.Wait = 1; // Wait at least 1 ms after 8bit switch
-                appData.LCD_Init = LCD_8bit_wait;
-            }
-            break;
-        case LCD_8bit_wait:
-            if (!appData.time.Wait) {
-                // data & address always LIFO
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_4BIT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_4BIT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_8BIT_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_switch_4bit;
-            }
-            break;
-        case LCD_switch_4bit:
-            if (APP_I2C_Ready()) {
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_LINEFONT_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_LINEFONT_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_4BIT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_4BIT_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_linefont_4bit;
-            }
-            break;
-        case LCD_linefont_4bit:
-            if (APP_I2C_Ready()) {
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_DISPLAY_OFF_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_DISPLAY_OFF_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_DISPLAY_OFF_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_DISPLAY_OFF_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_displayoff;
-            }
-            break;
-        case LCD_displayoff:
-            if (APP_I2C_Ready()) {
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_CLEAR_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_CLEAR_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_CLEAR_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_CLEAR_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_displayclear;
-            }
-            break;
-        case LCD_displayclear:
-            if (APP_I2C_Ready()) {
-                appData.time.Wait = 2; // Wait at least 2 ms after display clear
-                appData.LCD_Init = LCD_waitclear;
-            }
-            break;
-        case LCD_waitclear:
-            if (!appData.time.Wait) {
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_CURSORSHIFT_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_CURSORSHIFT_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_CURSORSHIFT_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_CURSORSHIFT_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_cursor_shift;
-            }
-            break;
-        case LCD_cursor_shift:
-            if (APP_I2C_Ready()) {
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_DISPLAY_ON_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_DISPLAY_ON_L);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_DISPLAY_ON_H);
-                APP_I2C_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_PREPARE | LCD_DISPLAY_ON_H);
-                APP_I2C_AddWrite( LCD_ADDRESS | I2C_WRITE);
-                APP_I2C_M_Write();
-                appData.LCD_Init = LCD_displayon;
-            }
-            break;
-        case LCD_displayon:
-            if (APP_I2C_Ready()) {
-                appData.LCD_Init = LCD_ready;
-            }
-            break;
-        case LCD_ready:
-            return true;
-            break;
-    }
-    return false;
-}
-
-bool APP_LCD_Ready(void) {
-    return (appData.LCD_Init == LCD_ready);
-}
+// LCD I2C Routines see POEi2clcd.h / POEi2clcd.c
 
 #ifdef APP_USE_UART
 // UART routines 
 // INT Handling Read
 void APP_UART_Read(void) {
-    appData.LCD_Line[0][18] = '*';
+    APP_LCD_PrintChar(0,18,'*');
     while (PLIB_USART_ReceiverDataIsAvailable(APP_UART_RX_ID)) {
         uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_UART_RX_ID);
         char dispChar = (char)readByte;
         if (!readByte) { dispChar = (char)0xdb; }
         if (appData.UART_INPUT_IDX < 40) {
             if (appData.UART_INPUT_IDX < 20) {
-                appData.LCD_Line[2][appData.UART_INPUT_IDX] = dispChar;
+                APP_LCD_PrintChar(2,appData.UART_INPUT_IDX,dispChar);
             } else {
-                appData.LCD_Line[3][appData.UART_INPUT_IDX - 20] = dispChar;
+                APP_LCD_PrintChar(3,appData.UART_INPUT_IDX - 20,dispChar);
             }
         }
         appData.UART_INPUT_BUF[appData.UART_INPUT_IDX++] = readByte;
         // POE.net: zero is sent for termination
         if (!readByte) {
             appData.UART_INPUT_SIZE = appData.UART_INPUT_IDX;
-            appData.LCD_Line[0][18] = 'R';
+            APP_LCD_PrintChar(0,18,'R');
         }
     }
 }
@@ -637,11 +348,11 @@ void APP_UART_Write(void) {
     if (appData.UART_OUTPUT_IDX == appData.UART_OUTPUT_SIZE) {
         appData.UART_OUTPUT_SIZE = 0;
         appData.UART_OUTPUT_IDX = 0;
-        appData.LCD_Line[0][19] = 'T';
+        APP_LCD_PrintChar(0,19,'T');
         PLIB_USART_TransmitterDisable(APP_UART_TX_ID);
     }
     if (appData.UART_OUTPUT_SIZE > 0) {
-        appData.LCD_Line[0][19] = '*';
+        APP_LCD_PrintChar(0,19,'*');
         if (!PLIB_USART_TransmitterBufferIsFull(APP_UART_TX_ID) & (appData.UART_OUTPUT_IDX < appData.UART_OUTPUT_SIZE)) {
             PLIB_USART_TransmitterByteSend(APP_UART_TX_ID, appData.UART_OUTPUT_BUF[ appData.UART_OUTPUT_IDX++]);
         }
@@ -675,7 +386,7 @@ void APP_Tasks ( void )
             appData.state = APP_STATE_LCD_INIT;
             break;
         case APP_STATE_LCD_INIT:
-            if (APP_LCD_Init()) {
+            if (APP_LCD_Init(appData.time.milliSeconds)) {
                 //LEDG_Clear;
                 // -> use of sprintf for string formatting
                 // Time and Status representation
@@ -720,7 +431,7 @@ void APP_Tasks ( void )
                 USB_DEVICE_Attach (appData.deviceHandle);
                 appData.state = APP_STATE_USB_CONFIGURATION;
                 // Fillup Display with USB Status
-                appData.LCD_Line[0][10] = 'U';
+                APP_LCD_PrintChar(0,10,'U');
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
             }
@@ -733,8 +444,8 @@ void APP_Tasks ( void )
                 // Clear error LED
                 //LEDR_Clear;
                 // Fillup Display with USB Status
-                appData.LCD_Line[0][12] = 'B';
-                APP_LCD_Print( 1, 7, "ready");
+                APP_LCD_PrintChar(0,12,'B');
+                APP_LCD_Print(1,7, "ready");
                 ClearBuffer(&appData.USB_INPUT_BUF[0]);
                 // If the device is configured then lets start reading
                 //LEDG_Set; // Set acceptance LED
@@ -755,15 +466,15 @@ void APP_Tasks ( void )
             appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
             appData.isWriteComplete = false;
             // Update LCD with count bytes to write
-            appData.LCD_Line[0][13] = '<';
+            APP_LCD_PrintChar(0,13,'<');
             i = appData.USB_OUTPUT_SIZE;
-            appData.LCD_Line[0][16] = numChar[i%10];
+            APP_LCD_PrintChar(0,16,numChar[i%10]);
             i /= 10;
-            appData.LCD_Line[0][15] = numChar[i%10];
+            APP_LCD_PrintChar(0,15,numChar[i%10]);
             i /= 10;
-            appData.LCD_Line[0][14] = numChar[i%10];
+            APP_LCD_PrintChar(0,14,numChar[i%10]);
             i /= 10;
-            if (i) { appData.LCD_Line[0][14] = 'A';}
+            if (i) { APP_LCD_PrintChar(0,14,'A');}
             if (!appData.USB_OUTPUT_SIZE) {
                 USB_DEVICE_CDC_Write(appData.cdcInstance, &appData.writeTransferHandle,
                         nokPrompt, 4, USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
@@ -837,15 +548,15 @@ void APP_Tasks ( void )
                 appData.USB_INPUT_SIZE = strlen( appData.USB_INPUT_BUF) + 1;
                 appData.USB_INPUT_IDX = 0;
                 // Update LCD with count bytes read
-                appData.LCD_Line[0][13] = '<';
+                APP_LCD_PrintChar(0,13,'<');
                 i = appData.USB_OUTPUT_SIZE;
-                appData.LCD_Line[0][16] = numChar[i%10];
+                APP_LCD_PrintChar(0,16,numChar[i%10]);
                 i /= 10;
-                appData.LCD_Line[0][15] = numChar[i%10];
+                APP_LCD_PrintChar(0,15,numChar[i%10]);
                 i /= 10;
-                appData.LCD_Line[0][14] = numChar[i%10];
+                APP_LCD_PrintChar(0,14,numChar[i%10]);
                 i /= 10;
-                if (i) { appData.LCD_Line[0][14] = 'A';}
+                if (i) { APP_LCD_PrintChar(0,14,'A');}
                 // pass via LCDout to INPUTReady
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_POENET_INPUT_READY;
@@ -910,7 +621,7 @@ void APP_Tasks ( void )
                     appData.state = APP_LCD_UPDATE;
                     break;
                 case 'B':
-                    appData.LCD_Backlight = !appData.LCD_Backlight;
+                    APP_LCD_Backlight = !APP_LCD_Backlight;
                     appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
                     appData.state = APP_LCD_UPDATE;
                     break;
@@ -952,7 +663,7 @@ void APP_Tasks ( void )
             if (APP_CheckTimer()) { break; }
 #ifdef APP_POEnet_SECONDARY
             // USB UART Bridge -> pass to UART
-            appData.LCD_Line[2][6] = '>';
+            APP_LCD_PrintChar(2,6,'>');
             // initiate UART transmission by writing 1st Byte
             //APP_UART_Write();
             // if UART Transmitter is enabled, it automatically asks 
@@ -1006,8 +717,8 @@ void APP_Tasks ( void )
             if (APP_CheckTimer()) { break; }
             // don't check USB on LCD cycles -> possible conflict with USB not yet initialized
             //if(APP_USBStateReset()) { break; }
-            if (APP_I2C_Ready()) {
-                APP_LCD_Update();
+            if (APP_LCD_I2C_Ready) {
+                APP_LCD_Update;
                 appData.state = appData.LCD_Return_AppState;
             }
             break;

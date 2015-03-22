@@ -89,57 +89,6 @@ typedef struct {
     int Wait;
 } APP_TIMING;
 
-// I2C definitions
-typedef enum {
-    // Uninitialized
-    I2C_UNINITIALIZED,
-    // Master modes
-    I2C_MASTER_IDLE,
-    I2C_MASTER_WRITE,
-    I2C_MASTER_WRITE_READ,
-    I2C_MASTER_READ,
-    // Slave modes
-    I2C_SLAVE_IDLE,
-    I2C_SLAVE_READ,
-    I2C_SLAVE_READ_WRITE,
-    I2C_SLAVE_WRITE
-} I2C_States;
-
-typedef enum {
-    // Bus Idle
-    I2C_Idle,
-    // Master Write Cycle
-    I2C_MS_Start,
-    I2C_MS_Address,
-    I2C_MS_Transmit,
-    I2C_MS_Repeat,
-    I2C_MS_Stop,
-    // Master Read Cycle
-    I2C_MS_Receive,
-    I2C_MS_Ack,
-    // Slave Read Cycle
-    I2C_SL_Receive,
-    I2C_SL_Ack,
-    // Slave Write Cycle
-    I2C_SL_Transmit
-} I2C_Data_State;
-
-typedef enum {
-    LCD_wait_on,
-    LCD_init_8bit,
-    LCD_wait_8bit,
-    LCD_switch_8bit,
-    LCD_8bit_wait,
-    LCD_switch_4bit,
-    LCD_linefont_4bit,
-    LCD_displayoff,
-    LCD_displayclear,
-    LCD_waitclear,
-    LCD_cursor_shift,
-    LCD_displayon,
-    LCD_ready
-} LCD_Init_Sequence;
-
 // Application Data
 typedef struct
 {
@@ -153,17 +102,10 @@ typedef struct
     APP_TIMING        time;
     int               lastSecond;
     bool              pollSecond;
-    // LCD I2C data
-    LCD_Init_Sequence LCD_Init;
-    I2C_States        I2C_State;
-    I2C_Data_State    I2C_Transfer;
-    uint8_t           LCD_Write[APP_LCD_I2C_WRITE_BUFFER_SIZE];
-    int               LCD_WriteIx;
-    uint8_t           LCD_Read[APP_LCD_I2C_READ_BUFFER_SIZE];
-    int               LCD_ReadIx;
-    char              LCD_Line[LCD_LINEBUFFERS][LCD_LINEBUFFER_SIZE];
-    bool              LCD_Backlight;
+    // LCD Refresh function callback
     APP_STATES        LCD_Return_AppState;
+    // LCD Dummy switch for Backlight
+    bool              LCD_Dummy_switch;
     char              POEnetPrimInputBuf[APP_BUFFER_SIZE];
     int               POEnetPrimInputSize;
     int               POEnetPrimInputIdx;
@@ -289,26 +231,6 @@ void APP_Initialize ( void );
 void APP_TimingCallback ( void );
 
 void APP_CheckTimedLED ( void );
-
-void APP_I2C_AddWrite( uint8_t WriteIn);
-
-void APP_I2C_M_Write(void);
-
-void APP_I2C_Process(void);
-
-bool APP_I2C_Ready(void);
-
-void APP_LCD_AddCharWrite( char aChar);
-
-void APP_LCD_Update(void);
-
-void APP_LCD_ClearLine( uint8_t line);
-
-void APP_LCD_Print(uint8_t line, uint8_t pos, char* string);
-
-bool APP_LCD_Init(void);
-
-bool APP_LCD_Ready(void);
 
 #ifdef APP_USE_UART
 void APP_UART_Read(void);

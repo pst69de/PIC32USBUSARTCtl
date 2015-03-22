@@ -424,9 +424,8 @@ void INT_Initialize(void) {
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_PRIORITY_LEVEL5);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_USB1, INT_SUBPRIORITY_LEVEL0);
 #endif // of ifdef APP_USE_USB
-    // set priority and enable I2C
-    PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_PRIORITY_LEVEL4);
-    PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_I2C1, INT_SUBPRIORITY_LEVEL0);    
+    // set priority LCD
+    APP_LCD_InterruptPriority(APP_INT_ID);
     // set priority and enable Timer1
     PLIB_INT_VectorPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_PRIORITY_LEVEL3);
     PLIB_INT_VectorSubPrioritySet(APP_INT_ID, INT_VECTOR_T1, INT_SUBPRIORITY_LEVEL0);
@@ -443,9 +442,7 @@ void INT_Initialize(void) {
 #ifdef APP_USE_USB
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USB_1);
 #endif
-    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_ERROR);
-    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
-    PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
+    APP_LCD_InterruptEnable(APP_INT_ID);
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_TIMER_1);
 #ifdef APP_USE_UART
     PLIB_INT_SourceEnable(APP_INT_ID, INT_SOURCE_USART_2_ERROR);
@@ -461,13 +458,7 @@ void INT_Initialize(void) {
 
 void SYS_Startup(void) {
     // LCD I2C com
-    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_ERROR);
-    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_SLAVE);
-    PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_I2C_1_MASTER);
-    // see http://ww1.microchip.com/downloads/en/DeviceDoc/80000531F.pdf Errata
-    // Enabling I2C1 makes Ports A0 / A1 unusable
-    // Enabling I2C2 makes Ports B5 / B6 unusable
-    PLIB_I2C_Enable(APP_LCD_I2C_ID);
+    APP_LCD_SYS_Startup(APP_INT_ID);
     // system clock 
     PLIB_INT_SourceFlagClear(APP_INT_ID, INT_SOURCE_TIMER_1);
     PLIB_TMR_Start(APP_TMR_CLOCK);
@@ -508,7 +499,7 @@ void SYS_Initialize ( void *data )
     SYS_ASSERT((SYS_MODULE_OBJ_INVALID != sysObjects.usbDevObject), "Invalid USB DEVICE object");
 #endif
     // init LCD
-    LCD_Initialize();
+    APP_LCD_Initialize(APP_PBCLK_FREQ);
 #ifdef APP_USE_UART
     // init UART
     UART_Initialize();
