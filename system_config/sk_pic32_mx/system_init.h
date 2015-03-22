@@ -18,7 +18,6 @@ extern "C" {
 #endif
 
 #include "system_config.h"
-//#include "system_definitions.h"
 
 void SYS_Initialize ( void *data );
 

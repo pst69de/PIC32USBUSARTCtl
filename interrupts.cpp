@@ -25,7 +25,6 @@
 #include <exception>         /* Includes try/catch functions                  */
 #include "system_config.h"
 #include "app.h"
-#include "system_definitions.h"
 #include "system_init.h"
 #include "POEi2clcd.h"
 

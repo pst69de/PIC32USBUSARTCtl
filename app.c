@@ -13,12 +13,15 @@
 #include <string.h>
 #include "app.h"
 #include "system_config.h"
-#include "system_definitions.h"
 #include "POEnet.h"
 
 #ifdef APP_LCD_I2C_ID
 #include "POEi2clcd.h"
 #endif // ifdef APP_LCD_I2C_ID
+#ifdef APP_USE_USB
+#include "POEusb.h"
+#endif
+
 
 // helper routines
 void ClearBuffer(char *buffer) {
@@ -372,7 +375,7 @@ void APP_Tasks ( void )
     int i;
 #ifdef APP_USE_USB
     // separate regular calls (at time USB Handling)
-    USB_DEVICE_Tasks(sysObjects.usbDevObject);
+    USB_SYS_Loop();
 #endif
     // check the application state
     switch ( appData.state ) {

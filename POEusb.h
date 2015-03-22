@@ -21,10 +21,11 @@ extern "C" {
 
 #ifdef APP_USE_USB
 
+#include "system/common/sys_module.h"
+
 // *****************************************************************************
 // Section: USB controller Driver Configuration compiler macros
 // *****************************************************************************
-#ifdef APP_USE_USB
 // Enables Device Support 
 #define DRV_USB_DEVICE_SUPPORT               true
 // Disables host support 
@@ -49,18 +50,37 @@ extern "C" {
 // *****************************************************************************
 // Maximum instances of CDC function driver 
 #define USB_DEVICE_CDC_INSTANCES_NUMBER      1
-// 
 // CDC Transfer Queue Size for both read and
 // write. Applicable to all instances of the
 // function driver 
-//
 #define USB_DEVICE_CDC_QUEUE_DEPTH_COMBINED  3
 // Application USB Device CDC Read Buffer Size. This should be a multiple of
 // the CDC Bulk Endpoint size 
 #define USB_BUFFER_SIZE                      APP_BUFFER_SIZE
 
+// *****************************************************************************
+// possible external Variables
+// *****************************************************************************
 
+extern SYS_MODULE_OBJ usbDevObject;
 
+// *****************************************************************************
+// Initialization routine
+// *****************************************************************************
+
+void USB_SYS_Init(void);
+
+// *****************************************************************************
+// ISR
+// *****************************************************************************
+
+void USB_SYS_ISR(void);
+
+// *****************************************************************************
+// permanent system task
+// *****************************************************************************
+
+void USB_SYS_Loop(void);
 
 
 #endif //ifdef APP_USE_USB

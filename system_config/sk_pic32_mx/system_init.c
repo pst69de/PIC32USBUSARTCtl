@@ -50,7 +50,6 @@
 */
 
 #include "system_init.h"
-#include "system_definitions.h"
 #include "system_config.h"
 #ifdef APP_USE_USB
 #include "usb/usb_device.h"
@@ -492,11 +491,7 @@ void SYS_Initialize ( void *data )
     // Set outputting Ports to Output (default is Input), clear analog Input
     LEDS_Initialize();
 #ifdef APP_USE_USB
-    // Initialize the USB device layer
-    sysObjects.usbDevObject = USB_DEVICE_Initialize (USB_DEVICE_INDEX_0 ,
-                                                    ( SYS_MODULE_INIT* ) & usbDevInitData);
-    // Check if the object returned by the device layer is valid
-    SYS_ASSERT((SYS_MODULE_OBJ_INVALID != sysObjects.usbDevObject), "Invalid USB DEVICE object");
+    USB_SYS_Init();
 #endif
     // init LCD
     APP_LCD_Initialize(APP_PBCLK_FREQ);

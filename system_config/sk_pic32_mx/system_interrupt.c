@@ -14,7 +14,6 @@
 #include <xc.h>
 #include <sys/attribs.h>
 #include "../../app.h"
-#include "system_definitions.h"
 #include "system_config.h"
 
 // ***********************************************
