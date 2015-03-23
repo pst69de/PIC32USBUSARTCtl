@@ -26,7 +26,13 @@
 #include "system_config.h"
 #include "app.h"
 #include "system_init.h"
+#ifdef APP_LCD_I2C_ID
 #include "POEi2clcd.h"
+#endif
+#ifdef APP_USE_USB
+#include "POEusb.h"
+#endif
+
 
 /* All the files in the C++ standard library declare its entities
  * within the std namespace. */
@@ -108,8 +114,7 @@ extern "C" {
 // Vector for USB 1, priority 5, software controlled register switching (on MX1xx/MX2xx MCUs)
 void __ISR ( _USB_1_VECTOR,ipl5soft ) _InterruptHandler_USB ( void )
 {
-    SYS_USB_DEVICE_ISR();
-    //USB_DEVICE_Tasks_ISR(sysObjects.usbDevObject);
+    USB_SYS_ISR();
 }
 #endif
 

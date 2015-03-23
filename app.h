@@ -75,10 +75,6 @@ typedef enum {
     APP_STATE_HOLD
 } APP_STATES;
 
-#ifdef APP_USE_USB
-#define USB_DEVICE_CDC_INDEX_0 0
-#endif
-
 // App Timing Structure
 typedef struct {
     int milliSeconds;
@@ -120,105 +116,13 @@ typedef struct
     int               POEnetSecOutputSize;
     int               POEnetSecOutputIdx;
 #endif // of ifdef APP_POEnet_SECONDARY
-#ifdef APP_USE_USB
-    // USB: Device layer handle returned by device layer open function
-    USB_DEVICE_HANDLE    deviceHandle;
-    USB_DEVICE_CDC_INDEX cdcInstance;
-    // USB: Device configured state
-    bool                 isConfigured;
-    // USB: Read Data Buffer
-    //char                 readBuffer[USB_BUFFER_SIZE];
-    // -> one of the Input Buffers defined by USB_INPUT_BUF
-    // USB: Set Line Coding Data
-    USB_CDC_LINE_CODING  setLineCodingData;
-    // USB: Get Line Coding Data
-    USB_CDC_LINE_CODING  getLineCodingData;
-    // USB: Control Line State
-    USB_CDC_CONTROL_LINE_STATE controlLineStateData;
-    // USB: Break data
-    uint16_t             breakData;
-    // USB: Read transfer handle
-    USB_DEVICE_CDC_TRANSFER_HANDLE readTransferHandle;
-    // USB: Write transfer handle
-    USB_DEVICE_CDC_TRANSFER_HANDLE writeTransferHandle;
-    // USB: True if a character was read
-    bool                 isReadComplete;
-    // USB: True if a character was written
-    bool                 isWriteComplete;
-    // extend USB: output buffer
-    //char                 writeBuffer[USB_BUFFER_SIZE];
-    // -> one of the Output Buffers defined by USB_OUTPUT_BUF
-    //int                  writeCount;
-    // -> one of the Output Sizes defined by USB_OUTPUT_SIZE
-#endif // of ifdef APP_USE_USB
-#ifdef APP_USE_UART
-    // UART 
-    // defined usage of Buffers by UART_INPUT_BUF, UART_INPUT_SIZE, UART_INPUT_IDX, UART_OUTPUT_BUF, UART_OUTPUT_SIZE, UART_OUTPUT_IDX
-    //char                 UARTreadBuffer[APP_UART_RX_BUFFER_SIZE];
-    //int                  UARTreadIdx;
-    //char                 UARTwriteBuffer[APP_UART_TX_BUFFER_SIZE];
-    //int                  UARTwriteIdx;
-#endif // of ifdef APP_USE_UART
+// -> USB Handling migrated to POEusb; UART needs only buffer handling
     // POE.net handling
     char                 POEnetCommand[APP_STRING_SIZE];
     int                  POEnet_NodeId;
 } APP_DATA;
 
-#ifdef APP_USE_USB
-// *****************************************************************************
-// Section: Application Callback Routines
-// *****************************************************************************
-// These routines are called by drivers when certain events occur.
-/*******************************************************************************
-  Function:
-    void APP_UsbDeviceEventCallBack(USB_DEVICE_EVENTS events)
-
-  Summary:
-    Device layer event notification callback.
-
-  Description:
-    This routine defines the device layer event notification callback.
-
-  Precondition:
-    The device layer should be opened by the application and the callback should
-    be registered with the device layer.
-
-  Parameters:
-    events  - specific device event
-
-  Returns:
-    None.
-
-  Remarks:
-    None.
-*/
-
-bool APP_USBStateReset ( void );
-
-void APP_USBDeviceEventCallBack(USB_DEVICE_EVENT events,
-        void * eventData, uintptr_t context);
-
-void APP_USBDeviceCDCEventHandler
-(
-    USB_DEVICE_CDC_INDEX index ,
-    USB_DEVICE_CDC_EVENT event ,
-    void * pData,
-    uintptr_t userData
-);
-
-void APP_USBDeviceEventHandler ( 
-    USB_DEVICE_EVENT event
-,   void * eventData
-,   uintptr_t context
-);
-
-USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler (
-    USB_DEVICE_CDC_INDEX index
-,   USB_DEVICE_CDC_EVENT event
-,   void * pData
-,   uintptr_t userData
-);
-#endif // of ifdef APP_USE_USB
+// -> USB Handling migrated to POEusb
 
 // helper routines
 void ClearBuffer(char *buffer);
@@ -240,21 +144,11 @@ void APP_UART_Write(void);
 
 void APP_Tasks ( void );
 
-
-// *****************************************************************************
 // *****************************************************************************
 // Section: extern declarations
 // *****************************************************************************
-// *****************************************************************************
 
 extern APP_DATA appData;
-
-#ifdef APP_USE_USB
-extern const USB_DEVICE_FUNCTION_REGISTRATION_TABLE
-    funcRegistrationTable[USB_DEVICE_CDC_INSTANCES_NUMBER];
-
-extern const USB_DEVICE_MASTER_DESCRIPTOR usbMasterDescriptor;
-#endif // of ifdef APP_USE_USB
 
 #ifdef	__cplusplus
 }

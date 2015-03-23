@@ -21,8 +21,9 @@ extern "C" {
 
 void SYS_Initialize ( void *data );
 
-void SYS_USB_DEVICE_ISR(void);
-
+// -> migrated to POEusb as USB_SYS_ISR
+//void SYS_USB_DEVICE_ISR(void);
+// -> no need as global object, migrated to POEusb
 //SYSTEM_OBJECTS sysObjects;
 
 #ifdef	__cplusplus
