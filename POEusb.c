@@ -10,17 +10,15 @@
  *   Version 0: alpha development
  */
 
-#include "POEi2clcd.h"
+#include "POEusb.h"
 
 #ifdef APP_USE_USB
 // *****************************************************************************
 // USB specific includes
 // *****************************************************************************
 #include "system/common/sys_module.h"
-#include "usb/usb_device.h"
-#include "usb/usb_chapter_9.h"
-#include "usb/usb_cdc.h"
-#include "usb/usb_device_cdc.h"
+//#include "usb/usb_chapter_9.h"
+//#include "usb/usb_cdc.h"
 
 
 // *****************************************************************************

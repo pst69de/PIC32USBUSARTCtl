@@ -49,8 +49,11 @@
 // DEVCFG2
 #pragma config FPLLIDIV = DIV_2         // PLL Input Divider (2x Divider)
 #pragma config FPLLMUL = MUL_24         // PLL Multiplier (24x Multiplier)
+// should be oriented on APP_USE_USB of system_config.h, but this will do the same as there
+#ifdef __32MX250F128B__
 #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider (2x Divider)
 #pragma config UPLLEN = ON              // USB PLL Enable (Enabled)
+#endif
 #pragma config FPLLODIV = DIV_4         // System PLL Output Clock Divider (PLL Divide by 4)
 
 // DEVCFG1

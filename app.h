@@ -24,7 +24,7 @@ extern "C" {
 #include <stdlib.h>
 #include "system_config/sk_pic32_mx/system_config.h"
 #ifdef APP_USE_USB
-#include "usb/usb_device_cdc.h"
+//#include "usb/usb_device_cdc.h"
 #endif
     
 // Application States

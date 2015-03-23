@@ -390,7 +390,7 @@ void APP_Tasks ( void )
             appData.POEnetSecOutputIdx = 0;
 #else // ifdef APP_POEnet_SECONDARY
             strcpy(&appData.POEnetPrimOutputBuf[0], "U<reset/>\0");
-            appData.POEnetPrimOutputSize = strlen((&appData.POEnetPrimOutputBuf[0]) + 1;
+            appData.POEnetPrimOutputSize = strlen(&appData.POEnetPrimOutputBuf[0]) + 1;
             appData.POEnetPrimOutputIdx = 0;            
 #endif // else APP_POEnet_SECONDARY
             APP_LCD_Print( 1, 8, &POEnet_reset[0]);
@@ -545,7 +545,7 @@ void APP_Tasks ( void )
             // no secondary -> pass Output to UART TX 
             // initiate UART transmission by writing 1st Byte
             //APP_UART_Write();
-            PLIB_UART_TransmitterEnable(APP_UART_TX_ID);
+            PLIB_USART_TransmitterEnable(APP_UART_TX_ID);
             appData.state = APP_STATE_POENET_OUTPUT_READY;
 #endif // else APP_USE_USB
 #endif // else APP_POEnet_SECONDARY

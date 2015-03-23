@@ -53,7 +53,7 @@
 #include "system_config.h"
 #ifdef APP_USE_USB
 //#include "usb/usb_device.h"
-#include "POEusb.h"
+#include "../../POEusb.h"
 #endif
 // -> only needed for USB migrated as usbDevObject to POEusb
 // Global allocation of structure to hold system objects handles
