@@ -87,6 +87,35 @@ void APP_Initialize ( void )
     // POE.net handling
     ClearString(&appData.POEnetCommand[0]);
     appData.POEnet_NodeId = -1;
+#ifdef APP_USE_ADC
+    appData.ADC_PinIdx = 1;
+    appData.ADC_PinValue[0] = 0;
+    appData.ADC_Numerator[0] = 3.3f;
+    appData.ADC_Denominator[0] = 1024f;
+    appData.ADC_Value[0] = 0.0f;
+    strcpy(&appData.ADC_Unit[0], "V");
+#ifdef APP_ADC2_INPUT_POS
+    appData.ADC_PinValue[1] = 0;
+    appData.ADC_Numerator[1] = 3.3f;
+    appData.ADC_Denominator[1] = 1024f;
+    appData.ADC_Value[1] = 0.0f;
+    strcpy(&appData.ADC_Unit[1], "V");
+#endif // ifdef APP_ADC2_INPUT_POS
+#ifdef APP_ADC3_INPUT_POS
+    appData.ADC_PinValue[2] = 0;
+    appData.ADC_Numerator[2] = 3.3f;
+    appData.ADC_Denominator[2] = 1024f;
+    appData.ADC_Value[2] = 0.0f;
+    strcpy(&appData.ADC_Unit[2], "V");
+#endif // ifdef APP_ADC3_INPUT_POS
+#ifdef APP_ADC4_INPUT_POS
+    appData.ADC_PinValue[3] = 0;
+    appData.ADC_Numerator[3] = 3.3f;
+    appData.ADC_Denominator[3] = 1024f;
+    appData.ADC_Value[3] = 0.0f;
+    strcpy(&appData.ADC_Unit[3], "V");
+#endif // ifdef APP_ADC4_INPUT_POS
+#endif // ifdef APP_USE_ADC
     // Place the App state machine in its initial state.
     appData.state = APP_STATE_INIT;
 }
@@ -579,6 +608,34 @@ void APP_Tasks ( void )
             appData.state = APP_STATE_USB_WRITE;
             break;
 #endif // ifdef APP_POEnet_SECONDARY
+#ifdef APP_USE_ADC
+        // Start a ADC read
+        case APP_STATE_START_ADC:
+            ADC_StartSample(appData.ADC_PinIdx);
+            break;
+        // Convert initiated ADC read
+        case APP_STATE_CONVERT_ADC:
+            // the ADC should have enough time to draw Voltage from the sampling port 
+            // sampling time should be at least 200ns, which is done in 5 Operations @ 25MHz
+            // a loop through the APP State machine is far more than 5 operations
+            ADC_ConvertSample();
+            break;
+        // wait on ADC conversion
+        case APP_STATE_READ_ADC:
+            if (ADC_ResultIfReady(&appData.ADC_PinValue[appData.ADC_PinIdx - 1])) {
+                appData.ADC_Value[appData.ADC_PinIdx - 1] = appData.ADC_PinValue[appData.ADC_PinIdx - 1] 
+                                                          * appData.ADC_Numerator[appData.ADC_PinIdx - 1] 
+                                                          / appData.ADC_Denominator[appData.ADC_PinIdx - 1];
+                sprintf(appData.ADC_Representation, "%.2f%s",appData.ADC_Value[appData.ADC_PinIdx - 1],appData.ADC_Value[appData.ADC_PinIdx - 1]);
+                if (appData.ADC_PinIdx - 1) {
+                    APP_LCD_Print(2, 10, &appData.ADC_Representation[0]);
+                } else {
+                    APP_LCD_Print(2, 0, &appData.ADC_Representation[0]);
+                }
+                appData.state = appData.ADC_Return_AppState;
+            }
+            break;
+#endif // ifdef APP_USE_ADC
         case APP_LCD_UPDATE:
             if (APP_CheckTimer()) { break; }
             // don't check USB on LCD cycles -> possible conflict with USB not yet initialized

@@ -63,6 +63,14 @@ typedef enum {
     // POE.net pass secondary
     APP_STATE_POENET_PASS,
 #endif // ifdef APP_POEnet_SECONDARY
+#ifdef APP_USE_ADC
+    // Start a ADC read
+    APP_STATE_START_ADC,
+    // Convert initiated ADC read
+    APP_STATE_CONVERT_ADC,
+    // wait on ADC conversion
+    APP_STATE_READ_ADC,
+#endif // ifdef APP_USE_ADC
     // LCD update
     APP_LCD_UPDATE,
     // (not used) Register timer callback
@@ -115,11 +123,21 @@ typedef struct
     char              POEnetSecOutputBuf[APP_BUFFER_SIZE];
     int               POEnetSecOutputSize;
     int               POEnetSecOutputIdx;
-#endif // of ifdef APP_POEnet_SECONDARY
+#endif // ifdef APP_POEnet_SECONDARY
 // -> USB Handling migrated to POEusb; UART needs only buffer handling
     // POE.net handling
-    char                 POEnetCommand[APP_STRING_SIZE];
-    int                  POEnet_NodeId;
+    char              POEnetCommand[APP_STRING_SIZE];
+    int               POEnet_NodeId;
+#ifdef APP_USE_ADC
+    APP_STATES        ADC_Return_AppState;
+    int               ADC_PinIdx;
+    int               ADC_PinValue[APP_ADC_NUM_PINS];
+    float             ADC_Numerator[APP_ADC_NUM_PINS];
+    float             ADC_Denominator[APP_ADC_NUM_PINS];
+    float             ADC_Value[APP_ADC_NUM_PINS];
+    char              ADC_Unit[APP_ADC_NUM_PINS][APP_STRING_SIZE];
+    char              ADC_Representation[APP_STRING_SIZE];
+#endif // ifdef APP_USE_ADC
 } APP_DATA;
 
 // -> USB Handling migrated to POEusb

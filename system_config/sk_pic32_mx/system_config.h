@@ -256,24 +256,25 @@ extern "C" {
 #endif // ifdef APP_USE_USB
 
 #ifdef APP_USE_ADC
+#define APP_ADC_NUM_PINS       2
 #define APP_ADC_ID             ADC_ID_1
 #define APP_ADC_CCLK_BASE      APP_PBCLK_FREQ
-#define APP_ADC_CCLK_RATE      1000000L
-// 1st analog input pin
+#define APP_ADC_CCLK_RATE      4000000L
+// 1st analog input pin (should allways be defined)
 #define APP_ADC1_INPUT_POS     ADC_INPUT_POSITIVE_AN9
 #define APP_ADC1_PORTS_ID      PORTS_ID_0
 #define APP_ADC1_PORT_CHANNEL  PORT_CHANNEL_B
 #define APP_ADC1_PIN           PORTS_BIT_POS_15
 #define APP_ADC1_AIPIN         PORTS_ANALOG_PIN_9
-// 2nd analog input pin
+// 2nd analog input pin (maybe defined)
 #define APP_ADC2_INPUT_POS     ADC_INPUT_POSITIVE_AN11
 #define APP_ADC2_PORTS_ID      PORTS_ID_0
 #define APP_ADC2_PORT_CHANNEL  PORT_CHANNEL_B
 #define APP_ADC2_PIN           PORTS_BIT_POS_13
 #define APP_ADC2_AIPIN         PORTS_ANALOG_PIN_11
-// 3rd analog input pin
+// 3rd analog input pin (maybe defined)
 #undef  APP_ADC3_INPUT_POS
-// 4th analog input pin
+// 4th analog input pin (maybe defined)
 #undef  APP_ADC4_INPUT_POS
 
 #endif // ifdef APP_USE_ADC

@@ -18,11 +18,9 @@ void ADC_Initialize(void) {
     // init ADC module for polling 
     PLIB_ADC_Disable(APP_ADC_ID);
     // port inits
-#ifdef APP_ADC1_INPUT_POS
     PLIB_PORTS_PinClear(APP_ADC1_PORTS_ID, APP_ADC1_PORT_CHANNEL, APP_ADC1_PIN);
     PLIB_PORTS_PinDirectionInputSet(APP_ADC1_PORTS_ID, APP_ADC1_PORT_CHANNEL, APP_ADC1_PIN);
     PLIB_PORTS_PinModeSelect(APP_ADC1_PORTS_ID, APP_ADC1_AIPIN, PORTS_PIN_MODE_ANALOG);
-#endif // ifdef APP_ADC1_INPUT_POS
 #ifdef APP_ADC2_INPUT_POS
     PLIB_PORTS_PinClear(APP_ADC2_PORTS_ID, APP_ADC2_PORT_CHANNEL, APP_ADC2_PIN);
     PLIB_PORTS_PinDirectionInputSet(APP_ADC2_PORTS_ID, APP_ADC2_PORT_CHANNEL, APP_ADC2_PIN);
@@ -55,32 +53,43 @@ void ADC_Initialize(void) {
 
 // start sampling of position
 void ADC_StartSample(int pos) {
-    PLIB_ADC_MuxChannel0InputNegativeSelect(APP_AIN_ADC_ID, ADC_MUX_A, ADC_INPUT_NEGATIVE_VREF_MINUS);
+    PLIB_ADC_MuxChannel0InputNegativeSelect(APP_ADC_ID, ADC_MUX_A, ADC_INPUT_NEGATIVE_VREF_MINUS);
     switch (pos) {
+#ifdef APP_ADC2_INPUT_POS
         case 2:
-            PLIB_ADC_MuxChannel0InputPositiveSelect(APP_AIN_ADC_ID, ADC_MUX_A, APP_AIN1_INPUT_POS);
+            PLIB_ADC_MuxChannel0InputPositiveSelect(APP_ADC_ID, ADC_MUX_A, APP_ADC2_INPUT_POS);
             break;
+#endif // ifdef APP_ADC2_INPUT_POS
+#ifdef APP_ADC3_INPUT_POS
         case 3:
+            PLIB_ADC_MuxChannel0InputPositiveSelect(APP_ADC_ID, ADC_MUX_A, APP_ADC3_INPUT_POS);
             break;
+#endif // ifdef APP_ADC3_INPUT_POS
+#ifdef APP_ADC4_INPUT_POS
         case 4:
+            PLIB_ADC_MuxChannel0InputPositiveSelect(APP_ADC_ID, ADC_MUX_A, APP_ADC4_INPUT_POS);
             break;
+#endif // ifdef APP_ADC4_INPUT_POS
         default:
+            PLIB_ADC_MuxChannel0InputPositiveSelect(APP_ADC_ID, ADC_MUX_A, APP_ADC1_INPUT_POS);
             break;
     }
-    PLIB_ADC_SamplingStart(APP_AIN_ADC_ID);
+    PLIB_ADC_SamplingStart(APP_ADC_ID);
 }
 
 // start sample conversion
 void ADC_ConvertSample(void) {
-            PLIB_ADC_ConversionStart(APP_AIN_ADC_ID);
-    
+    PLIB_ADC_ConversionStart(APP_ADC_ID);
 }
 
 // wait on result
 bool ADC_ResultIfReady(int *result) {
-            if (PLIB_ADC_ConversionHasCompleted(APP_AIN_ADC_ID)) {
-                appData.adcResult1 = PLIB_ADC_ResultGetByIndex(APP_AIN_ADC_ID, 0);
-    
+    if (PLIB_ADC_ConversionHasCompleted(APP_ADC_ID)) {
+        *result = PLIB_ADC_ResultGetByIndex(APP_ADC_ID, 0);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 #endif //ifdef APP_ADC_ID

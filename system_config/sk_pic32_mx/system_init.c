@@ -236,11 +236,12 @@ void SYS_Initialize ( void *data )
     // init UART
     UART_Initialize();
 #endif
-    /* TODO:  Initialize all modules and the application. */
-
+#ifdef APP_USE_ADC
+    ADC_Initialize();
+#endif
     // Initialize the Application
     APP_Initialize();
-
+    
     // Initialize the interrupt system (after all other init's)
     INT_Initialize();
     // startup system
