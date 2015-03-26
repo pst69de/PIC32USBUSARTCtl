@@ -115,7 +115,8 @@ void APP_Initialize ( void )
     appData.ADC_Value[3] = 0.0f;
     strcpy(&appData.ADC_Unit[3], "V");
 #endif // ifdef APP_ADC4_INPUT_POS
-    
+    // for demo purposes
+    appData.pollADC;    
 #endif // ifdef APP_USE_ADC
     // Place the App state machine in its initial state.
     appData.state = APP_STATE_INIT;
@@ -165,8 +166,13 @@ void APP_TimingCallback ( void ) {
     }
 #ifdef APP_USE_ADC
     // for demo purposes
-    
-#endif
+    if (!(appData.time.milliSeconds%100)) {
+        appData.pollADC = true;
+        int i = appData.time.milliSeconds/100;
+        // switch between pin 1 and 2
+        appData.ADC_PinIdx = (i%2)+1;
+    }
+#endif // ifdef APP_USE_ADC
 }
 
 // APP Timed LED callback registration routine
@@ -195,6 +201,19 @@ bool APP_CheckTimer (void) {
             }
         }
     }
+#ifdef APP_USE_ADC
+    // for demo purposes
+    if (appData.pollADC) {
+        appData.pollADC = false;
+        // eventually add other critical ops
+        if (appData.state != APP_LCD_UPDATE) {
+            appData.ADC_Return_AppState = appData.state;
+            // APP_TimingCallback sets Pin to poll
+            appData.state = APP_STATE_START_ADC;
+            Result = true; // set break on current action
+        }
+    } 
+#endif // ifdef APP_USE_ADC
     return Result;
 }
 
