@@ -21,6 +21,9 @@
 #ifdef APP_USE_USB
 #include "POEusb.h"
 #endif
+#ifdef APP_USE_ADC
+#include "POEadc.h"
+#endif
 
 
 // helper routines
@@ -90,27 +93,27 @@ void APP_Initialize ( void )
 #ifdef APP_USE_ADC
     appData.ADC_PinIdx = 1;
     appData.ADC_PinValue[0] = 0;
-    appData.ADC_Numerator[0] = 3.3f;
-    appData.ADC_Denominator[0] = 1024f;
+    appData.ADC_Numerator[0] = 36.3f;
+    appData.ADC_Denominator[0] = 1024.0f;
     appData.ADC_Value[0] = 0.0f;
-    strcpy(&appData.ADC_Unit[0], "V");
+    strcpy(&appData.ADC_Unit[0][0], "V");
 #ifdef APP_ADC2_INPUT_POS
     appData.ADC_PinValue[1] = 0;
-    appData.ADC_Numerator[1] = 3.3f;
-    appData.ADC_Denominator[1] = 1024f;
+    appData.ADC_Numerator[1] = 36.3f;
+    appData.ADC_Denominator[1] = 1024.0f;
     appData.ADC_Value[1] = 0.0f;
-    strcpy(&appData.ADC_Unit[1], "V");
+    strcpy(&appData.ADC_Unit[1][0], "V");
 #endif // ifdef APP_ADC2_INPUT_POS
 #ifdef APP_ADC3_INPUT_POS
     appData.ADC_PinValue[2] = 0;
-    appData.ADC_Numerator[2] = 3.3f;
+    appData.ADC_Numerator[2] = 36.3f;
     appData.ADC_Denominator[2] = 1024f;
     appData.ADC_Value[2] = 0.0f;
     strcpy(&appData.ADC_Unit[2], "V");
 #endif // ifdef APP_ADC3_INPUT_POS
 #ifdef APP_ADC4_INPUT_POS
     appData.ADC_PinValue[3] = 0;
-    appData.ADC_Numerator[3] = 3.3f;
+    appData.ADC_Numerator[3] = 36.3f;
     appData.ADC_Denominator[3] = 1024f;
     appData.ADC_Value[3] = 0.0f;
     strcpy(&appData.ADC_Unit[3], "V");
@@ -660,6 +663,7 @@ void APP_Tasks ( void )
         // Start a ADC read
         case APP_STATE_START_ADC:
             ADC_StartSample(appData.ADC_PinIdx);
+            appData.state = APP_STATE_CONVERT_ADC;
             break;
         // Convert initiated ADC read
         case APP_STATE_CONVERT_ADC:
@@ -667,6 +671,7 @@ void APP_Tasks ( void )
             // sampling time should be at least 200ns, which is done in 5 Operations @ 25MHz
             // a loop through the APP State machine is far more than 5 operations
             ADC_ConvertSample();
+            appData.state = APP_STATE_READ_ADC;
             break;
         // wait on ADC conversion
         case APP_STATE_READ_ADC:

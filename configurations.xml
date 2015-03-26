@@ -20,6 +20,7 @@
         <itemPath>../src/POEnet.h</itemPath>
         <itemPath>../src/POEi2clcd.h</itemPath>
         <itemPath>../src/POEusb.h</itemPath>
+        <itemPath>../src/POEadc.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="framework" projectFiles="true">
         <logicalFolder name="f3" displayName="driver" projectFiles="true">
@@ -90,6 +91,7 @@
         <itemPath>../src/POEnet.cpp</itemPath>
         <itemPath>../src/POEi2clcd.c</itemPath>
         <itemPath>../src/POEusb.c</itemPath>
+        <itemPath>../src/POEadc.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="framework" projectFiles="true">
         <logicalFolder name="f2" displayName="driver" projectFiles="true">

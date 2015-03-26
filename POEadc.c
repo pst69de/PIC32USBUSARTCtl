@@ -14,6 +14,8 @@
 
 #ifdef APP_ADC_ID
 
+#include "peripheral/adc/plib_adc.h"
+
 void ADC_Initialize(void) {
     // init ADC module for polling 
     PLIB_ADC_Disable(APP_ADC_ID);
