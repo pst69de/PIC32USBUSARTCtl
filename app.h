@@ -137,6 +137,8 @@ typedef struct
     float             ADC_Value[APP_ADC_NUM_PINS];
     char              ADC_Unit[APP_ADC_NUM_PINS][APP_STRING_SIZE];
     char              ADC_Representation[APP_STRING_SIZE];
+    // for demo purposes
+    bool              pollADC;
 #endif // ifdef APP_USE_ADC
 } APP_DATA;
 

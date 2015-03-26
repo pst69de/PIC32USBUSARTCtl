@@ -115,6 +115,7 @@ void APP_Initialize ( void )
     appData.ADC_Value[3] = 0.0f;
     strcpy(&appData.ADC_Unit[3], "V");
 #endif // ifdef APP_ADC4_INPUT_POS
+    
 #endif // ifdef APP_USE_ADC
     // Place the App state machine in its initial state.
     appData.state = APP_STATE_INIT;
@@ -162,6 +163,10 @@ void APP_TimingCallback ( void ) {
     if (appData.time.Wait > 0) {
         appData.time.Wait--;
     }
+#ifdef APP_USE_ADC
+    // for demo purposes
+    
+#endif
 }
 
 // APP Timed LED callback registration routine
@@ -544,6 +549,30 @@ void APP_Tasks ( void )
             if (!strcmp(&appData.POEnetCommand[0],&POEnet_net[0])) {
                 // handle net command
                 POEnet_GetNewNodeId(&appData.POEnet_NodeId);
+            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_node[0])) {
+                // handle node command 
+                // -> pass sensors and actors
+#ifdef APP_USE_ADC
+                //POEnet_AddAnalog(1,appData.ADC_Numerator[0],appData.ADC_Denominator[0],&appData.ADC_Unit[0]);
+#endif // ifdef APP_USE_ADC
+#ifdef APP_USE_DIO
+#endif // ifdef APP_USE_DIO
+#ifdef APP_USE_PWM
+#endif // ifdef APP_USE_PWM
+#ifdef APP_USE_ADC
+            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_analog[0])) {
+                
+#endif // ifdef APP_USE_ADC
+#ifdef APP_USE_DIO
+            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_digital[0])) {
+                
+            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_switch[0])) {
+                
+#endif // ifdef APP_USE_DIO
+#ifdef APP_USE_PWM
+            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_pwm[0])) {
+                
+#endif // ifdef APP_USE_PWM
             }
             appData.POEnetPrimOutputBuf[0] = 'U';
             POEnet_Output(&appData.POEnetPrimOutputBuf[1]);
@@ -626,12 +655,14 @@ void APP_Tasks ( void )
                 appData.ADC_Value[appData.ADC_PinIdx - 1] = appData.ADC_PinValue[appData.ADC_PinIdx - 1] 
                                                           * appData.ADC_Numerator[appData.ADC_PinIdx - 1] 
                                                           / appData.ADC_Denominator[appData.ADC_PinIdx - 1];
-                sprintf(appData.ADC_Representation, "%.2f%s",appData.ADC_Value[appData.ADC_PinIdx - 1],appData.ADC_Value[appData.ADC_PinIdx - 1]);
+                sprintf(appData.ADC_Representation, "%.2f%s",appData.ADC_Value[appData.ADC_PinIdx - 1],appData.ADC_Unit[appData.ADC_PinIdx - 1]);
+                // vv for demo purposes
                 if (appData.ADC_PinIdx - 1) {
                     APP_LCD_Print(2, 10, &appData.ADC_Representation[0]);
                 } else {
                     APP_LCD_Print(2, 0, &appData.ADC_Representation[0]);
                 }
+                // ^^ for demo purposes
                 appData.state = appData.ADC_Return_AppState;
             }
             break;
