@@ -20,6 +20,7 @@ extern "C" {
 #undef APP_USE_USB
 #endif
 #define APP_USE_ADC
+#define APP_USE_DIO
 
 // imports:
 #include "peripheral/ports/plib_ports.h"
@@ -96,6 +97,7 @@ extern "C" {
 // compiler macro consts & funcs for LED Handling
 // LED red 
 // Used for general error signaling 
+#ifndef APP_USE_DIO
 #define LEDR_Direction  PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
 #define LEDR_Mode       PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_4, PORTS_PIN_MODE_DIGITAL)
 #define LEDR_OD
@@ -103,8 +105,18 @@ extern "C" {
 #define LEDR_Clear      PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
 #define LEDR_Set        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
 #define LEDR_Toggle     PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_2)
+#else // ifndef APP_USE_DIO
+#define LEDR_Direction  
+#define LEDR_Mode       
+#define LEDR_OD         
+#define LEDR_Remap      
+#define LEDR_Clear      
+#define LEDR_Set        
+#define LEDR_Toggle     
+#endif // else ifndef APP_USE_DIO
 // LED yellow
 // Used for I2C transmit / error signaling 
+#ifndef APP_USE_DIO
 #define LEDY_Direction  PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
 #define LEDY_Mode
 #define LEDY_OD
@@ -112,8 +124,18 @@ extern "C" {
 #define LEDY_Clear      PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
 #define LEDY_Set        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
 #define LEDY_Toggle     PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_4)
+#else // ifndef APP_USE_DIO
+#define LEDY_Direction  
+#define LEDY_Mode       
+#define LEDY_OD         
+#define LEDY_Remap      
+#define LEDY_Clear      
+#define LEDY_Set        
+#define LEDY_Toggle     
+#endif // else ifndef APP_USE_DIO
 // LED green
 // Used for data acceptance
+#ifndef APP_USE_DIO
 #define LEDG_Direction  PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
 #define LEDG_Mode       PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_5, PORTS_PIN_MODE_DIGITAL)
 #define LEDG_OD
@@ -121,6 +143,15 @@ extern "C" {
 #define LEDG_Clear      PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
 #define LEDG_Set        PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
 #define LEDG_Toggle     PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3)
+#else // ifndef APP_USE_DIO
+#define LEDG_Direction  
+#define LEDG_Mode       
+#define LEDG_OD         
+#define LEDG_Remap      
+#define LEDG_Clear      
+#define LEDG_Set        
+#define LEDG_Toggle     
+#endif // else ifndef APP_USE_DIO
 // LED blue
 // Not Used
 #define LEDB_Direction
@@ -279,7 +310,9 @@ extern "C" {
 
 #endif // ifdef APP_USE_ADC
 
-/* TODO:  Define build-time Configuration Options. */
+#ifdef APP_USE_DIO
+/* TODO:  Define dio Options */
+#endif // ifdef APP_USE_DIO
 
 #ifdef	__cplusplus
 }
