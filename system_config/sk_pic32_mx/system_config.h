@@ -312,6 +312,15 @@ extern "C" {
 
 #ifdef APP_USE_DIO
 /* TODO:  Define dio Options */
+#include "POEdiopins.h"
+#define APP_DI_1         DIO_PIN_B0
+#define APP_DI_2         DIO_PIN_B1
+#undef  APP_DI_3
+#undef  APP_DI_4
+#define APP_DO_1         DIO_PIN_B2
+#define APP_DO_2         DIO_PIN_B3
+#define APP_DO_3         DIO_PIN_B4
+#undef  APP_DO_4
 #endif // ifdef APP_USE_DIO
 
 #ifdef	__cplusplus
