@@ -16,7 +16,7 @@
 
 #ifdef APP_USE_DIO
 
-#include "peripheral/adc/plib_ports.h"
+#include "peripheral/ports/plib_ports.h"
 
 PORTS_CHANNEL  pin2channel[DIO_PIN_COUNT] = {
     PORT_CHANNEL_B
@@ -66,22 +66,134 @@ PORTS_BIT_POS  pin2portpos[DIO_PIN_COUNT] = {
 ,   PORTS_BIT_POS_4
 };
 
+void DIO_PinModeSelectDigital(int num) {
+    switch (num) {
+        case DIO_PIN_B0:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_2, PORTS_PIN_MODE_DIGITAL);
+        case DIO_PIN_B1:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_3, PORTS_PIN_MODE_DIGITAL);
+        case DIO_PIN_B2:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_4, PORTS_PIN_MODE_DIGITAL);
+        case DIO_PIN_B3:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_5, PORTS_PIN_MODE_DIGITAL);
+#ifdef __32MX150F128B__
+        case DIO_PIN_B12:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_12, PORTS_PIN_MODE_DIGITAL);
+#endif
+        case DIO_PIN_B13:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_11, PORTS_PIN_MODE_DIGITAL);
+        case DIO_PIN_B14:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_10, PORTS_PIN_MODE_DIGITAL);
+        case DIO_PIN_B15:
+            PLIB_PORTS_PinModeSelect(PORTS_ID_0, PORTS_ANALOG_PIN_9, PORTS_PIN_MODE_DIGITAL);
+        default:
+            break;
+    }
+}
+
+void DIO_Initialize(void) {
+#ifdef APP_DO_1
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_1], pin2portpos[APP_DO_1]);
+    PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, pin2channel[APP_DO_1], pin2portpos[APP_DO_1]);
+    DIO_PinModeSelectDigital(APP_DO_1);
+    APP_DO_1_OD;
+#endif
+#ifdef APP_DO_2
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+    PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+    DIO_PinModeSelectDigital(APP_DO_2);
+    APP_DO_2_OD;
+#endif
+#ifdef APP_DO_3
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+    PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+    DIO_PinModeSelectDigital(APP_DO_3);
+    APP_DO_3_OD;
+#endif
+#ifdef APP_DO_4
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_4], pin2portpos[APP_DO_4]);
+    PLIB_PORTS_PinDirectionOutputSet(PORTS_ID_0, pin2channel[APP_DO_4], pin2portpos[APP_DO_4]);
+    DIO_PinModeSelectDigital(APP_DO_4);
+    APP_DO_4_OD;
+#endif
+#ifdef APP_DI_1
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DI_1], pin2portpos[APP_DI_1]);
+    PLIB_PORTS_PinDirectionInputSet(PORTS_ID_0, pin2channel[APP_DI_1], pin2portpos[APP_DI_1]);
+    DIO_PinModeSelectDigital(APP_DI_1);
+#endif
+#ifdef APP_DI_2
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DI_2], pin2portpos[APP_DI_2]);
+    PLIB_PORTS_PinDirectionInputSet(PORTS_ID_0, pin2channel[APP_DI_2], pin2portpos[APP_DI_2]);
+    DIO_PinModeSelectDigital(APP_DI_2);
+#endif
+#ifdef APP_DI_3
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DI_3], pin2portpos[APP_DI_3]);
+    PLIB_PORTS_PinDirectionInputSet(PORTS_ID_0, pin2channel[APP_DI_3], pin2portpos[APP_DI_3]);
+    DIO_PinModeSelectDigital(APP_DI_3);
+#endif
+#ifdef APP_DI_4
+    PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DI_4], pin2portpos[APP_DI_4]);
+    PLIB_PORTS_PinDirectionInputSet(PORTS_ID_0, pin2channel[APP_DI_4], pin2portpos[APP_DI_4]);
+    DIO_PinModeSelectDigital(APP_DI_4);
+#endif
+}
+
+
 int DIO_ReadDI(int num) {
-    return 0;
+    int retVal = 0;
+    switch (num) {
+#ifdef APP_DI_2
+        case 2:
+            if (PLIB_PORTS_PinGet(PORTS_ID_0,pin2channel[APP_DI_2], pin2portpos[APP_DI_2])) {
+                retVal = 1;
+            }
+            break;
+#endif
+#ifdef APP_DI_3
+        case 3:
+            if (PLIB_PORTS_PinGet(PORTS_ID_0,pin2channel[APP_DI_3], pin2portpos[APP_DI_3])) {
+                retVal = 1;
+            }
+            break;
+#endif
+#ifdef APP_DI_4
+        case 4:
+            if (PLIB_PORTS_PinGet(PORTS_ID_0,pin2channel[APP_DI_4], pin2portpos[APP_DI_4])) {
+                retVal = 1;
+            }
+            break;
+#endif
+        default:
+            if (PLIB_PORTS_PinGet(PORTS_ID_0,pin2channel[APP_DI_1], pin2portpos[APP_DI_1])) {
+                retVal = 1;
+            }
+            break;
+    }
+    return retVal;
 }
 
 void DIO_SetDOto(int num, int val) {
     switch (num) {
 #ifdef APP_DO_2
-        2:
+        case 2:
+            if (val) {
+                PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+            } else {
+                PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+            }
             break;
 #endif
 #ifdef APP_DO_3
-        3:
+        case 3:
+            if (val) {
+                PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+            } else {
+                PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+            }
             break;
 #endif
 #ifdef APP_DO_4
-        4:
+        case 4:
             if (val) {
                 PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_4], pin2portpos[APP_DO_4]);
             } else {
@@ -100,15 +212,72 @@ void DIO_SetDOto(int num, int val) {
 }
 
 void DIO_SetDO(int num) {
-    
+    switch (num) {
+#ifdef APP_DO_2
+        case 2:
+            PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+            break;
+#endif
+#ifdef APP_DO_3
+        case 3:
+            PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+            break;
+#endif
+#ifdef APP_DO_4
+        case 4:
+            PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_4], pin2portpos[APP_DO_4]);
+            break;
+#endif
+        default: 
+            PLIB_PORTS_PinSet(PORTS_ID_0, pin2channel[APP_DO_1], pin2portpos[APP_DO_1]);
+            break;
+    }
 }
 
 void DIO_ClearDO(int num) {
-    
+    switch (num) {
+#ifdef APP_DO_2
+        case 2:
+            PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+            break;
+#endif
+#ifdef APP_DO_3
+        case 3:
+            PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+            break;
+#endif
+#ifdef APP_DO_4
+        case 4:
+            PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_4], pin2portpos[APP_DO_4]);
+            break;
+#endif
+        default: 
+            PLIB_PORTS_PinClear(PORTS_ID_0, pin2channel[APP_DO_1], pin2portpos[APP_DO_1]);
+            break;
+    }
 }
 
 void DIO_ToggleDO(int num) {
-    
+    switch (num) {
+#ifdef APP_DO_2
+        case 2:
+            PLIB_PORTS_PinToggle(PORTS_ID_0, pin2channel[APP_DO_2], pin2portpos[APP_DO_2]);
+            break;
+#endif
+#ifdef APP_DO_3
+        case 3:
+            PLIB_PORTS_PinToggle(PORTS_ID_0, pin2channel[APP_DO_3], pin2portpos[APP_DO_3]);
+            break;
+#endif
+#ifdef APP_DO_4
+        case 4:
+            PLIB_PORTS_PinToggle(PORTS_ID_0, pin2channel[APP_DO_4], pin2portpos[APP_DO_4]);
+            break;
+#endif
+        default: 
+            PLIB_PORTS_PinToggle(PORTS_ID_0, pin2channel[APP_DO_1], pin2portpos[APP_DO_1]);
+            break;
+    }
 }
 
 
