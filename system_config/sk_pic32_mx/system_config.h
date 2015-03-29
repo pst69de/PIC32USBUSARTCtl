@@ -110,9 +110,9 @@ extern "C" {
 #define LEDR_Mode       
 #define LEDR_OD         
 #define LEDR_Remap      
-#define LEDR_Clear      
-#define LEDR_Set        
-#define LEDR_Toggle     
+#define LEDR_Clear      DIO_ClearDO(1)
+#define LEDR_Set        DIO_SetDO(1)
+#define LEDR_Toggle     DIO_ToggleDO(1)
 #endif // else ifndef APP_USE_DIO
 // LED yellow
 // Used for I2C transmit / error signaling 
@@ -129,9 +129,9 @@ extern "C" {
 #define LEDY_Mode       
 #define LEDY_OD         
 #define LEDY_Remap      
-#define LEDY_Clear      
-#define LEDY_Set        
-#define LEDY_Toggle     
+#define LEDY_Clear      DIO_ClearDO(3)
+#define LEDY_Set        DIO_SetDO(3)
+#define LEDY_Toggle     DIO_ToggleDO(3)
 #endif // else ifndef APP_USE_DIO
 // LED green
 // Used for data acceptance
@@ -148,9 +148,9 @@ extern "C" {
 #define LEDG_Mode       
 #define LEDG_OD         
 #define LEDG_Remap      
-#define LEDG_Clear      
-#define LEDG_Set        
-#define LEDG_Toggle     
+#define LEDG_Clear      DIO_ClearDO(2)
+#define LEDG_Set        DIO_SetDO(2)
+#define LEDG_Toggle     DIO_ToggleDO(2)
 #endif // else ifndef APP_USE_DIO
 // LED blue
 // Not Used
@@ -317,6 +317,7 @@ extern "C" {
 #define APP_DI_2         DIO_PIN_B1
 #undef  APP_DI_3
 #undef  APP_DI_4
+#define APP_DI_COUNT     2
 #define APP_DO_1         DIO_PIN_B2
 #define APP_DO_1_OD
 #define APP_DO_2         DIO_PIN_B3
@@ -325,6 +326,7 @@ extern "C" {
 #define APP_DO_3_OD
 #undef  APP_DO_4
 #define APP_DO_4_OD
+#define APP_DO_COUNT     3
 #endif // ifdef APP_USE_DIO
 
 #ifdef	__cplusplus

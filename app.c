@@ -574,11 +574,48 @@ void APP_Tasks ( void )
             } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_node[0])) {
                 // handle node command 
                 // -> pass sensors and actors
+/* 1st Steps interface integration
 #ifdef APP_USE_ADC
-                //POEnet_AddAnalog(1,appData.ADC_Numerator[0],appData.ADC_Denominator[0],&appData.ADC_Unit[0]);
+#ifdef APP_ADC1_INPUT_POS
+                POEnet_AddAnalog(1,&appData.ADC_Numerator[0],&appData.ADC_Denominator[0],&appData.ADC_Unit[0][0]);
+#endif
+#ifdef APP_ADC2_INPUT_POS
+                POEnet_AddAnalog(2,&appData.ADC_Numerator[1],&appData.ADC_Denominator[1],&appData.ADC_Unit[1][0]);
+#endif
+#ifdef APP_ADC3_INPUT_POS
+                POEnet_AddAnalog(3,&appData.ADC_Numerator[2],&appData.ADC_Denominator[2],&appData.ADC_Unit[2][0]);
+#endif
+#ifdef APP_ADC4_INPUT_POS
+                POEnet_AddAnalog(4,&appData.ADC_Numerator[3],&appData.ADC_Denominator[3],&appData.ADC_Unit[3][0]);
+#endif
 #endif // ifdef APP_USE_ADC
 #ifdef APP_USE_DIO
+#ifdef APP_DI_1
+                POEnet_AddDigital(1,&appData.DI_LoValue[0][0],&appData.DI_HiValue[0][0]);
+#endif
+#ifdef APP_DI_2
+                POEnet_AddDigital(2,&appData.DI_LoValue[1][0],&appData.DI_HiValue[1][0]);
+#endif
+#ifdef APP_DI_3
+                POEnet_AddDigital(3,&appData.DI_LoValue[2][0],&appData.DI_HiValue[2][0]);
+#endif
+#ifdef APP_DI_4
+                POEnet_AddDigital(4,&appData.DI_LoValue[3][0],&appData.DI_HiValue[3][0]);
+#endif
+#ifdef APP_DO_1
+                POEnet_AddSwitch(1,&appData.DO_LoValue[0][0],&appData.DO_HiValue[0][0]);
+#endif
+#ifdef APP_DO_2
+                POEnet_AddSwitch(2,&appData.DO_LoValue[1][0],&appData.DO_HiValue[1][0]);
+#endif
+#ifdef APP_DO_3
+                POEnet_AddSwitch(3,&appData.DO_LoValue[2][0],&appData.DO_HiValue[2][0]);
+#endif
+#ifdef APP_DO_4
+                POEnet_AddSwitch(4,&appData.DO_LoValue[3][0],&appData.DO_HiValue[3][0]);
+#endif
 #endif // ifdef APP_USE_DIO
+1st Steps interface integration */
 #ifdef APP_USE_PWM
 #endif // ifdef APP_USE_PWM
 #ifdef APP_USE_ADC
