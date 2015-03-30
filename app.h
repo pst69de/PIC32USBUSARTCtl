@@ -106,6 +106,8 @@ typedef struct
     APP_TIMING        time;
     int               lastSecond;
     bool              pollSecond;
+    // LCD (Re-)Init function callback
+    APP_STATES        LCD_Init_Return;
     // LCD Refresh function callback
     APP_STATES        LCD_Return_AppState;
     // LCD Dummy switch for Backlight

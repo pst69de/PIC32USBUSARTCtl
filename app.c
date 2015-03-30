@@ -195,11 +195,20 @@ bool APP_CheckTimer (void) {
         appData.timerExpired = false;
     }
     if (appData.pollSecond) {
+        // every second 
         appData.pollSecond = false;
         if (APP_LCD_Ready) {
+            // actualize LCD
             if (appData.state != APP_LCD_UPDATE) {
                 appData.LCD_Return_AppState = appData.state;
                 appData.state = APP_LCD_UPDATE;
+                Result = true;
+            }
+        } else {
+            // try reinit LCD
+            if (appData.state != APP_STATE_LCD_INIT) {
+                appData.LCD_Init_Return = appData.state;
+                appData.state = APP_STATE_LCD_INIT;
                 Result = true;
             }
         }
@@ -318,38 +327,44 @@ void APP_Tasks ( void )
             LEDY_Clear;
             //LEDG_Set;
             LEDG_Clear;
+#ifdef APP_USE_UART
+            // init UART before USB
+            appData.LCD_Init_Return = APP_STATE_UART_INIT;
+#else
+            appData.LCD_Init_Return = APP_STATE_HOLD;
+#endif // ifdef APP_USE_UART
+#ifdef APP_USE_USB
+            // use of USB overrides Init of UART
+            appData.LCD_Init_Return = APP_STATE_USB_INIT;
+#endif // of else APP_USE_USB
             appData.state = APP_STATE_LCD_INIT;
             break;
         case APP_STATE_LCD_INIT:
             if (APP_LCD_Init(appData.time.milliSeconds)) {
-                //LEDG_Clear;
-                // -> use of sprintf for string formatting
-                // Time and Status representation
-                // USB Status:
-                // U (LCD_Line[0][10])      = USB_DEVICE_Open successfull
-                // S (LCD_Line[0][11])      = USB_DEVICE_CDC_EventHandlerSet
-                // B (LCD_Line[0][12])      = Device attached (Vbus is powered)
-                // # (LCD_Line[0][13])      = > = Received; < = Sending
-                // 000 (LCD_Line[0][14-16]) = count Bytes 
-                // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
-                // POE.net status representation
-                APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
-                APP_LCD_Print( 1, 0, "POEnet _______ 00000");
+                if (APP_LCD_Ready) {
+                    //LEDG_Clear;
+                    // -> use of sprintf for string formatting
+                    // Time and Status representation
+                    // USB Status:
+                    // U (LCD_Line[0][10])      = USB_DEVICE_Open successfull
+                    // S (LCD_Line[0][11])      = USB_DEVICE_CDC_EventHandlerSet
+                    // B (LCD_Line[0][12])      = Device attached (Vbus is powered)
+                    // # (LCD_Line[0][13])      = > = Received; < = Sending
+                    // 000 (LCD_Line[0][14-16]) = count Bytes 
+                    // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
+                    // POE.net status representation
+                    APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
+                    APP_LCD_Print( 1, 0, "POEnet _______ 00000");
 #ifdef APP_USE_UART
-                APP_LCD_Print( 2, 0, "UART");
+                    APP_LCD_Print( 3, 5, "UART");
 #endif // ifdef APP_USE_UART
-                APP_LCD_Print( 3, 0, "LCD");
-#ifdef APP_USE_UART
-                // init UART before USB
-                appData.LCD_Return_AppState = APP_STATE_UART_INIT;
-#else
-                appData.LCD_Return_AppState = APP_STATE_HOLD;
-#endif // ifdef APP_USE_UART
-#ifdef APP_USE_USB
-                // use of USB overrides Init of UART
-                appData.LCD_Return_AppState = APP_STATE_USB_INIT;
-#endif // of else APP_USE_USB
-                appData.state = APP_LCD_UPDATE;
+                    APP_LCD_Print( 3, 0, "LCD");
+                    appData.LCD_Return_AppState = appData.LCD_Init_Return;
+                    appData.state = APP_LCD_UPDATE;
+                } else {
+                    // LCD Init failed, no LCD avaiable
+                    appData.state = appData.LCD_Init_Return;
+                } 
             }
             break;
 #ifdef APP_USE_USB
@@ -362,8 +377,8 @@ void APP_Tasks ( void )
                 appData.state = APP_STATE_USB_CONFIGURATION;
                 // Fillup Display with USB Status
                 APP_LCD_PrintChar(0,10,'U');
-                appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_USB_CONFIGURATION;
+                appData.state = APP_LCD_UPDATE;
             }
             break;
         case APP_STATE_USB_CONFIGURATION:
@@ -735,6 +750,11 @@ void APP_Tasks ( void )
             if (APP_LCD_I2C_Ready) {
                 APP_LCD_Update;
                 appData.state = appData.LCD_Return_AppState;
+            } else {
+                if (!APP_LCD_Ready) {
+                    // LCD may not be connected
+                    appData.state = appData.LCD_Return_AppState;
+                }
             }
             break;
         case APP_STATE_ERROR:

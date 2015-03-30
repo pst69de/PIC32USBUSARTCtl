@@ -198,6 +198,7 @@ typedef enum {
 
 // LCD Init
 typedef enum {
+    LCD_uninitialized,
     LCD_wait_on,
     LCD_init_8bit,
     LCD_wait_8bit,

@@ -36,6 +36,7 @@ void LCD_Initialize(uint32_t pb_clk_freq) {
     int i;
     I2C_State = I2C_UNINITIALIZED;
     I2C_Transfer = I2C_Idle;
+    Waits = 20; // Wait at least 20 ms after power on (and only after power on)
     LCD_InitState = LCD_wait_on;
     memset( &LCD_Write[0], '\0', LCD_I2C_WRITE_BUFFER_SIZE);
     LCD_WriteIx = 0;
@@ -124,7 +125,11 @@ void LCD_I2C_Process(void) {
                 case I2C_MS_Address:
                     // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
                     if (!PLIB_I2C_TransmitterByteWasAcknowledged(LCD_I2C_ID)) {
-                        //LEDR_Set;
+                        APP_Set_ErrorCondition("I2C NACK");
+                        // Slave did not acknowledge its address -> its not there, reset ready state 
+                        I2C_Transfer = I2C_Idle;
+                        I2C_State = I2C_MASTER_IDLE;
+                        LCD_InitState = LCD_uninitialized;
                     } else {
                         if ( PLIB_I2C_TransmitterIsReady(LCD_I2C_ID)) {
                             I2C_Transfer = I2C_MS_Transmit;
@@ -270,7 +275,7 @@ void LCD_Print(uint8_t line, uint8_t pos, char* lcdString) {
 bool LCD_Init(int mSecs) {
     if (I2C_State == I2C_UNINITIALIZED) {
         I2C_State = I2C_MASTER_IDLE;
-        Waits = 20; // Wait at least 20 ms after power on
+        // Power on waiting by LCD_Initialize
         LCD_InitState = LCD_wait_on;
     } else if (Waits) {
         if (lastWait != mSecs) {
@@ -279,6 +284,11 @@ bool LCD_Init(int mSecs) {
         }
     } else {
         switch (LCD_InitState) {
+            case LCD_uninitialized:
+                // fault state I2C slave (LCD) didn't acknowledge its address 
+                LCD_InitState = LCD_wait_on;
+                return true;
+                break;
             case LCD_wait_on:
                 // data & address always LIFO
                 LCD_AddWrite( LCD_COMMAND | LCD_RW_WRITE | LCD_E_WRITE | LCD_8BIT_H);
