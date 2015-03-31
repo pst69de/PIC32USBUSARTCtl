@@ -125,7 +125,8 @@ void LCD_I2C_Process(void) {
                 case I2C_MS_Address:
                     // for this purpose no collision checking by PLIB_I2C_ArbitrationLossHasOccurred
                     if (!PLIB_I2C_TransmitterByteWasAcknowledged(LCD_I2C_ID)) {
-                        APP_Set_ErrorCondition("I2C NACK");
+                        /* TODO: Future use of a delegate */
+                        //APP_Set_ErrorCondition("I2C NACK");
                         // Slave did not acknowledge its address -> its not there, reset ready state 
                         I2C_Transfer = I2C_Idle;
                         I2C_State = I2C_MASTER_IDLE;
