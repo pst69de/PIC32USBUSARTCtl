@@ -40,7 +40,7 @@
 /******************************************************************************/
 
 // DEVCFG3
-// USERID = No Setting
+#pragma config USERID = 0x0001u
 #pragma config PMDL1WAY = OFF           // Peripheral Module Disable Configuration (Allow multiple reconfigurations)
 #pragma config IOL1WAY = OFF            // Peripheral Pin Select Configuration (Allow multiple reconfigurations)
 #pragma config FUSBIDIO = OFF           // USB USID Selection (Controlled by Port Function)

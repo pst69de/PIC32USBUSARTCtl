@@ -53,7 +53,6 @@ APP_DATA appData;
 // Initialize
 void APP_Initialize ( void )
 {
-    int i;
     // Initialize App Timing to zero 
     appData.time.milliSeconds = 0;
     appData.time.Seconds = 0;
@@ -88,6 +87,7 @@ void APP_Initialize ( void )
     appData.UART_OUTPUT_IDX = 0;
 #endif // of ifdef APP_USE_UART
     // POE.net handling
+    appData.POEnetUID = DEVCFG3bits.USERID;
     ClearString(&appData.POEnetCommand[0]);
     appData.POEnet_NodeId = -1;
 #ifdef APP_USE_ADC
@@ -354,7 +354,9 @@ void APP_Tasks ( void )
                     // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
                     // POE.net status representation
                     APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
-                    APP_LCD_Print( 1, 0, "POEnet _______ 00000");
+                    char POEnetUID[APP_STRING_SIZE + 1];
+                    sprintf(&POEnetUID[0],"POEnet UID%4x 00000", appData.POEnetUID);
+                    APP_LCD_Print( 1, 0, &POEnetUID[0]);
 #ifdef APP_USE_UART
                     APP_LCD_Print( 3, 5, "UART");
 #endif // ifdef APP_USE_UART

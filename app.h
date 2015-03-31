@@ -128,6 +128,7 @@ typedef struct
 #endif // ifdef APP_POEnet_SECONDARY
 // -> USB Handling migrated to POEusb; UART needs only buffer handling
     // POE.net handling
+    int               POEnetUID;
     char              POEnetCommand[APP_STRING_SIZE];
     int               POEnet_NodeId;
 #ifdef APP_USE_ADC
