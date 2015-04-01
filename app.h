@@ -31,6 +31,8 @@ extern "C" {
 typedef enum {
     // Application?s initial state
     APP_STATE_INIT,
+    // POE.net node initialization
+    APP_STATE_POENET_INIT,
     // Init LCD
     APP_STATE_LCD_INIT,
 #ifdef APP_USE_USB
@@ -128,9 +130,12 @@ typedef struct
 #endif // ifdef APP_POEnet_SECONDARY
 // -> USB Handling migrated to POEusb; UART needs only buffer handling
     // POE.net handling
-    int               POEnetUID;
+    char              POEnetUID[APP_STRING_SIZE];
     char              POEnetCommand[APP_STRING_SIZE];
+    char              POEnetXMLError[2 * APP_STRING_SIZE];
     int               POEnet_NodeId;
+    bool              pollValues;
+    int               pollGranularity;
 #ifdef APP_USE_ADC
     APP_STATES        ADC_Return_AppState;
     int               ADC_PinIdx;
@@ -139,10 +144,16 @@ typedef struct
     float             ADC_Denominator[APP_ADC_NUM_PINS];
     float             ADC_Value[APP_ADC_NUM_PINS];
     char              ADC_Unit[APP_ADC_NUM_PINS][APP_STRING_SIZE];
-    char              ADC_Representation[APP_STRING_SIZE];
-    // for demo purposes
-    bool              pollADC;
+    char              ADC_Representation[APP_ADC_NUM_PINS][APP_STRING_SIZE];
 #endif // ifdef APP_USE_ADC
+#ifdef APP_USE_DIO
+    int               DI_Value[APP_DI_COUNT];
+    char              DI_LoValue[APP_DI_COUNT][APP_STRING_SIZE];
+    char              DI_HiValue[APP_DI_COUNT][APP_STRING_SIZE];
+    int               DO_Value[APP_DI_COUNT];
+    char              DO_LoValue[APP_DO_COUNT][APP_STRING_SIZE];
+    char              DO_HiValue[APP_DO_COUNT][APP_STRING_SIZE];
+#endif
 } APP_DATA;
 
 // -> USB Handling migrated to POEusb

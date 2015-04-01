@@ -30,6 +30,12 @@ extern const char POEnet_text[];
 extern const char POEnet_action[];
 
 
+void POEnet_Node_Init(int * id, char * name);
+
+void POEnet_AddAnalog(int id, float * Value, float * numerator, float * denominator, char * unit);
+void POEnet_AddDigital(int id, int * Value, char * loVal, char * hiVal);
+void POEnet_AddSwitch(int id, int * Value, char * loVal, char * hiVal);
+
 void POEnet_Interpret(const char *buffer);
 
 bool POEnet_GetError(char *tostring);
@@ -39,8 +45,6 @@ void POEnet_Output(char *buffer);
 void POEnet_GetCommand(char *tostring);
 
 void POEnet_GetNewNodeId(int *nodeid);
-
-void POEnet_SetNodeProperty(char *name, int propId, char *attributeList);
 
 #ifdef	__cplusplus
 }

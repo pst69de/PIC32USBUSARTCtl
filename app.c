@@ -53,6 +53,7 @@ APP_DATA appData;
 // Initialize
 void APP_Initialize ( void )
 {
+    int i;
     // Initialize App Timing to zero 
     appData.time.milliSeconds = 0;
     appData.time.Seconds = 0;
@@ -87,9 +88,14 @@ void APP_Initialize ( void )
     appData.UART_OUTPUT_IDX = 0;
 #endif // of ifdef APP_USE_UART
     // POE.net handling
-    appData.POEnetUID = DEVCFG3bits.USERID;
+    sprintf(&appData.POEnetUID[0],"%4X", DEVCFG3bits.USERID);
     ClearString(&appData.POEnetCommand[0]);
+    ClearString(&appData.POEnetXMLError[0]);
+    // Double String Length so repeat 
+    ClearString(&appData.POEnetXMLError[20]);    
     appData.POEnet_NodeId = -1;
+    appData.pollValues = false;
+    appData.pollGranularity = 100;
 #ifdef APP_USE_ADC
     appData.ADC_PinIdx = 1;
     appData.ADC_PinValue[0] = 0;
@@ -118,9 +124,19 @@ void APP_Initialize ( void )
     appData.ADC_Value[3] = 0.0f;
     strcpy(&appData.ADC_Unit[3], "V");
 #endif // ifdef APP_ADC4_INPUT_POS
-    // for demo purposes
-    appData.pollADC;    
 #endif // ifdef APP_USE_ADC
+#ifdef APP_USE_DIO
+    for (i = 0; i < APP_DI_COUNT; i++) {
+        appData.DI_Value[i] = 0;
+        ClearString(&appData.DI_LoValue[i][0]);
+        ClearString(&appData.DI_HiValue[i][0]);
+    }
+    for (i = 0; i < APP_DO_COUNT; i++) {
+        appData.DO_Value[i] = 0;
+        ClearString(&appData.DO_LoValue[i][0]);
+        ClearString(&appData.DO_HiValue[i][0]);
+    }
+#endif
     // Place the App state machine in its initial state.
     appData.state = APP_STATE_INIT;
 }
@@ -167,15 +183,9 @@ void APP_TimingCallback ( void ) {
     if (appData.time.Wait > 0) {
         appData.time.Wait--;
     }
-#ifdef APP_USE_ADC
-    // for demo purposes
-    if (!(appData.time.milliSeconds%100)) {
-        appData.pollADC = true;
-        int i = appData.time.milliSeconds/100;
-        // switch between pin 1 and 2
-        appData.ADC_PinIdx = (i%2)+1;
+    if (!(appData.time.milliSeconds%appData.pollGranularity)) {
+        appData.pollValues = true;
     }
-#endif // ifdef APP_USE_ADC
 }
 
 // APP Timed LED callback registration routine
@@ -213,19 +223,15 @@ bool APP_CheckTimer (void) {
             }
         }
     }
-#ifdef APP_USE_ADC
-    // for demo purposes
-    if (appData.pollADC) {
-        appData.pollADC = false;
+    if (appData.pollValues) {
+        appData.pollValues = false;
         // eventually add other critical ops
         if (appData.state != APP_LCD_UPDATE) {
-            appData.ADC_Return_AppState = appData.state;
-            // APP_TimingCallback sets Pin to poll
-            appData.state = APP_STATE_START_ADC;
+            //appData.ADC_Return_AppState = appData.state;
+            //appData.state = APP_STATE_START_ADC;
             Result = true; // set break on current action
         }
     } 
-#endif // ifdef APP_USE_ADC
     return Result;
 }
 
@@ -327,6 +333,52 @@ void APP_Tasks ( void )
             LEDY_Clear;
             //LEDG_Set;
             LEDG_Clear;
+            appData.state = APP_STATE_POENET_INIT;
+            break;
+        case APP_STATE_POENET_INIT:
+            POEnet_Node_Init( &appData.POEnet_NodeId, &appData.POEnetUID[0]);
+#ifdef APP_USE_ADC
+#ifdef APP_ADC1_INPUT_POS
+            POEnet_AddAnalog(1,&appData.ADC_Value[0],&appData.ADC_Numerator[0],&appData.ADC_Denominator[0],&appData.ADC_Unit[0][0]);
+#endif
+#ifdef APP_ADC2_INPUT_POS
+            POEnet_AddAnalog(2,&appData.ADC_Value[1],&appData.ADC_Numerator[1],&appData.ADC_Denominator[1],&appData.ADC_Unit[1][0]);
+#endif
+#ifdef APP_ADC3_INPUT_POS
+            POEnet_AddAnalog(3,&appData.ADC_Value[2],&appData.ADC_Numerator[2],&appData.ADC_Denominator[2],&appData.ADC_Unit[2][0]);
+#endif
+#ifdef APP_ADC4_INPUT_POS
+            POEnet_AddAnalog(4,&appData.ADC_Value[3],&appData.ADC_Numerator[3],&appData.ADC_Denominator[3],&appData.ADC_Unit[3][0]);
+#endif
+#endif // ifdef APP_USE_ADC
+#ifdef APP_USE_DIO
+#ifdef APP_DI_1
+            POEnet_AddDigital(1,&appData.DI_Value[0],&appData.DI_LoValue[0][0],&appData.DI_HiValue[0][0]);
+#endif
+#ifdef APP_DI_2
+            POEnet_AddDigital(2,&appData.DI_Value[1],&appData.DI_LoValue[1][0],&appData.DI_HiValue[1][0]);
+#endif
+#ifdef APP_DI_3
+            POEnet_AddDigital(3,&appData.DI_Value[2],&appData.DI_LoValue[2][0],&appData.DI_HiValue[2][0]);
+#endif
+#ifdef APP_DI_4
+            POEnet_AddDigital(4,&appData.DI_Value[3],&appData.DI_LoValue[3][0],&appData.DI_HiValue[3][0]);
+#endif
+#ifdef APP_DO_1
+            POEnet_AddSwitch(1,&appData.DO_Value[0],&appData.DO_LoValue[0][0],&appData.DO_HiValue[0][0]);
+#endif
+#ifdef APP_DO_2
+            POEnet_AddSwitch(2,&appData.DO_Value[1],&appData.DO_LoValue[1][0],&appData.DO_HiValue[1][0]);
+#endif
+#ifdef APP_DO_3
+            POEnet_AddSwitch(3,&appData.DO_Value[2],&appData.DO_LoValue[2][0],&appData.DO_HiValue[2][0]);
+#endif
+#ifdef APP_DO_4
+            POEnet_AddSwitch(4,&appData.DO_Value[3],&appData.DO_LoValue[3][0],&appData.DO_HiValue[3][0]);
+#endif
+#endif // ifdef APP_USE_DIO
+#ifdef APP_USE_PWM
+#endif // ifdef APP_USE_PWM
 #ifdef APP_USE_UART
             // init UART before USB
             appData.LCD_Init_Return = APP_STATE_UART_INIT;
@@ -354,9 +406,8 @@ void APP_Tasks ( void )
                     // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
                     // POE.net status representation
                     APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
-                    char POEnetUID[APP_STRING_SIZE + 1];
-                    sprintf(&POEnetUID[0],"POEnet UID%4x 00000", appData.POEnetUID);
-                    APP_LCD_Print( 1, 0, &POEnetUID[0]);
+                    APP_LCD_Print( 1, 0, "POEnet UID____ 00000");
+                    APP_LCD_Print( 1, 10, &appData.POEnetUID[0]);
 #ifdef APP_USE_UART
                     APP_LCD_Print( 3, 5, "UART");
 #endif // ifdef APP_USE_UART
@@ -583,73 +634,16 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_COMMAND:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
-            POEnet_GetCommand(&appData.POEnetCommand[0]);
-            APP_LCD_Print( 1, 8, &appData.POEnetCommand[0]);
-            if (!strcmp(&appData.POEnetCommand[0],&POEnet_net[0])) {
-                // handle net command
-                POEnet_GetNewNodeId(&appData.POEnet_NodeId);
-            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_node[0])) {
-                // handle node command 
-                // -> pass sensors and actors
-/* 1st Steps interface integration
-#ifdef APP_USE_ADC
-#ifdef APP_ADC1_INPUT_POS
-                POEnet_AddAnalog(1,&appData.ADC_Numerator[0],&appData.ADC_Denominator[0],&appData.ADC_Unit[0][0]);
-#endif
-#ifdef APP_ADC2_INPUT_POS
-                POEnet_AddAnalog(2,&appData.ADC_Numerator[1],&appData.ADC_Denominator[1],&appData.ADC_Unit[1][0]);
-#endif
-#ifdef APP_ADC3_INPUT_POS
-                POEnet_AddAnalog(3,&appData.ADC_Numerator[2],&appData.ADC_Denominator[2],&appData.ADC_Unit[2][0]);
-#endif
-#ifdef APP_ADC4_INPUT_POS
-                POEnet_AddAnalog(4,&appData.ADC_Numerator[3],&appData.ADC_Denominator[3],&appData.ADC_Unit[3][0]);
-#endif
-#endif // ifdef APP_USE_ADC
-#ifdef APP_USE_DIO
-#ifdef APP_DI_1
-                POEnet_AddDigital(1,&appData.DI_LoValue[0][0],&appData.DI_HiValue[0][0]);
-#endif
-#ifdef APP_DI_2
-                POEnet_AddDigital(2,&appData.DI_LoValue[1][0],&appData.DI_HiValue[1][0]);
-#endif
-#ifdef APP_DI_3
-                POEnet_AddDigital(3,&appData.DI_LoValue[2][0],&appData.DI_HiValue[2][0]);
-#endif
-#ifdef APP_DI_4
-                POEnet_AddDigital(4,&appData.DI_LoValue[3][0],&appData.DI_HiValue[3][0]);
-#endif
-#ifdef APP_DO_1
-                POEnet_AddSwitch(1,&appData.DO_LoValue[0][0],&appData.DO_HiValue[0][0]);
-#endif
-#ifdef APP_DO_2
-                POEnet_AddSwitch(2,&appData.DO_LoValue[1][0],&appData.DO_HiValue[1][0]);
-#endif
-#ifdef APP_DO_3
-                POEnet_AddSwitch(3,&appData.DO_LoValue[2][0],&appData.DO_HiValue[2][0]);
-#endif
-#ifdef APP_DO_4
-                POEnet_AddSwitch(4,&appData.DO_LoValue[3][0],&appData.DO_HiValue[3][0]);
-#endif
-#endif // ifdef APP_USE_DIO
-1st Steps interface integration */
-#ifdef APP_USE_PWM
-#endif // ifdef APP_USE_PWM
-#ifdef APP_USE_ADC
-            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_analog[0])) {
-                
-#endif // ifdef APP_USE_ADC
-#ifdef APP_USE_DIO
-            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_digital[0])) {
-                
-            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_switch[0])) {
-                
-#endif // ifdef APP_USE_DIO
-#ifdef APP_USE_PWM
-            } else if (!strcmp(&appData.POEnetCommand[0],&POEnet_pwm[0])) {
-                
-#endif // ifdef APP_USE_PWM
+            // Handle Error
+            if (POEnet_GetError()) {
+            } else {
+                POEnet_GetCommand(&appData.POEnetCommand[0]);
+                APP_LCD_Print( 1, 8, &appData.POEnetCommand[0]);
             }
+            //if (!strcmp(&appData.POEnetCommand[0],&POEnet_net[0])) {
+            //    // handle net command
+            //    POEnet_GetNewNodeId(&appData.POEnet_NodeId);
+            //}
             appData.POEnetPrimOutputBuf[0] = 'U';
             POEnet_Output(&appData.POEnetPrimOutputBuf[1]);
             appData.POEnetPrimOutputSize = strlen(appData.POEnetPrimOutputBuf) + 1;

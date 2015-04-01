@@ -114,7 +114,7 @@ Create an empty MPLABX project at your framework folder. This creates a MPLABX f
 Create the repository folder src (like C:\microchip\harmony\projects\PIC32USBUSARTCtl\framework\src).
 Clone the repository to the src folder.
 
-The configuration.xml should be copied to C:\microchip\harmony\projects\PIC32USBUSARTCtl\framework\PIC32USBUSARTCtl.X\nbproject. Or set up the MPLABX project in equivalent way.
+The configuration.xml should be copied to C:\microchip\harmony\projects\PIC32USBUSARTCtl\framework\PIC32USBUSARTCtl.X\nbproject. Or set up the MPLABX project in equivalent way. If copying the configuration.xml to the nbproject folder results in an unusable project (with "errors while reading xml") the private folder beneath the nbproject folder should be renamed or deleted. 
 
 The files contained in harmony_mods should be copied to their respective places in the MPLAB Harmony library. In my actual installation these are:
 C:\microchip\harmony\v1_03\framework\peripheral\int\templates
