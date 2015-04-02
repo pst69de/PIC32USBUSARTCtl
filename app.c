@@ -517,6 +517,7 @@ void APP_Tasks ( void )
             appData.POEnetPrimOutputSize = strlen(&appData.POEnetPrimOutputBuf[0]) + 1;
             appData.POEnetPrimOutputIdx = 0;            
 #endif // else APP_POEnet_SECONDARY
+            // POETODO: try a const_cast to avoid warning http://en.cppreference.com/w/cpp/language/const_cast
             APP_LCD_Print( 1, 8, &POEnet_reset[0]);
             appData.LCD_Return_AppState = APP_STATE_POENET_OUTPUT_PREPARE;
             appData.state = APP_LCD_UPDATE;

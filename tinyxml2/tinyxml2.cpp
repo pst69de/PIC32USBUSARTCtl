@@ -1135,6 +1135,27 @@ const char* XMLAttribute::Name() const
 
 const char* XMLAttribute::Value() const 
 {
+#ifdef REFDATTRIBUTE
+    // read original before return
+    // maybe optimized with a more direct access
+    switch (_type) {
+        case 1:
+            _value.SetStr((char*)_pvalue);
+            break;
+        case 2:
+            char buf[BUF_SIZE];
+            XMLUtil::ToStr( (int*)_pvalue, buf, BUF_SIZE );
+            _value.SetStr( buf );
+            break;
+        case 3:
+            char buf[BUF_SIZE];
+            XMLUtil::ToStr( (float*)_pvalue, buf, BUF_SIZE );
+            _value.SetStr( buf );
+            break;
+        default:
+            break;
+    }
+#endif
     return _value.GetStr();
 }
 
@@ -1220,6 +1241,9 @@ XMLError XMLAttribute::QueryDoubleValue( double* value ) const
 void XMLAttribute::SetAttribute( const char* v )
 {
     _value.SetStr( v );
+#ifdef REFDATTRIBUTE
+    // POETODO: if ref'd Data present write through 
+#endif
 }
 
 
@@ -1228,6 +1252,9 @@ void XMLAttribute::SetAttribute( int v )
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
     _value.SetStr( buf );
+#ifdef REFDATTRIBUTE
+    // POETODO: if ref'd Data present write through 
+#endif
 }
 
 
@@ -1236,6 +1263,9 @@ void XMLAttribute::SetAttribute( unsigned v )
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
     _value.SetStr( buf );
+#ifdef REFDATTRIBUTE
+    // POETODO: if ref'd Data present write through 
+#endif
 }
 
 
@@ -1244,6 +1274,9 @@ void XMLAttribute::SetAttribute( bool v )
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
     _value.SetStr( buf );
+#ifdef REFDATTRIBUTE
+    // POETODO: if ref'd Data present write through 
+#endif
 }
 
 void XMLAttribute::SetAttribute( double v )
@@ -1251,6 +1284,9 @@ void XMLAttribute::SetAttribute( double v )
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
     _value.SetStr( buf );
+#ifdef REFDATTRIBUTE
+    // POETODO: if ref'd Data present write through 
+#endif
 }
 
 void XMLAttribute::SetAttribute( float v )
@@ -1258,7 +1294,14 @@ void XMLAttribute::SetAttribute( float v )
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
     _value.SetStr( buf );
+#ifdef REFDATTRIBUTE
+    // POETODO: if ref'd Data present write through 
+#endif
 }
+
+#ifdef REFDATTRIBUTE
+// POETODO: new variants of SetAttribute
+#endif
 
 
 // --------- XMLElement ---------- //

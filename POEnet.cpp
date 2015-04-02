@@ -43,45 +43,41 @@ void POEnet_Node_Init(int * id, char * name) {
 
 
 void POEnet_AddAnalog(int id, float * Value, float * numerator, float * denominator, char * unit) {
-    tinyxml2::XMLElement *elemNode = POEnetNode.NewElement( &POEnet_analog[0]); 
-    elemNode->SetAttribute("id", id);
+    tinyxml2::XMLElement *elemAnalog = POEnetNode.NewElement( &POEnet_analog[0]); 
+    elemAnalog->SetAttribute("id", id);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("value", *Value);
+    elemAnalog->SetAttribute("value", *Value);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("numerator", *numerator);
+    elemAnalog->SetAttribute("numerator", *numerator);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("denominator", *denominator);
+    elemAnalog->SetAttribute("denominator", *denominator);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("unit", *denominator);
-    POEnetNode.RootElement->InsertEndChild( elemNode);
+    elemAnalog->SetAttribute("unit", *denominator);
+    POEnetNode.RootElement->InsertEndChild( elemAnalog);
 }
 
 void POEnet_AddDigital(int id, int * Value, char * loVal, char * hiVal) {
-    tinyxml2::XMLElement *elemNode = POEnetNode.NewElement( &POEnet_digital[0]); 
-    elemNode->SetAttribute("id", id);
+    tinyxml2::XMLElement *elemDigital = POEnetNode.NewElement( &POEnet_digital[0]); 
+    elemDigital->SetAttribute("id", id);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("value", *Value);
+    elemDigital->SetAttribute("value", *Value);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("numerator", *numerator);
+    elemDigital->SetAttribute("lovalue", *loVal);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("denominator", *denominator);
-    // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("unit", *denominator);
-    POEnetNode.RootElement->InsertEndChild( elemNode);
+    elemDigital->SetAttribute("hivalue", *hiVal);
+    POEnetNode.RootElement->InsertEndChild( elemDigital);
 }
 
 void POEnet_AddSwitch(int id, int * Value, char * loVal, char * hiVal) {
-    tinyxml2::XMLElement *elemNode = POEnetNode.NewElement( &POEnet_switch[0]); 
-    elemNode->SetAttribute("id", id);
+    tinyxml2::XMLElement *elemSwitch = POEnetNode.NewElement( &POEnet_switch[0]); 
+    elemSwitch->SetAttribute("id", id);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("value", *Value);
+    elemSwitch->SetAttribute("value", *Value);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("numerator", *numerator);
+    elemSwitch->SetAttribute("lovalue", *loVal);
     // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("denominator", *denominator);
-    // vv Replace by XMLRefAttribute
-    elemNode->SetAttribute("unit", *denominator);
-    POEnetNode.RootElement->InsertEndChild( elemNode);
+    elemSwitch->SetAttribute("hivalue", *hiVal);
+    POEnetNode.RootElement->InsertEndChild( elemSwitch);
 }
 
 

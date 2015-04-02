@@ -35,7 +35,7 @@ using namespace std;        /* use the standard namespace                     */
 /* Global Variable/Classes Declaration                                        */
 /******************************************************************************/
 
-/* TODO add variables and classes. These can be organized many ways.  */
+/* add variables and classes. These can be organized many ways.  */
 
 /* i.e. INT32 <variable_name>; */
 
@@ -88,7 +88,7 @@ INT main(void)
     SYS_CFG_ALL (configures the flash wait states, PB bus, and pCache)*/
     // Not needed in particular, should be done by SYS_Initialize() 
     //SYSTEMConfig(SYS_FREQ, SYS_CFG_ALL);
-    /* TODO Add user clock/system configuration code if appropriate.  */
+    /* Add user clock/system configuration code if appropriate.  */
 
     /* Initialize I/O and Peripherals for application */
     // defined in user.hpp/user.cpp redirects to the SYS_Initialize

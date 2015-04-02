@@ -311,7 +311,7 @@ extern "C" {
 #endif // ifdef APP_USE_ADC
 
 #ifdef APP_USE_DIO
-/* TODO:  Define dio Options */
+// Define dio Options
 #include "../../POEdiopins.h"
 #define APP_DI_1         DIO_PIN_B0
 #define APP_DI_2         DIO_PIN_B1

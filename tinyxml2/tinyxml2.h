@@ -28,6 +28,7 @@ distribution.
 #define NOFILEIO
 #define NOXMLHANDLE
 #define MEMPOOL    128
+#define REFDATTRIBUTE
 #else
 #define MEMPOOL    1024
 #endif
@@ -1156,6 +1157,9 @@ public:
     void SetAttribute( double value );
     /// Set the attribute to value.
     void SetAttribute( float value );
+#ifdef REFDATTRIBUTE
+    // POETODO: new variants of SetAttribute
+#endif
 
 private:
     enum { BUF_SIZE = 200 };
@@ -1171,6 +1175,10 @@ private:
 
     mutable StrPair _name;
     mutable StrPair _value;
+#ifdef REFDATTRIBUTE
+    int             _type; // 0 = normale, 1 = ref'd char, 2 = ref'd int, 3 = ref'd float 
+    void            *_pvalue; // TODO: 1st try with untyped pointer
+#endif
     XMLAttribute*   _next;
     MemPool*        _memPool;
 };
@@ -1383,6 +1391,9 @@ public:
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
     }
+#ifdef REFDATTRIBUTE
+    // POETODO: new variants of SetAttribute
+#endif
 
     /**
     	Delete an attribute.

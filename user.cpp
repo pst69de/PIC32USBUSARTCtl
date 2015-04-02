@@ -36,7 +36,7 @@ using namespace std;        /* use the standard namespace                     */
 /* User Functions                                                             */
 /******************************************************************************/
 
-/* TODO Initialize User Ports/Peripherals/Project here.  Users may want to
+/* Initialize User Ports/Peripherals/Project here.  Users may want to
  * initialize peripheral classes here.  */
 
 void InitApp(void)
