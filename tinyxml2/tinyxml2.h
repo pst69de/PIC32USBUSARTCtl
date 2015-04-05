@@ -1159,7 +1159,10 @@ public:
     void SetAttribute( float value );
 #ifdef REFDATTRIBUTE
     // POETODO: new variants of SetAttribute
-#endif
+    void SetAttribute( char *value, int maxLen);
+    void SetAttribute( int *value );
+    void SetAttribute( float *value );
+#endif // ifdef REFDATTRIBUTE
 
 private:
     enum { BUF_SIZE = 200 };
@@ -1178,7 +1181,8 @@ private:
 #ifdef REFDATTRIBUTE
     int             _type; // 0 = normale, 1 = ref'd char, 2 = ref'd int, 3 = ref'd float 
     void            *_pvalue; // TODO: 1st try with untyped pointer
-#endif
+    int             _maxlen; // if ref'd char maxlen to copy
+#endif // ifdef REFDATTRIBUTE
     XMLAttribute*   _next;
     MemPool*        _memPool;
 };
@@ -1393,6 +1397,18 @@ public:
     }
 #ifdef REFDATTRIBUTE
     // POETODO: new variants of SetAttribute
+    void SetAttribute( const char* name, char* value, int maxLen )	{
+        XMLAttribute* a = FindOrCreateAttribute( name );
+        a->SetAttribute( value, maxLen );
+    }
+    void SetAttribute( const char* name, int* value )			{
+        XMLAttribute* a = FindOrCreateAttribute( name );
+        a->SetAttribute( value );
+    }
+    void SetAttribute( const char* name, float* value )		{
+        XMLAttribute* a = FindOrCreateAttribute( name );
+        a->SetAttribute( value );
+    }
 #endif
 
     /**

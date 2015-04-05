@@ -65,6 +65,8 @@ typedef enum {
     // POE.net pass secondary
     APP_STATE_POENET_PASS,
 #endif // ifdef APP_POEnet_SECONDARY
+    // poll data
+    APP_STATE_POLL_DATA,
 #ifdef APP_USE_ADC
     // Start a ADC read
     APP_STATE_START_ADC,
@@ -136,9 +138,11 @@ typedef struct
     int               POEnet_NodeId;
     bool              pollValues;
     int               pollGranularity;
+    APP_STATES        poll_Return_AppState;
+// ADC_PinIdx is used as polling state for data polling
+    int               ADC_PinIdx;
 #ifdef APP_USE_ADC
     APP_STATES        ADC_Return_AppState;
-    int               ADC_PinIdx;
     int               ADC_PinValue[APP_ADC_NUM_PINS];
     float             ADC_Numerator[APP_ADC_NUM_PINS];
     float             ADC_Denominator[APP_ADC_NUM_PINS];
@@ -150,7 +154,7 @@ typedef struct
     int               DI_Value[APP_DI_COUNT];
     char              DI_LoValue[APP_DI_COUNT][APP_STRING_SIZE];
     char              DI_HiValue[APP_DI_COUNT][APP_STRING_SIZE];
-    int               DO_Value[APP_DI_COUNT];
+    int               DO_Value[APP_DO_COUNT];
     char              DO_LoValue[APP_DO_COUNT][APP_STRING_SIZE];
     char              DO_HiValue[APP_DO_COUNT][APP_STRING_SIZE];
 #endif

@@ -1138,24 +1138,23 @@ const char* XMLAttribute::Value() const
 #ifdef REFDATTRIBUTE
     // read original before return
     // maybe optimized with a more direct access
+    char buf[BUF_SIZE];
     switch (_type) {
         case 1:
             _value.SetStr((char*)_pvalue);
             break;
         case 2:
-            char buf[BUF_SIZE];
-            XMLUtil::ToStr( (int*)_pvalue, buf, BUF_SIZE );
+            XMLUtil::ToStr( *(int*)_pvalue, buf, BUF_SIZE );
             _value.SetStr( buf );
             break;
         case 3:
-            char buf[BUF_SIZE];
-            XMLUtil::ToStr( (float*)_pvalue, buf, BUF_SIZE );
+            XMLUtil::ToStr( *(float*)_pvalue, buf, BUF_SIZE );
             _value.SetStr( buf );
             break;
         default:
             break;
     }
-#endif
+#endif // ifdef REFDATTRIBUTE
     return _value.GetStr();
 }
 
@@ -1243,7 +1242,7 @@ void XMLAttribute::SetAttribute( const char* v )
     _value.SetStr( v );
 #ifdef REFDATTRIBUTE
     // POETODO: if ref'd Data present write through 
-#endif
+#endif // ifdef REFDATTRIBUTE
 }
 
 
@@ -1254,7 +1253,7 @@ void XMLAttribute::SetAttribute( int v )
     _value.SetStr( buf );
 #ifdef REFDATTRIBUTE
     // POETODO: if ref'd Data present write through 
-#endif
+#endif // ifdef REFDATTRIBUTE
 }
 
 
@@ -1265,7 +1264,7 @@ void XMLAttribute::SetAttribute( unsigned v )
     _value.SetStr( buf );
 #ifdef REFDATTRIBUTE
     // POETODO: if ref'd Data present write through 
-#endif
+#endif // ifdef REFDATTRIBUTE
 }
 
 
@@ -1276,7 +1275,7 @@ void XMLAttribute::SetAttribute( bool v )
     _value.SetStr( buf );
 #ifdef REFDATTRIBUTE
     // POETODO: if ref'd Data present write through 
-#endif
+#endif // ifdef REFDATTRIBUTE
 }
 
 void XMLAttribute::SetAttribute( double v )
@@ -1286,7 +1285,7 @@ void XMLAttribute::SetAttribute( double v )
     _value.SetStr( buf );
 #ifdef REFDATTRIBUTE
     // POETODO: if ref'd Data present write through 
-#endif
+#endif // ifdef REFDATTRIBUTE
 }
 
 void XMLAttribute::SetAttribute( float v )
@@ -1296,12 +1295,34 @@ void XMLAttribute::SetAttribute( float v )
     _value.SetStr( buf );
 #ifdef REFDATTRIBUTE
     // POETODO: if ref'd Data present write through 
-#endif
+#endif // ifdef REFDATTRIBUTE
 }
 
 #ifdef REFDATTRIBUTE
 // POETODO: new variants of SetAttribute
-#endif
+void XMLAttribute::SetAttribute( char *value, int maxLen) {
+    _type = 1;
+    _maxlen = maxLen;
+    _pvalue = value;
+    _value.SetStr( (char*)_pvalue);
+}
+
+void XMLAttribute::SetAttribute( int *value ) {
+    _type = 2;
+    _pvalue = value;
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( *(int*)_pvalue, buf, BUF_SIZE );
+    _value.SetStr( buf );
+}
+
+void XMLAttribute::SetAttribute( float *value ) {
+    _type = 3;
+    _pvalue = value;
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( *(float*)_pvalue, buf, BUF_SIZE );
+    _value.SetStr( buf );
+}
+#endif // ifdef REFDATTRIBUTE
 
 
 // --------- XMLElement ---------- //

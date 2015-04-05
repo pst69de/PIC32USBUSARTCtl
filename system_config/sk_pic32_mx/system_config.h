@@ -307,7 +307,9 @@ extern "C" {
 #undef  APP_ADC3_INPUT_POS
 // 4th analog input pin (maybe defined)
 #undef  APP_ADC4_INPUT_POS
-
+#else
+// used as indicator for data polling
+#define APP_ADC_NUM_PINS       0
 #endif // ifdef APP_USE_ADC
 
 #ifdef APP_USE_DIO

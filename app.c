@@ -56,11 +56,15 @@ void APP_Initialize ( void )
     int i;
     // Initialize App Timing to zero 
     appData.time.milliSeconds = 0;
-    appData.time.Seconds = 0;
-    appData.time.Minutes = 0;
-    appData.time.Hours = 0;
+    //appData.time.Seconds = 0;
+    //appData.time.Minutes = 0;
+    //appData.time.Hours = 0;
     appData.time.Days = 0;
-    appData.lastSecond = 59;
+    if (appData.time.Seconds) {
+        appData.lastSecond = appData.time.Seconds - 1;
+    } else {
+        appData.lastSecond = 59;
+    }
     appData.pollSecond = false;
     appData.time.Wait = 0;
     // timing repetition 
@@ -88,14 +92,14 @@ void APP_Initialize ( void )
     appData.UART_OUTPUT_IDX = 0;
 #endif // of ifdef APP_USE_UART
     // POE.net handling
-    sprintf(&appData.POEnetUID[0],"%4X", DEVCFG3bits.USERID);
+    sprintf(&appData.POEnetUID[0],"%04X", DEVCFG3bits.USERID);
     ClearString(&appData.POEnetCommand[0]);
     ClearString(&appData.POEnetXMLError[0]);
     // Double String Length so repeat 
     ClearString(&appData.POEnetXMLError[20]);    
     appData.POEnet_NodeId = -1;
     appData.pollValues = false;
-    appData.pollGranularity = 100;
+    appData.pollGranularity = 10;
 #ifdef APP_USE_ADC
     appData.ADC_PinIdx = 1;
     appData.ADC_PinValue[0] = 0;
@@ -129,12 +133,16 @@ void APP_Initialize ( void )
     for (i = 0; i < APP_DI_COUNT; i++) {
         appData.DI_Value[i] = 0;
         ClearString(&appData.DI_LoValue[i][0]);
+        appData.DI_LoValue[i][0] = 'L';
         ClearString(&appData.DI_HiValue[i][0]);
+        appData.DI_HiValue[i][0] = 'H';
     }
     for (i = 0; i < APP_DO_COUNT; i++) {
         appData.DO_Value[i] = 0;
         ClearString(&appData.DO_LoValue[i][0]);
+        appData.DO_LoValue[i][0] = '0';
         ClearString(&appData.DO_HiValue[i][0]);
+        appData.DO_HiValue[i][0] = '1';
     }
 #endif
     // Place the App state machine in its initial state.
@@ -160,14 +168,14 @@ void APP_TimingCallback ( void ) {
                     appData.time.Hours = 0;
                     appData.time.Days++;
                 }
-                // Set Hours to Time field
-                APP_LCD_PrintChar(0,2,numChar[appData.time.Hours % 10]);
-                APP_LCD_PrintChar(0,1,numChar[appData.time.Hours / 10]);
             }
-            // Set Minutes to Time field
-            APP_LCD_PrintChar(0,5,numChar[appData.time.Minutes % 10]);
-            APP_LCD_PrintChar(0,4,numChar[appData.time.Minutes / 10]);
         }
+        // Set Hours to Time field
+        APP_LCD_PrintChar(0,2,numChar[appData.time.Hours % 10]);
+        APP_LCD_PrintChar(0,1,numChar[appData.time.Hours / 10]);
+        // Set Minutes to Time field
+        APP_LCD_PrintChar(0,5,numChar[appData.time.Minutes % 10]);
+        APP_LCD_PrintChar(0,4,numChar[appData.time.Minutes / 10]);
         // Set Seconds to Time field
         APP_LCD_PrintChar(0,8,numChar[appData.time.Seconds % 10]);
         APP_LCD_PrintChar(0,7,numChar[appData.time.Seconds / 10]);
@@ -225,10 +233,17 @@ bool APP_CheckTimer (void) {
     }
     if (appData.pollValues) {
         appData.pollValues = false;
-        // eventually add other critical ops
-        if (appData.state != APP_LCD_UPDATE) {
-            //appData.ADC_Return_AppState = appData.state;
-            //appData.state = APP_STATE_START_ADC;
+        // not while LCD_Update Or Polling itself
+        if ((appData.state != APP_LCD_UPDATE)
+#ifdef APP_USE_ADC
+            & (appData.state != APP_STATE_START_ADC)
+            & (appData.state != APP_STATE_CONVERT_ADC)
+            & (appData.state != APP_STATE_READ_ADC)
+#endif
+            & (appData.state != APP_STATE_POLL_DATA)) {
+            appData.poll_Return_AppState = appData.state;
+            appData.state = APP_STATE_POLL_DATA;
+            appData.ADC_PinIdx = 0; // start with digital polling
             Result = true; // set break on current action
         }
     } 
@@ -275,15 +290,16 @@ void APP_UART_Read(void) {
     APP_LCD_PrintChar(0,18,'*');
     while (PLIB_USART_ReceiverDataIsAvailable(APP_UART_RX_ID)) {
         uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_UART_RX_ID);
-        char dispChar = (char)readByte;
-        if (!readByte) { dispChar = (char)0xdb; }
-        if (appData.UART_INPUT_IDX < 40) {
-            if (appData.UART_INPUT_IDX < 20) {
-                APP_LCD_PrintChar(2,appData.UART_INPUT_IDX,dispChar);
-            } else {
-                APP_LCD_PrintChar(3,appData.UART_INPUT_IDX - 20,dispChar);
-            }
-        }
+        // for testing output on LCD
+        //char dispChar = (char)readByte;
+        //if (!readByte) { dispChar = (char)0xdb; }
+        //if (appData.UART_INPUT_IDX < 40) {
+        //    if (appData.UART_INPUT_IDX < 20) {
+        //        APP_LCD_PrintChar(2,appData.UART_INPUT_IDX,dispChar);
+        //    } else {
+        //        APP_LCD_PrintChar(3,appData.UART_INPUT_IDX - 20,dispChar);
+        //    }
+        //}
         appData.UART_INPUT_BUF[appData.UART_INPUT_IDX++] = readByte;
         // POE.net: zero is sent for termination
         if (!readByte) {
@@ -336,7 +352,7 @@ void APP_Tasks ( void )
             appData.state = APP_STATE_POENET_INIT;
             break;
         case APP_STATE_POENET_INIT:
-            POEnet_Node_Init( &appData.POEnet_NodeId, &appData.POEnetUID[0]);
+            POEnet_Node_Init( &appData.POEnet_NodeId, &appData.POEnetUID[0], &appData.time.Hours, &appData.time.Minutes, &appData.time.Seconds);
 #ifdef APP_USE_ADC
 #ifdef APP_ADC1_INPUT_POS
             POEnet_AddAnalog(1,&appData.ADC_Value[0],&appData.ADC_Numerator[0],&appData.ADC_Denominator[0],&appData.ADC_Unit[0][0]);
@@ -405,9 +421,16 @@ void APP_Tasks ( void )
                     // 000 (LCD_Line[0][14-16]) = count Bytes 
                     // RT (LCD_Line[0][18-19])  = R = UART Receiver (* if receiving); T = UART Transmitter (* if transmitting) 
                     // POE.net status representation
-                    APP_LCD_Print( 0, 0, " 00:00:00 ---#000 RT");
+                    APP_LCD_Print( 0, 0, " __:__:__ ---#000 RT");
+                    APP_LCD_PrintChar(0,2,numChar[appData.time.Hours % 10]);
+                    APP_LCD_PrintChar(0,1,numChar[appData.time.Hours / 10]);
+                    APP_LCD_PrintChar(0,5,numChar[appData.time.Minutes % 10]);
+                    APP_LCD_PrintChar(0,4,numChar[appData.time.Minutes / 10]);
+                    APP_LCD_PrintChar(0,8,numChar[appData.time.Seconds % 10]);
+                    APP_LCD_PrintChar(0,7,numChar[appData.time.Seconds / 10]);
                     APP_LCD_Print( 1, 0, "POEnet UID____ 00000");
                     APP_LCD_Print( 1, 10, &appData.POEnetUID[0]);
+                    APP_LCD_Print( 2, 0, "00.0@ 00.0@ ****####");
 #ifdef APP_USE_UART
                     APP_LCD_Print( 3, 5, "UART");
 #endif // ifdef APP_USE_UART
@@ -474,7 +497,7 @@ void APP_Tasks ( void )
             if (!appData.USB_OUTPUT_SIZE) {
                 USB_PrepareWrite( nokPrompt, 4);
             } else {
-                USB_PrepareWrite( appData.USB_OUTPUT_BUF, appData.USB_OUTPUT_SIZE - 1);
+                USB_PrepareWrite( appData.USB_OUTPUT_BUF, appData.USB_OUTPUT_SIZE);
             }
             appData.state = APP_STATE_USB_WAIT_WRITE_COMPLETE;
             break;
@@ -518,7 +541,7 @@ void APP_Tasks ( void )
             appData.POEnetPrimOutputIdx = 0;            
 #endif // else APP_POEnet_SECONDARY
             // POETODO: try a const_cast to avoid warning http://en.cppreference.com/w/cpp/language/const_cast
-            APP_LCD_Print( 1, 8, &POEnet_reset[0]);
+            APP_LCD_Print( 1, 7, &POEnet_reset[0]);
             appData.LCD_Return_AppState = APP_STATE_POENET_OUTPUT_PREPARE;
             appData.state = APP_LCD_UPDATE;
             break;
@@ -581,7 +604,7 @@ void APP_Tasks ( void )
                 case 'U':
                     //POE.net Message -> pass to interpreter
                     POEnet_Interpret(&appData.POEnetPrimInputBuf[1]);
-                    APP_LCD_Print( 1, 7, "       ");
+                    APP_LCD_Print( 1, 7, &POEnet_empty[0]);
                     appData.LCD_Return_AppState = APP_STATE_POENET_COMMAND;
                     appData.state = APP_LCD_UPDATE;
                     break;
@@ -616,6 +639,17 @@ void APP_Tasks ( void )
                     appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
                     appData.state = APP_LCD_UPDATE;
                     break;
+#ifdef APP_USE_USB
+                case 'N':
+                    // Dump Node Description to USB out
+                    POEnet_NodeDump(&appData.POEnetSecOutputBuf[0]);
+                    appData.POEnetSecOutputSize = strlen(appData.POEnetSecOutputBuf);
+                    appData.POEnetSecOutputBuf[appData.POEnetSecOutputSize] = '\n';
+                    appData.POEnetSecOutputSize++;
+                    appData.POEnetSecOutputIdx = 0;
+                    appData.state = APP_STATE_USB_WRITE;
+                    break;
+#endif // ifdef APP_USE_USB
                 default:
                     // ignore Message
                     ClearBuffer(&appData.POEnetPrimInputBuf[0]);
@@ -636,10 +670,13 @@ void APP_Tasks ( void )
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
             // Handle Error
-            if (POEnet_GetError()) {
+            if (POEnet_GetError(&appData.POEnetXMLError[0])) {
+                APP_LCD_Print( 1, 7, &POEnet_error[0]);
+                APP_LCD_Print( 3, 0, &appData.POEnetXMLError[0]);
             } else {
                 POEnet_GetCommand(&appData.POEnetCommand[0]);
-                APP_LCD_Print( 1, 8, &appData.POEnetCommand[0]);
+                APP_LCD_Print( 1, 7, &POEnet_empty[0]);
+                APP_LCD_Print( 1, 7, &appData.POEnetCommand[0]);
             }
             //if (!strcmp(&appData.POEnetCommand[0],&POEnet_net[0])) {
             //    // handle net command
@@ -647,7 +684,9 @@ void APP_Tasks ( void )
             //}
             appData.POEnetPrimOutputBuf[0] = 'U';
             POEnet_Output(&appData.POEnetPrimOutputBuf[1]);
-            appData.POEnetPrimOutputSize = strlen(appData.POEnetPrimOutputBuf) + 1;
+            appData.POEnetPrimOutputSize = strlen(&appData.POEnetPrimOutputBuf[0]);
+            appData.POEnetPrimOutputBuf[appData.POEnetPrimOutputSize] = '\0';
+            appData.POEnetPrimOutputSize++;
             appData.POEnetPrimOutputIdx = 0;
             appData.LCD_Return_AppState = APP_STATE_POENET_OUTPUT_PREPARE;
             appData.state = APP_LCD_UPDATE;
@@ -658,7 +697,7 @@ void APP_Tasks ( void )
             if (APP_CheckTimer()) { break; }
 #ifdef APP_POEnet_SECONDARY
             // USB UART Bridge -> pass to UART
-            APP_LCD_PrintChar(2,6,'>');
+            //APP_LCD_PrintChar(2,6,'>');
             // initiate UART transmission by writing 1st Byte
             //APP_UART_Write();
             // if UART Transmitter is enabled, it automatically asks 
@@ -708,6 +747,94 @@ void APP_Tasks ( void )
             appData.state = APP_STATE_USB_WRITE;
             break;
 #endif // ifdef APP_POEnet_SECONDARY
+        case APP_STATE_POLL_DATA:
+            if (appData.ADC_PinIdx == 0) {
+#ifdef APP_USE_DIO
+#ifdef APP_DI_1
+                appData.DI_Value[0] = DIO_ReadDI(1);
+                if (appData.DI_Value[0]) {
+                    APP_LCD_PrintChar(2,16,appData.DI_HiValue[0][0]);
+                } else {
+                    APP_LCD_PrintChar(2,16,appData.DI_LoValue[0][0]);
+                }
+#endif // ifdef APP_DI_1
+#ifdef APP_DI_2
+                appData.DI_Value[1] = DIO_ReadDI(2);
+                if (appData.DI_Value[1]) {
+                    APP_LCD_PrintChar(2,17,appData.DI_HiValue[1][0]);
+                } else {
+                    APP_LCD_PrintChar(2,17,appData.DI_LoValue[1][0]);
+                }
+#endif // ifdef APP_DI_2
+#ifdef APP_DI_3
+                appData.DI_Value[2] = DIO_ReadDI(3);
+                if (appData.DI_Value[2]) {
+                    APP_LCD_PrintChar(2,18,appData.DI_HiValue[2][0]);
+                } else {
+                    APP_LCD_PrintChar(2,18,appData.DI_LoValue[2][0]);
+                }
+#endif // ifdef APP_DI_3
+#ifdef APP_DI_4
+                appData.DI_Value[3] = DIO_ReadDI(4);
+                if (appData.DI_Value[3]) {
+                    APP_LCD_PrintChar(2,19,appData.DI_HiValue[3][0]);
+                } else {
+                    APP_LCD_PrintChar(2,19,appData.DI_LoValue[3][0]);
+                }
+#endif // ifdef APP_DI_4
+#ifdef APP_DO_1
+                if (appData.DO_Value[0]) {
+                    DIO_SetDO(1);
+                    APP_LCD_PrintChar(2,12,appData.DO_HiValue[0][0]);
+                } else {
+                    DIO_ClearDO(1);
+                    APP_LCD_PrintChar(2,12,appData.DO_LoValue[0][0]);
+                }
+#endif // ifdef APP_DO_1
+#ifdef APP_DO_2
+                if (appData.DO_Value[1]) {
+                    DIO_SetDO(2);
+                    APP_LCD_PrintChar(2,13,appData.DO_HiValue[1][0]);
+                } else {
+                    DIO_ClearDO(2);
+                    APP_LCD_PrintChar(2,13,appData.DO_LoValue[1][0]);
+                }
+#endif // ifdef APP_DO_2
+#ifdef APP_DO_3
+                if (appData.DO_Value[2]) {
+                    DIO_SetDO(3);
+                    APP_LCD_PrintChar(2,14,appData.DO_HiValue[2][0]);
+                } else {
+                    DIO_ClearDO(3);
+                    APP_LCD_PrintChar(2,14,appData.DO_LoValue[2][0]);
+                }
+#endif // ifdef APP_DO_3
+#ifdef APP_DO_4
+                if (appData.DO_Value[3]) {
+                    DIO_SetDO(4);
+                    APP_LCD_PrintChar(2,15,appData.DO_HiValue[3][0]);
+                } else {
+                    DIO_ClearDO(4);
+                    APP_LCD_PrintChar(2,15,appData.DO_LoValue[3][0]);
+                }
+#endif // ifdef APP_DO_4
+#endif // ifdef APP_USE_DIO
+                // maybe indirect redirect to return, when no ADC is used
+                appData.ADC_PinIdx = 1;
+#ifdef APP_USE_ADC
+                appData.ADC_Return_AppState = APP_STATE_POLL_DATA;
+                appData.state = APP_STATE_START_ADC;
+            } else {
+                appData.ADC_PinIdx++;
+                appData.ADC_Return_AppState = APP_STATE_POLL_DATA;
+                appData.state = APP_STATE_START_ADC;
+#endif // ifdef APP_USE_ADC
+            }
+            if (appData.ADC_PinIdx > APP_ADC_NUM_PINS) {
+                appData.ADC_PinIdx = 0;
+                appData.state = appData.poll_Return_AppState;
+            }
+            break;
 #ifdef APP_USE_ADC
         // Start a ADC read
         case APP_STATE_START_ADC:
@@ -728,14 +855,17 @@ void APP_Tasks ( void )
                 appData.ADC_Value[appData.ADC_PinIdx - 1] = appData.ADC_PinValue[appData.ADC_PinIdx - 1] 
                                                           * appData.ADC_Numerator[appData.ADC_PinIdx - 1] 
                                                           / appData.ADC_Denominator[appData.ADC_PinIdx - 1];
-                sprintf(appData.ADC_Representation, "%.2f%s",appData.ADC_Value[appData.ADC_PinIdx - 1],appData.ADC_Unit[appData.ADC_PinIdx - 1]);
-                // vv for demo purposes
-                if (appData.ADC_PinIdx - 1) {
-                    APP_LCD_Print(2, 10, &appData.ADC_Representation[0]);
-                } else {
-                    APP_LCD_Print(2, 0, &appData.ADC_Representation[0]);
+                sprintf(&appData.ADC_Representation[appData.ADC_PinIdx - 1][0], "%.1f%s",appData.ADC_Value[appData.ADC_PinIdx - 1],&appData.ADC_Unit[appData.ADC_PinIdx - 1][0]);
+#ifdef APP_ADC1_INPUT_POS
+                if (appData.ADC_PinIdx == 1) {
+                    APP_LCD_Print(2, 0, &appData.ADC_Representation[0][0]);
+                } 
+#endif // ifdef APP_ADC1_INPUT_POS
+#ifdef APP_ADC2_INPUT_POS
+                if (appData.ADC_PinIdx == 2) {
+                    APP_LCD_Print(2, 6, &appData.ADC_Representation[1][0]);
                 }
-                // ^^ for demo purposes
+#endif // ifdef APP_ADC2_INPUT_POS
                 appData.state = appData.ADC_Return_AppState;
             }
             break;

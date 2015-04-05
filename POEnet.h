@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+extern const char POEnet_empty[];
+extern const char POEnet_error[];
 extern const char POEnet_noop[];
 extern const char POEnet_reset[];
 extern const char POEnet_net[];
@@ -30,11 +32,13 @@ extern const char POEnet_text[];
 extern const char POEnet_action[];
 
 
-void POEnet_Node_Init(int * id, char * name);
+void POEnet_Node_Init(int *id, char *name, int *hours, int *minutes, int *seconds);
 
-void POEnet_AddAnalog(int id, float * Value, float * numerator, float * denominator, char * unit);
-void POEnet_AddDigital(int id, int * Value, char * loVal, char * hiVal);
-void POEnet_AddSwitch(int id, int * Value, char * loVal, char * hiVal);
+void POEnet_AddAnalog(int id, float *Value, float *numerator, float *denominator, char *unit);
+void POEnet_AddDigital(int id, int *Value, char *loVal, char *hiVal);
+void POEnet_AddSwitch(int id, int *Value, char *loVal, char *hiVal);
+
+void POEnet_NodeDump(char *buffer);
 
 void POEnet_Interpret(const char *buffer);
 
@@ -44,7 +48,11 @@ void POEnet_Output(char *buffer);
 
 void POEnet_GetCommand(char *tostring);
 
-void POEnet_GetNewNodeId(int *nodeid);
+void POEnet_GetNewNodeId();
+
+void POEnet_DescribeNode();
+
+void POEnet_SetTime();
 
 #ifdef	__cplusplus
 }
