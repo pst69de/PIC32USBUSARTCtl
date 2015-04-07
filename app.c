@@ -347,8 +347,8 @@ void APP_Tasks ( void )
             // Turn Off LED
             LEDR_Clear;
             LEDY_Clear;
-            //LEDG_Set;
             LEDG_Clear;
+            APP_LCD_PrintChar(3,10,'I');
             appData.state = APP_STATE_POENET_INIT;
             break;
         case APP_STATE_POENET_INIT:
@@ -406,6 +406,7 @@ void APP_Tasks ( void )
             appData.LCD_Init_Return = APP_STATE_USB_INIT;
 #endif // of else APP_USE_USB
             appData.state = APP_STATE_LCD_INIT;
+            APP_LCD_PrintChar(3,11,'P');
             break;
         case APP_STATE_LCD_INIT:
             if (APP_LCD_Init(appData.time.milliSeconds)) {
@@ -437,6 +438,7 @@ void APP_Tasks ( void )
                     APP_LCD_Print( 3, 0, "LCD");
                     appData.LCD_Return_AppState = appData.LCD_Init_Return;
                     appData.state = APP_LCD_UPDATE;
+                    APP_LCD_PrintChar(3,12,'L');
                 } else {
                     // LCD Init failed, no LCD avaiable
                     appData.state = appData.LCD_Init_Return;
@@ -478,6 +480,7 @@ void APP_Tasks ( void )
                 appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
 #endif // else APP_USE_UART
                 appData.state = APP_LCD_UPDATE;
+                APP_LCD_PrintChar(3,13,'U');
             }
             break;
         case APP_STATE_USB_WRITE:
@@ -527,6 +530,7 @@ void APP_Tasks ( void )
             // goto Input afterwards
             appData.LCD_Return_AppState = APP_STATE_POENET_INPUT;
             appData.state = APP_LCD_UPDATE;
+            APP_LCD_PrintChar(3,14,'A');
             break;
 #endif // of ifdef APP_USE_UART
         // POE.net reset message
@@ -549,6 +553,8 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_INPUT:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
+            APP_LCD_PrintChar(3,15,'*');
+            APP_LCD_PrintChar(3,16,' ');
 #ifdef APP_USE_USB
             // USB is always Primary, so pass Input to command interpretation
             if (USB_isReadComplete()) {
@@ -574,6 +580,7 @@ void APP_Tasks ( void )
                 // pass via LCDout to INPUTReady
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_POENET_INPUT_READY;
+                APP_LCD_PrintChar(3,15,'U');
                 break;
             }
 #endif // of ifdef APP_USE_USB
@@ -592,6 +599,7 @@ void APP_Tasks ( void )
                 // pass to INPUTReady
                 appData.state = APP_STATE_POENET_INPUT_READY;
 #endif
+                APP_LCD_PrintChar(3,15,'A');
                 break;
             }
 #endif // of ifdef APP_USE_USB
@@ -600,6 +608,7 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_INPUT_READY:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
+            APP_LCD_PrintChar(3,16,appData.POEnetPrimInputBuf[0]);
             switch (appData.POEnetPrimInputBuf[0]) {
                 case 'U':
                     //POE.net Message -> pass to interpreter
@@ -650,6 +659,14 @@ void APP_Tasks ( void )
                     appData.state = APP_STATE_USB_WRITE;
                     break;
 #endif // ifdef APP_USE_USB
+                case '\0':
+                    // there is an initial USB read -> ignore
+                    //for (i = 0; i < APP_STRING_SIZE; i++) { APP_LCD_PrintChar(3,i,appData.POEnetPrimInputBuf[i]); }
+                    ClearBuffer(&appData.POEnetPrimInputBuf[0]);
+                    appData.POEnetPrimInputSize = 0;
+                    appData.POEnetPrimInputIdx = 0;
+                    appData.state = APP_STATE_POENET_INPUT;
+                    break;
                 default:
                     // ignore Message
                     ClearBuffer(&appData.POEnetPrimInputBuf[0]);
@@ -669,6 +686,7 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_COMMAND:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
+            APP_LCD_PrintChar(3,17,'C');
             // Handle Error
             if (POEnet_GetError(&appData.POEnetXMLError[0])) {
                 APP_LCD_Print( 1, 7, &POEnet_error[0]);
@@ -695,6 +713,7 @@ void APP_Tasks ( void )
         case APP_STATE_POENET_OUTPUT_PREPARE:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
+            APP_LCD_PrintChar(3,18,'T');
 #ifdef APP_POEnet_SECONDARY
             // USB UART Bridge -> pass to UART
             //APP_LCD_PrintChar(2,6,'>');

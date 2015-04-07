@@ -74,6 +74,7 @@ void TMR_Initialize(void) {
     PLIB_TMR_Period16BitSet(APP_TMR_CLOCK, APP_TMR_CLKINTERVAL);
 }
 
+#ifndef APP_USE_DIO
 void LEDS_Initialize(void) {
     // red LED
     LEDR_Clear;
@@ -106,6 +107,7 @@ void LEDS_Initialize(void) {
     LEDW_Remap;
     LEDW_OD;
 }
+#endif // ifndef APP_USE_DIO
 
 #ifdef APP_USE_UART
 void UART_Initialize(void) {
@@ -226,7 +228,11 @@ void SYS_Initialize ( void *data )
     // Timer initializations
     TMR_Initialize();
     // Set outputting Ports to Output (default is Input), clear analog Input
+#ifdef APP_USE_DIO
+    DIO_Initialize();
+#else // ifdef APP_USE_DIO
     LEDS_Initialize();
+#endif // else APP_USE_DIO
 #ifdef APP_USE_USB
     USB_SYS_Init();
 #endif
