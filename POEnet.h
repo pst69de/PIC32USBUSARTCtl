@@ -23,9 +23,17 @@ extern const char POEnet_noop[];
 extern const char POEnet_reset[];
 extern const char POEnet_net[];
 extern const char POEnet_node[];
+extern const char POEnet_id[];
+extern const char POEnet_name[];
 extern const char POEnet_time[];
-extern const char POEnet_digital[];
 extern const char POEnet_analog[];
+extern const char POEnet_value[];
+extern const char POEnet_numerator[];
+extern const char POEnet_denominator[];
+extern const char POEnet_unit[];
+extern const char POEnet_digital[];
+extern const char POEnet_lovalue[];
+extern const char POEnet_hivalue[];
 extern const char POEnet_switch[];
 extern const char POEnet_pwm[];
 extern const char POEnet_text[];
@@ -47,12 +55,6 @@ bool POEnet_GetError(char *tostring);
 void POEnet_Output(char *buffer);
 
 void POEnet_GetCommand(char *tostring);
-
-void POEnet_GetNewNodeId();
-
-void POEnet_DescribeNode();
-
-void POEnet_SetTime();
 
 #ifdef	__cplusplus
 }
