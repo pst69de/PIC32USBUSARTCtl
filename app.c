@@ -151,6 +151,19 @@ void APP_Initialize ( void )
 
 const char numChar[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+// Write Size Information to LCD
+void APP_LCD_WriteSize(int line, int pos, int size) {
+    int i = size;
+    APP_LCD_PrintChar(line, pos + 2, numChar[i%10]);
+    i /= 10;
+    APP_LCD_PrintChar(line, pos + 1, numChar[i%10]);
+    i /= 10;
+    APP_LCD_PrintChar(line, pos, numChar[i%10]);
+    i /= 10;
+    // not exact, but as we are dealing with values up to 1024 write A24 instead
+    if (i) { APP_LCD_PrintChar(line, pos, 'A');}
+}
+
 // APP Time Base
 void APP_TimingCallback ( void ) {
     // Adjust App Timing
@@ -290,19 +303,11 @@ void APP_UART_Read(void) {
     APP_LCD_PrintChar(0,18,'*');
     while (PLIB_USART_ReceiverDataIsAvailable(APP_UART_RX_ID)) {
         uint8_t readByte = PLIB_USART_ReceiverByteReceive(APP_UART_RX_ID);
-        // for testing output on LCD
-        //char dispChar = (char)readByte;
-        //if (!readByte) { dispChar = (char)0xdb; }
-        //if (appData.UART_INPUT_IDX < 40) {
-        //    if (appData.UART_INPUT_IDX < 20) {
-        //        APP_LCD_PrintChar(2,appData.UART_INPUT_IDX,dispChar);
-        //    } else {
-        //        APP_LCD_PrintChar(3,appData.UART_INPUT_IDX - 20,dispChar);
-        //    }
-        //}
         appData.UART_INPUT_BUF[appData.UART_INPUT_IDX++] = readByte;
-        // POE.net: zero is sent for termination
-        if (!readByte) {
+        APP_LCD_PrintChar(3,5,'R');
+        APP_LCD_WriteSize(3,6,appData.UART_INPUT_IDX);
+        // POE.net: zero/LF is sent for termination
+        if (!readByte | (readByte == 10)) {
             appData.UART_INPUT_SIZE = appData.UART_INPUT_IDX;
             APP_LCD_PrintChar(0,18,'R');
         }
@@ -312,10 +317,12 @@ void APP_UART_Read(void) {
 // INT Handling Write 
 void APP_UART_Write(void) {
     if (appData.UART_OUTPUT_IDX == appData.UART_OUTPUT_SIZE) {
+        PLIB_USART_TransmitterDisable(APP_UART_TX_ID);
+        APP_LCD_PrintChar(0,19,'T');
+        APP_LCD_PrintChar(3,0,'T');
+        APP_LCD_WriteSize(3,1,appData.UART_OUTPUT_IDX);
         appData.UART_OUTPUT_SIZE = 0;
         appData.UART_OUTPUT_IDX = 0;
-        APP_LCD_PrintChar(0,19,'T');
-        PLIB_USART_TransmitterDisable(APP_UART_TX_ID);
     }
     if (appData.UART_OUTPUT_SIZE > 0) {
         APP_LCD_PrintChar(0,19,'*');
@@ -488,14 +495,7 @@ void APP_Tasks ( void )
             if (APP_CheckTimer()) { break; }
             // Update LCD with count bytes to write
             APP_LCD_PrintChar(0,13,'<');
-            i = appData.USB_OUTPUT_SIZE;
-            APP_LCD_PrintChar(0,16,numChar[i%10]);
-            i /= 10;
-            APP_LCD_PrintChar(0,15,numChar[i%10]);
-            i /= 10;
-            APP_LCD_PrintChar(0,14,numChar[i%10]);
-            i /= 10;
-            if (i) { APP_LCD_PrintChar(0,14,'A');}
+            APP_LCD_WriteSize(0,14,appData.USB_OUTPUT_SIZE);
             // Setup the write 
             if (!appData.USB_OUTPUT_SIZE) {
                 USB_PrepareWrite( nokPrompt, 4);
@@ -514,6 +514,7 @@ void APP_Tasks ( void )
                 ClearBuffer(appData.USB_OUTPUT_BUF);
                 appData.USB_OUTPUT_IDX = 0;
                 appData.USB_OUTPUT_SIZE = 0;
+                APP_LCD_PrintChar(3,19,' ');
                 appData.state = APP_STATE_POENET_INPUT;
             }
             break;
@@ -569,14 +570,7 @@ void APP_Tasks ( void )
                 appData.USB_INPUT_IDX = 0;
                 // Update LCD with count bytes read
                 APP_LCD_PrintChar(0,13,'<');
-                i = appData.USB_OUTPUT_SIZE;
-                APP_LCD_PrintChar(0,16,numChar[i%10]);
-                i /= 10;
-                APP_LCD_PrintChar(0,15,numChar[i%10]);
-                i /= 10;
-                APP_LCD_PrintChar(0,14,numChar[i%10]);
-                i /= 10;
-                if (i) { APP_LCD_PrintChar(0,14,'A');}
+                APP_LCD_WriteSize(0,14,appData.USB_INPUT_SIZE);
                 // pass via LCDout to INPUTReady
                 appData.state = APP_LCD_UPDATE;
                 appData.LCD_Return_AppState = APP_STATE_POENET_INPUT_READY;
@@ -747,12 +741,15 @@ void APP_Tasks ( void )
                 appData.POEnetPrimOutputSize = 0;
                 appData.POEnetPrimOutputIdx = 0;
                 appData.state = APP_STATE_POENET_INPUT;
+                APP_LCD_PrintChar(3,17,' ');
+                APP_LCD_PrintChar(3,18,' ');
             }
             break;
 #ifdef APP_POEnet_SECONDARY
         case APP_STATE_POENET_PASS:
             if (APP_USBStateReset()) { break; }
             if (APP_CheckTimer()) { break; }
+            APP_LCD_PrintChar(3,19,'X');
             strcpy( &appData.POEnetSecOutputBuf[0], &appData.POEnetSecInputBuf[0]);
             appData.POEnetSecOutputSize = appData.POEnetSecInputSize;
             // POE.net messages usually terminate with zero \0
