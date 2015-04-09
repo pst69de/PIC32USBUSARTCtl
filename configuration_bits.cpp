@@ -57,10 +57,15 @@
 #pragma config FPLLODIV = DIV_4         // System PLL Output Clock Divider (PLL Divide by 4)
 
 // DEVCFG1
+#ifdef __32MX250F128B__
 #pragma config FNOSC = PRIPLL           // Oscillator Selection Bits (Primary Osc w/PLL (XT+,HS+,EC+PLL))
+#pragma config POSCMOD = XT             // Primary Oscillator Configuration (XT osc mode)
+#else
+#pragma config FNOSC = FRCPLL           // Oscillator Selection Bits (FRC w/PLL)
+#pragma config POSCMOD = OFF            // Primary Oscillator Configuration (OFF)
+#endif
 #pragma config FSOSCEN = OFF            // Secondary Oscillator Enable (Disabled)
 #pragma config IESO = ON                // Internal/External Switch Over (Enabled)
-#pragma config POSCMOD = XT             // Primary Oscillator Configuration (XT osc mode)
 #pragma config OSCIOFNC = OFF           // CLKO Output Signal Active on the OSCO Pin (Disabled)
 #pragma config FPBDIV = DIV_1           // Peripheral Clock Divisor (Pb_Clk is Sys_Clk/1)
 #pragma config FCKSM = CSDCMD           // Clock Switching and Monitor Selection (Clock Switch Disable, FSCM Disabled)
