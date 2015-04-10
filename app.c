@@ -537,11 +537,11 @@ void APP_Tasks ( void )
         // POE.net reset message
         case APP_STATE_POENET_RESET:
 #ifdef APP_POEnet_SECONDARY
-            strcpy(&appData.POEnetSecOutputBuf[0], "U<reset/>\0");
+            strcpy(&appData.POEnetSecOutputBuf[0], "U<reset/>\n");
             appData.POEnetSecOutputSize = strlen(&appData.POEnetSecOutputBuf[0]) + 1;
             appData.POEnetSecOutputIdx = 0;
 #else // ifdef APP_POEnet_SECONDARY
-            strcpy(&appData.POEnetPrimOutputBuf[0], "U<reset/>\0");
+            strcpy(&appData.POEnetPrimOutputBuf[0], "U<reset/>\n");
             appData.POEnetPrimOutputSize = strlen(&appData.POEnetPrimOutputBuf[0]) + 1;
             appData.POEnetPrimOutputIdx = 0;            
 #endif // else APP_POEnet_SECONDARY
@@ -697,7 +697,7 @@ void APP_Tasks ( void )
             appData.POEnetPrimOutputBuf[0] = 'U';
             POEnet_Output(&appData.POEnetPrimOutputBuf[1]);
             appData.POEnetPrimOutputSize = strlen(&appData.POEnetPrimOutputBuf[0]);
-            appData.POEnetPrimOutputBuf[appData.POEnetPrimOutputSize] = '\0';
+            appData.POEnetPrimOutputBuf[appData.POEnetPrimOutputSize] = '\n';
             appData.POEnetPrimOutputSize++;
             appData.POEnetPrimOutputIdx = 0;
             appData.LCD_Return_AppState = APP_STATE_POENET_OUTPUT_PREPARE;
